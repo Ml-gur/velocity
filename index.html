@@ -896,88 +896,849 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MotoGP Wheel Simulation</title>
     <style>
-        body { margin: 0; background-color: #050505; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
-        #canvas-container { width: 100%; height: 100vh; position: fixed; top: 0; left: 0; z-index: 1; }
-        canvas { display: block; outline: none; }
-        #overlay-container { position: fixed; bottom: 5%; left: 50%; transform: translateX(-50%); z-index: 3; pointer-events: none; mix-blend-mode: difference; max-width: 600px; width: 100%; perspective: 1000px; text-align: center; }
-        .theme-section { position: absolute; bottom: 0; left: 0; width: 100%; opacity: 0; transform: rotateX(20deg) translateY(40px); transform-origin: center bottom; transition: opacity 0.2s ease, transform 0.3s ease; pointer-events: none; will-change: opacity, transform; display: flex; flex-direction: column; align-items: center; }
-        .theme-section.active { opacity: 1; transform: rotateX(0deg) translateY(0); pointer-events: auto; transition: opacity 1.0s ease, transform 1.2s cubic-bezier(0.23, 1, 0.32, 1); }
-        .theme-header { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #ff3333; margin-bottom: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; opacity: 0; transform: translateY(10px); transition: opacity 0.1s ease, transform 0.1s ease; }
-        .theme-section.active .theme-header { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease 0.1s, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.1s; }
-        .theme-header::before, .theme-header::after { content: ''; display: inline-block; width: 30px; height: 2px; background: #ff3333; transform: scaleX(0); transition: transform 0.1s ease; }
+        body { 
+            margin: 0; 
+            background-color: #050505; 
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden; 
+        }
+        
+        #canvas-container {
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        canvas { 
+            display: block; 
+            outline: none;
+        }
+
+        /* --- HEADER STYLES --- */
+        #main-header {
+            position: fixed;
+            top: 80px;
+            width: 100%;
+            text-align: center;
+            z-index: 4;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        #main-header h1 {
+            font-family: 'Arial Black', sans-serif;
+            font-size: 42px;
+            text-transform: uppercase;
+            margin: 0 0 10px 0;
+            letter-spacing: -1px;
+            color: #ffffff;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        #main-header p {
+            font-family: monospace;
+            font-size: 13px;
+            color: #888;
+            margin: 0;
+            letter-spacing: 1px;
+            line-height: 1.5;
+            text-transform: uppercase;
+        }
+
+        /* --- MARKETPLACE SECTION --- */
+        #marketplace {
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(to bottom, transparent 0%, #050505 20%);
+            min-height: 100vh;
+            padding: 100px 5% 50px 5%;
+            margin-top: -50vh; 
+            pointer-events: auto; 
+            perspective: 2000px; /* Deep perspective for the curved effect */
+        }
+
+        .market-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- SLEEK SEARCH BAR (Reference Style) --- */
+        .search-area {
+            display: flex;
+            align-items: center;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 8px; /* Slightly rounded like the reference */
+            padding: 5px;
+            margin-bottom: 60px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 50px; /* Slim height */
+        }
+
+        .search-icon {
+            padding: 0 15px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: #ccc;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            outline: none;
+            height: 100%;
+        }
+        
+        .search-input::placeholder {
+            color: #444;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 5px;
+            padding-right: 5px;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #666;
+            padding: 6px 16px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn:hover {
+            color: #fff;
+            background: #151515;
+        }
+
+        .filter-btn.active {
+            background: #222;
+            color: #fff;
+            border-color: #333;
+        }
+
+        /* --- TAGS (Below Search) --- */
+        .tags-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+
+        .tag-pill {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            color: #555;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-pill:hover {
+            border-color: #444;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* --- CURVED MONITOR GRID LAYOUT --- */
+        .components-grid {
+            display: grid;
+            /* Force 3 columns for the panoramic effect */
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 20px;
+            /* Add some padding to avoid clipping transforms */
+            padding: 20px 0; 
+        }
+
+        .component-card {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px; /* Monitor corner radius */
+            padding: 0;
+            position: relative;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease, border-color 0.4s ease;
+            cursor: pointer;
+            overflow: hidden;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            
+            /* MONITOR REFLECTION OVERLAY */
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+        }
+
+        /* SCREEN REFLECTION GLARE */
+        .component-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 40%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* --- THE CURVED EFFECT LOGIC --- */
+        
+        /* LEFT CARDS (Column 1) */
+        .components-grid .component-card:nth-child(3n+1) {
+            transform: rotateY(15deg) scale(0.95);
+            transform-origin: right center;
+            border-right: 1px solid #333; /* Enhance edge definition */
+            box-shadow: -10px 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* CENTER CARDS (Column 2) */
+        .components-grid .component-card:nth-child(3n+2) {
+            transform: translateZ(40px); /* Push forward */
+            z-index: 2;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border: 1px solid #333;
+        }
+
+        /* RIGHT CARDS (Column 3) */
+        .components-grid .component-card:nth-child(3n+3) {
+            transform: rotateY(-15deg) scale(0.95);
+            transform-origin: left center;
+            border-left: 1px solid #333;
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* HOVER STATES - Break out of formation slightly */
+        .components-grid .component-card:nth-child(3n+1):hover {
+            transform: rotateY(5deg) scale(1.0) translateZ(20px);
+            border-color: #ff3333;
+            z-index: 5;
+        }
+        .components-grid .component-card:nth-child(3n+2):hover {
+            transform: translateZ(60px) scale(1.02);
+            border-color: #ff3333;
+            z-index: 5;
+        }
+        .components-grid .component-card:nth-child(3n+3):hover {
+            transform: rotateY(-5deg) scale(1.0) translateZ(20px);
+            border-color: #ff3333;
+            z-index: 5;
+        }
+
+        /* Card Content Styles */
+        .card-preview {
+            flex-grow: 1;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-family: monospace;
+            font-size: 24px;
+            position: relative;
+            /* Grid Pattern background */
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .card-info {
+            padding: 15px;
+            background: #0a0a0a;
+            border-top: 1px solid #1a1a1a;
+            position: relative;
+            z-index: 3;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #eee;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #666;
+            font-family: monospace;
+            text-transform: uppercase;
+        }
+
+        .pro-badge {
+            background: #ff3333;
+            color: #000;
+            font-size: 8px;
+            font-weight: 800;
+            padding: 1px 4px;
+            border-radius: 2px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        /* Responsive Fix for Mobile */
+        @media (max-width: 900px) {
+            .components-grid {
+                grid-template-columns: 1fr; /* Stack on mobile */
+            }
+            /* Remove 3D effects on mobile for usability */
+            .components-grid .component-card:nth-child(n) {
+                transform: none;
+                margin-bottom: 20px;
+            }
+            .components-grid .component-card:nth-child(n):hover {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Text Overlay System (Existing) */
+        #overlay-container {
+            position: fixed;
+            bottom: 5%; 
+            left: 50%;
+            transform: translateX(-50%); 
+            z-index: 3;
+            pointer-events: none;
+            mix-blend-mode: difference;
+            max-width: 600px;
+            width: 100%;
+            perspective: 1000px;
+            text-align: center;
+        }
+
+        .theme-section {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%; 
+            opacity: 0;
+            transform: rotateX(20deg) translateY(40px);
+            transform-origin: center bottom;
+            transition: opacity 0.2s ease, transform 0.3s ease;
+            pointer-events: none;
+            will-change: opacity, transform;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+        }
+
+        .theme-section.active {
+            opacity: 1;
+            transform: rotateX(0deg) translateY(0);
+            pointer-events: auto;
+            transition: opacity 1.0s ease, transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .theme-header {
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #ff3333;
+            margin-bottom: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.1s ease, transform 0.1s ease;
+        }
+
+        .theme-section.active .theme-header {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.6s ease 0.1s, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.1s;
+        }
+
+        .theme-header::before, .theme-header::after {
+            content: '';
+            display: inline-block;
+            width: 30px;
+            height: 2px;
+            background: #ff3333;
+            transform: scaleX(0);
+            transition: transform 0.1s ease;
+        }
+        
         .theme-header::before { margin-right: 15px; transform-origin: right; }
         .theme-header::after { margin-left: 15px; transform-origin: left; }
-        .theme-section.active .theme-header::before, .theme-section.active .theme-header::after { transform: scaleX(1); transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
-        .theme-title { font-size: 56px; font-weight: 900; line-height: 0.9; margin-bottom: 15px; text-transform: uppercase; font-family: 'Arial Black', sans-serif; color: #fff; letter-spacing: -2px; clip-path: inset(0 0 100% 0); transform: translateY(10px); transition: clip-path 0.2s ease, transform 0.2s ease; }
-        .theme-section.active .theme-title { clip-path: inset(0 0 0 0); transform: translateY(0); transition: clip-path 1.0s cubic-bezier(0.19, 1, 0.22, 1) 0.2s, transform 1.0s cubic-bezier(0.19, 1, 0.22, 1) 0.2s; }
-        .theme-desc { font-size: 13px; line-height: 1.6; color: #ccc; font-family: monospace; text-transform: uppercase; letter-spacing: 1px; border-top: 1px solid #444; padding-top: 15px; opacity: 0; clip-path: inset(0 100% 0 0); transition: opacity 0.2s ease, clip-path 0.2s ease; }
-        .theme-section.active .theme-desc { opacity: 1; clip-path: inset(0 0 0 0); transition: opacity 0.8s ease 0.4s, clip-path 1.2s cubic-bezier(0.19, 1, 0.22, 1) 0.4s; }
-        #scroll-spacer { height: 500vh; position: relative; z-index: 0; pointer-events: none; }
-        .scroll-instruction { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #444; animation: pulse 2s infinite; z-index: 2; pointer-events: none; font-family: monospace; font-size: 10px; letter-spacing: 2px; }
-        @keyframes pulse { 0% { opacity: 0.1; } 50% { opacity: 0.6; } 100% { opacity: 0.1; } }
+
+        .theme-section.active .theme-header::before,
+        .theme-section.active .theme-header::after {
+            transform: scaleX(1);
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .theme-title {
+            font-size: 56px; 
+            font-weight: 900;
+            line-height: 0.9;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-family: 'Arial Black', sans-serif;
+            color: #fff;
+            letter-spacing: -2px;
+            clip-path: inset(0 0 100% 0); 
+            transform: translateY(10px);
+            transition: clip-path 0.2s ease, transform 0.2s ease;
+        }
+
+        .theme-section.active .theme-title {
+            clip-path: inset(0 0 0 0); 
+            transform: translateY(0);
+            transition: clip-path 1.0s cubic-bezier(0.19, 1, 0.22, 1) 0.2s, transform 1.0s cubic-bezier(0.19, 1, 0.22, 1) 0.2s;
+        }
+
+        .theme-desc {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #ccc;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-top: 1px solid #444;
+            padding-top: 15px;
+            opacity: 0;
+            clip-path: inset(0 100% 0 0); 
+            transition: opacity 0.2s ease, clip-path 0.2s ease;
+        }
+
+        .theme-section.active .theme-desc {
+            opacity: 1;
+            clip-path: inset(0 0 0 0); 
+            transition: opacity 0.8s ease 0.4s, clip-path 1.2s cubic-bezier(0.19, 1, 0.22, 1) 0.4s; 
+        }
+
+        #scroll-spacer {
+            height: 4000px; 
+            position: relative;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .scroll-instruction {
+            position: absolute;
+            top: 50%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #444;
+            animation: pulse 2s infinite;
+            z-index: 2;
+            pointer-events: none;
+            font-family: monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 0.1; }
+        }
     </style>
-    <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } } <\/script>
+    <!-- Import Three.js and OrbitControls -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    <\/script>
 </head>
 <body>
-    <div id="overlay-container">
-        <div id="theme-concept" class="theme-section"> <div class="theme-header">PHASE 01 // CONCEPT</div> <div class="theme-title">ROTATIONAL<br>DYNAMICS</div> <div class="theme-desc"> [>] MINIMIZED UNSPRUNG MASS &nbsp;&nbsp; [>] AERO-SCULPTED PROFILE </div> </div>
-        <div id="theme-engineering" class="theme-section"> <div class="theme-header">PHASE 02 // ENGINEERING</div> <div class="theme-title">FORGED<br>MAGNESIUM</div> <div class="theme-desc"> [>] AZ80 MONOBLOCK &nbsp;&nbsp; [>] FEM-DERIVED SPOKES </div> </div>
-        <div id="theme-configure" class="theme-section"> <div class="theme-header">PHASE 03 // CONFIGURE</div> <div class="theme-title">SYSTEM<br>INTERFACE</div> <div class="theme-desc"> [>] FLOATING CARBON ROTORS &nbsp;&nbsp; [>] TITANIUM HARDWARE </div> </div>
+    <!-- HEADER -->
+    <div id="main-header">
+        <h1>Podium-Proven Parts.</h1>
+        <p>Precision components machined for the fastest teams on the grid.<br>Lightweight, rigid, and race-ready.</p>
     </div>
+
+    <!-- OVERLAYS -->
+    <div id="overlay-container">
+        <!-- PHASE 1 -->
+        <div id="theme-concept" class="theme-section">
+            <div class="theme-header">PHASE 01 // CONCEPT</div>
+            <div class="theme-title">ROTATIONAL<br>DYNAMICS</div>
+            <div class="theme-desc">
+                [>] MINIMIZED UNSPRUNG MASS &nbsp;&nbsp; [>] AERO-SCULPTED PROFILE
+            </div>
+        </div>
+        <!-- PHASE 2 -->
+        <div id="theme-engineering" class="theme-section">
+            <div class="theme-header">PHASE 02 // ENGINEERING</div>
+            <div class="theme-title">FORGED<br>MAGNESIUM</div>
+            <div class="theme-desc">
+                [>] AZ80 MONOBLOCK &nbsp;&nbsp; [>] FEM-DERIVED SPOKES
+            </div>
+        </div>
+        <!-- PHASE 3 -->
+        <div id="theme-configure" class="theme-section">
+            <div class="theme-header">PHASE 03 // CONFIGURE</div>
+            <div class="theme-title">SYSTEM<br>INTERFACE</div>
+            <div class="theme-desc">
+                [>] FLOATING CARBON ROTORS &nbsp;&nbsp; [>] TITANIUM HARDWARE
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-instruction">SCROLL TO ACTIVATE</div>
     
     <div id="canvas-container"></div>
+    
+    <!-- Animation Scroll Spacer -->
     <div id="scroll-spacer"></div>
+
+    <!-- MARKETPLACE SECTION -->
+    <section id="marketplace">
+        <div class="market-container">
+            
+            <div class="search-area">
+                <span class="search-icon">⌕</span>
+                <input type="text" class="search-input" placeholder="Search 1847 components...">
+                <div class="filter-group">
+                    <button class="filter-btn active">Popular</button>
+                    <button class="filter-btn">Explore</button>
+                    <button class="filter-btn">Recent</button>
+                </div>
+            </div>
+
+            <div class="tags-row">
+                <div class="tag-pill">HERO SECTION</div>
+                <div class="tag-pill">BUTTONS</div>
+                <div class="tag-pill">CARDS</div>
+                <div class="tag-pill">FORMS</div>
+                <div class="tag-pill">HEADERS</div>
+                <div class="tag-pill">FOOTERS</div>
+                <div class="tag-pill">PRICING</div>
+                <div class="tag-pill">TESTIMONIALS</div>
+                <div class="tag-pill">GALLERY</div>
+            </div>
+
+            <div class="components-grid">
+                <!-- Row 1 -->
+                <div class="component-card">
+                    <div class="card-preview">H1</div>
+                    <div class="card-info">
+                        <div class="card-title">Cinematic Hero <span class="pro-badge">PRO</span></div>
+                        <div class="card-meta"><span>v2.4</span><span>React</span></div>
+                    </div>
+                </div>
+                <div class="component-card">
+                    <div class="card-preview">btn</div>
+                    <div class="card-info">
+                        <div class="card-title">Magnetic Button</div>
+                        <div class="card-meta"><span>v1.2</span><span>CSS</span></div>
+                    </div>
+                </div>
+                <div class="component-card">
+                    <div class="card-preview">grid</div>
+                    <div class="card-info">
+                        <div class="card-title">Bento Grid</div>
+                        <div class="card-meta"><span>v3.0</span><span>Vue</span></div>
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="component-card">
+                    <div class="card-preview">nav</div>
+                    <div class="card-info">
+                        <div class="card-title">Floating Dock <span class="pro-badge">PRO</span></div>
+                        <div class="card-meta"><span>v1.8</span><span>Motion</span></div>
+                    </div>
+                </div>
+                <div class="component-card">
+                    <div class="card-preview">img</div>
+                    <div class="card-info">
+                        <div class="card-title">Parallax Scroll</div>
+                        <div class="card-meta"><span>v2.1</span><span>GSAP</span></div>
+                    </div>
+                </div>
+                <div class="component-card">
+                    <div class="card-preview">txt</div>
+                    <div class="card-info">
+                        <div class="card-title">Typewriter Effect</div>
+                        <div class="card-meta"><span>v1.0</span><span>JS</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
     <script type="module">
-        import * as THREE from 'three'; import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        const themeConcept = document.getElementById('theme-concept'); const themeEngineering = document.getElementById('theme-engineering'); const themeConfigure = document.getElementById('theme-configure');
-        const CONFIG = { tireRadius: 10, tireTube: 3.5, rimRadius: 5.8, rimWidth: 5, spokeCount: 7, brakeDiscRadius: 4.5 };
-        const scene = new THREE.Scene(); scene.background = new THREE.Color(0x050505); scene.fog = new THREE.FogExp2(0x050505, 0.02);
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 5, 45); camera.lookAt(0, 0, 0);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; document.getElementById('canvas-container').appendChild(renderer.domElement);
-        const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.minDistance = 10; controls.maxDistance = 60; controls.enableZoom = false;
-        function createBrakeDiscTexture() { const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 512, 512); ctx.fillStyle = '#000000'; const centerX = 256; const centerY = 256; for (let r = 100; r < 230; r += 25) { const circumference = 2 * Math.PI * r; const holeCount = Math.floor(circumference / 20); for (let i = 0; i < holeCount; i++) { const angle = (i / holeCount) * Math.PI * 2; const offsetR = r + (Math.random() * 5 - 2.5); const x = centerX + Math.cos(angle) * offsetR; const y = centerY + Math.sin(angle) * offsetR; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill(); } } const texture = new THREE.CanvasTexture(canvas); texture.anisotropy = 16; return texture; }
-        function createTireTexture() { const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, 1024, 1024); for(let i=0; i<50000; i++){ ctx.fillStyle = \`rgba(255,255,255, \${Math.random() * 0.05})\`; ctx.fillRect(Math.random()*1024, Math.random()*1024, 2, 2); } ctx.save(); ctx.translate(512, 512); function drawCurvedText(text, radius, startAngle, color, fontSize, angleSpacing = 0.15) { ctx.font = \`900 \${fontSize}px Arial\`; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const totalAngle = text.length * angleSpacing; let currentAngle = startAngle - (totalAngle / 2); text.split('').forEach((char) => { ctx.save(); ctx.rotate(currentAngle); ctx.translate(0, -radius); ctx.fillText(char, 0, 0); ctx.restore(); currentAngle += angleSpacing; }); } drawCurvedText("DESIGNING THE INVISIBLE", 350, 0, "#ffffff", 60, 0.10); ctx.rotate(Math.PI / 4); ctx.fillStyle = '#FFCC00'; ctx.fillRect(-60, -320, 120, 40); ctx.fillStyle = '#000000'; ctx.font = 'bold 20px Arial'; ctx.fillText("WARNING", 0, -300); ctx.restore(); const texture = new THREE.CanvasTexture(canvas); texture.anisotropy = 16; return texture; }
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- DOM Elements ---
+        const mainHeader = document.getElementById('main-header');
+        const themeConcept = document.getElementById('theme-concept');
+        const themeEngineering = document.getElementById('theme-engineering');
+        const themeConfigure = document.getElementById('theme-configure');
+        const overlayContainer = document.getElementById('overlay-container');
+
+        // --- Configuration ---
+        const CONFIG = {
+            tireRadius: 10,
+            tireTube: 3.5,
+            rimRadius: 5.8,
+            rimWidth: 5,
+            spokeCount: 7,
+            brakeDiscRadius: 4.5
+        };
+
+        // --- Scene Setup ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050505);
+        scene.fog = new THREE.FogExp2(0x050505, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 45); 
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 10;
+        controls.maxDistance = 60;
+        controls.enableZoom = false; 
+
+        // --- Texture Generators (Same as previous) ---
+        function createBrakeDiscTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 512, 512);
+            ctx.fillStyle = '#000000';
+            const centerX = 256; const centerY = 256;
+            for (let r = 100; r < 230; r += 25) {
+                const circumference = 2 * Math.PI * r;
+                const holeCount = Math.floor(circumference / 20); 
+                for (let i = 0; i < holeCount; i++) {
+                    const angle = (i / holeCount) * Math.PI * 2;
+                    const offsetR = r + (Math.random() * 5 - 2.5);
+                    const x = centerX + Math.cos(angle) * offsetR;
+                    const y = centerY + Math.sin(angle) * offsetR;
+                    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.anisotropy = 16;
+            return texture;
+        }
+
+        function createTireTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, 1024, 1024);
+            for(let i=0; i<50000; i++){
+                ctx.fillStyle = \`rgba(255,255,255, \${Math.random() * 0.05})\`;
+                ctx.fillRect(Math.random()*1024, Math.random()*1024, 2, 2);
+            }
+            ctx.save(); ctx.translate(512, 512);
+            function drawCurvedText(text, radius, startAngle, color, fontSize, angleSpacing = 0.15) {
+                ctx.font = \`900 \${fontSize}px Arial\`; ctx.fillStyle = color;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                const totalAngle = text.length * angleSpacing;
+                let currentAngle = startAngle - (totalAngle / 2);
+                text.split('').forEach((char) => {
+                    ctx.save(); ctx.rotate(currentAngle); ctx.translate(0, -radius);
+                    ctx.fillText(char, 0, 0); ctx.restore(); currentAngle += angleSpacing;
+                });
+            }
+            drawCurvedText("DESIGNING THE INVISIBLE", 350, 0, "#ffffff", 60, 0.10); 
+            ctx.rotate(Math.PI / 4);
+            ctx.fillStyle = '#FFCC00'; ctx.fillRect(-60, -320, 120, 40);
+            ctx.fillStyle = '#000000'; ctx.font = 'bold 20px Arial'; ctx.fillText("WARNING", 0, -300); 
+            ctx.restore();
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.anisotropy = 16;
+            return texture;
+        }
+
+        // --- Materials ---
         const rubberMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6, metalness: 0.1, map: createTireTexture(), bumpMap: createTireTexture(), bumpScale: 0.02 });
         const slickMaterial = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.7, metalness: 0.0 });
         const rimMaterial = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.4, metalness: 0.8 });
         const rimStripeMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0x990000, emissiveIntensity: 0.5, roughness: 0.2, metalness: 0.5 });
-        const brakeDiscMap = createBrakeDiscTexture(); const brakeDiscMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, map: brakeDiscMap, alphaMap: brakeDiscMap, transparent: true, side: THREE.DoubleSide, roughness: 0.3, metalness: 0.9 });
+        const brakeDiscMap = createBrakeDiscTexture();
+        const brakeDiscMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, map: brakeDiscMap, alphaMap: brakeDiscMap, transparent: true, side: THREE.DoubleSide, roughness: 0.3, metalness: 0.9 });
         const hubMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.5, metalness: 0.7 });
         const axleMaterial = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.6, metalness: 0.6 });
-        const wheelAssembly = new THREE.Group(); wheelAssembly.rotation.x = -Math.PI / 2; scene.add(wheelAssembly);
-        const axleGeo = new THREE.CylinderGeometry(0.5, 0.5, 7, 16); axleGeo.rotateX(Math.PI/2); const axle = new THREE.Mesh(axleGeo, axleMaterial); wheelAssembly.add(axle);
+
+        // --- Geometry ---
+        const wheelAssembly = new THREE.Group();
+        wheelAssembly.rotation.x = -Math.PI / 2;
+        scene.add(wheelAssembly);
+        
+        const axleGeo = new THREE.CylinderGeometry(0.5, 0.5, 7, 16); axleGeo.rotateX(Math.PI/2);
+        const axle = new THREE.Mesh(axleGeo, axleMaterial); wheelAssembly.add(axle);
+
         const rotatingGroup = new THREE.Group(); wheelAssembly.add(rotatingGroup);
-        const tireGroup = new THREE.Group(); const rimGroup = new THREE.Group(); const brakeGroup = new THREE.Group();
+        const tireGroup = new THREE.Group(); const rimGroup = new THREE.Group(); const brakeGroup = new THREE.Group(); 
         rotatingGroup.add(tireGroup); rotatingGroup.add(rimGroup); rotatingGroup.add(brakeGroup);
-        const tireGeo = new THREE.TorusGeometry(CONFIG.tireRadius, CONFIG.tireTube, 32, 64); const tire = new THREE.Mesh(tireGeo, rubberMaterial); tire.scale.set(1, 1, 1.8);
-        const sidewallGeo = new THREE.RingGeometry(CONFIG.rimRadius, CONFIG.tireRadius + CONFIG.tireTube/2, 64); const sidewallLeft = new THREE.Mesh(sidewallGeo, rubberMaterial); sidewallLeft.position.z = 2.5; sidewallLeft.rotation.y = Math.PI;
+
+        // Tire
+        const tireGeo = new THREE.TorusGeometry(CONFIG.tireRadius, CONFIG.tireTube, 32, 64);
+        const tire = new THREE.Mesh(tireGeo, rubberMaterial); tire.scale.set(1, 1, 1.8);
+        const sidewallGeo = new THREE.RingGeometry(CONFIG.rimRadius, CONFIG.tireRadius + CONFIG.tireTube/2, 64);
+        const sidewallLeft = new THREE.Mesh(sidewallGeo, rubberMaterial); sidewallLeft.position.z = 2.5; sidewallLeft.rotation.y = Math.PI; 
         const sidewallRight = new THREE.Mesh(sidewallGeo, rubberMaterial); sidewallRight.position.z = -2.5;
-        const slickGeo = new THREE.CylinderGeometry(CONFIG.tireRadius + CONFIG.tireTube - 0.2, CONFIG.tireRadius + CONFIG.tireTube - 0.2, 5, 64, 1, true); slickGeo.rotateX(Math.PI/2); const slick = new THREE.Mesh(slickGeo, slickMaterial);
-        const edgeGeo = new THREE.TorusGeometry(CONFIG.tireRadius + 1.5, 1.8, 16, 64); const edgeMesh = new THREE.Mesh(edgeGeo, slickMaterial); edgeMesh.scale.set(1, 1, 1.4);
+        const slickGeo = new THREE.CylinderGeometry(CONFIG.tireRadius + CONFIG.tireTube - 0.2, CONFIG.tireRadius + CONFIG.tireTube - 0.2, 5, 64, 1, true); slickGeo.rotateX(Math.PI/2);
+        const slick = new THREE.Mesh(slickGeo, slickMaterial);
+        const edgeGeo = new THREE.TorusGeometry(CONFIG.tireRadius + 1.5, 1.8, 16, 64);
+        const edgeMesh = new THREE.Mesh(edgeGeo, slickMaterial); edgeMesh.scale.set(1, 1, 1.4);
         tireGroup.add(sidewallLeft); tireGroup.add(sidewallRight); tireGroup.add(slick); tireGroup.add(edgeMesh);
-        const rimCylGeo = new THREE.CylinderGeometry(CONFIG.rimRadius, CONFIG.rimRadius, CONFIG.rimWidth, 64, 1, true); rimCylGeo.rotateX(Math.PI/2); const rim = new THREE.Mesh(rimCylGeo, rimMaterial); rimGroup.add(rim);
-        const rimLipGeo = new THREE.TorusGeometry(CONFIG.rimRadius - 0.1, 0.2, 16, 64); const rimLip1 = new THREE.Mesh(rimLipGeo, rimMaterial); rimLip1.position.z = CONFIG.rimWidth / 2; const rimLip2 = rimLip1.clone(); rimLip2.position.z = -CONFIG.rimWidth / 2; rimGroup.add(rimLip1); rimGroup.add(rimLip2);
-        const rimStripeGeo = new THREE.TorusGeometry(CONFIG.rimRadius - 0.05, 0.05, 16, 100); const rimStripe1 = new THREE.Mesh(rimStripeGeo, rimStripeMaterial); rimStripe1.position.z = CONFIG.rimWidth / 2 + 0.1; const rimStripe2 = rimStripe1.clone(); rimStripe2.position.z = -CONFIG.rimWidth / 2 - 0.1; rimGroup.add(rimStripe1); rimGroup.add(rimStripe2);
-        for (let i = 0; i < CONFIG.spokeCount; i++) { const angle = (i / CONFIG.spokeCount) * Math.PI * 2; const spokeGeo = new THREE.CylinderGeometry(0.4, 0.2, CONFIG.rimRadius - 1, 8); const spoke = new THREE.Mesh(spokeGeo, rimMaterial); spoke.position.x = Math.cos(angle) * (CONFIG.rimRadius / 2); spoke.position.y = Math.sin(angle) * (CONFIG.rimRadius / 2); spoke.rotation.z = angle - Math.PI / 2; spoke.rotation.x = Math.PI / 2; spoke.rotation.set(0, 0, angle - Math.PI/2); rimGroup.add(spoke); }
-        const hubGeo = new THREE.CylinderGeometry(1.5, 1.5, 6, 32); hubGeo.rotateX(Math.PI/2); const hub = new THREE.Mesh(hubGeo, hubMaterial); rimGroup.add(hub);
-        const discGeo = new THREE.RingGeometry(2.5, CONFIG.brakeDiscRadius, 64); const disc = new THREE.Mesh(discGeo, brakeDiscMaterial); disc.position.z = 1.8;
-        const discBack = disc.clone(); discBack.rotation.y = Math.PI; discBack.position.z = 1.9;
-        const carrierGeo = new THREE.RingGeometry(1.5, 2.5, 32); const carrierMat = new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 0.8, roughness: 0.5 }); const carrier = new THREE.Mesh(carrierGeo, carrierMat); carrier.position.z = 1.85;
+
+        // Rim
+        const rimCylGeo = new THREE.CylinderGeometry(CONFIG.rimRadius, CONFIG.rimRadius, CONFIG.rimWidth, 64, 1, true); rimCylGeo.rotateX(Math.PI/2);
+        const rim = new THREE.Mesh(rimCylGeo, rimMaterial); rimGroup.add(rim);
+        const rimLipGeo = new THREE.TorusGeometry(CONFIG.rimRadius - 0.1, 0.2, 16, 64);
+        const rimLip1 = new THREE.Mesh(rimLipGeo, rimMaterial); rimLip1.position.z = CONFIG.rimWidth / 2;
+        const rimLip2 = rimLip1.clone(); rimLip2.position.z = -CONFIG.rimWidth / 2;
+        rimGroup.add(rimLip1); rimGroup.add(rimLip2);
+        const rimStripeGeo = new THREE.TorusGeometry(CONFIG.rimRadius - 0.05, 0.05, 16, 100);
+        const rimStripe1 = new THREE.Mesh(rimStripeGeo, rimStripeMaterial); rimStripe1.position.z = CONFIG.rimWidth / 2 + 0.1;
+        const rimStripe2 = rimStripe1.clone(); rimStripe2.position.z = -CONFIG.rimWidth / 2 - 0.1;
+        rimGroup.add(rimStripe1); rimGroup.add(rimStripe2);
+        for (let i = 0; i < CONFIG.spokeCount; i++) {
+            const angle = (i / CONFIG.spokeCount) * Math.PI * 2;
+            const spokeGeo = new THREE.CylinderGeometry(0.4, 0.2, CONFIG.rimRadius - 1, 8);
+            const spoke = new THREE.Mesh(spokeGeo, rimMaterial);
+            spoke.position.x = Math.cos(angle) * (CONFIG.rimRadius / 2); spoke.position.y = Math.sin(angle) * (CONFIG.rimRadius / 2);
+            spoke.rotation.z = angle - Math.PI / 2; spoke.rotation.x = Math.PI / 2; spoke.rotation.set(0, 0, angle - Math.PI/2);
+            rimGroup.add(spoke);
+        }
+        const hubGeo = new THREE.CylinderGeometry(1.5, 1.5, 6, 32); hubGeo.rotateX(Math.PI/2);
+        const hub = new THREE.Mesh(hubGeo, hubMaterial); rimGroup.add(hub);
+
+        // Brakes
+        const discGeo = new THREE.RingGeometry(2.5, CONFIG.brakeDiscRadius, 64);
+        const disc = new THREE.Mesh(discGeo, brakeDiscMaterial); disc.position.z = 1.8; 
+        const discBack = disc.clone(); discBack.rotation.y = Math.PI; discBack.position.z = 1.9; 
+        const carrierGeo = new THREE.RingGeometry(1.5, 2.5, 32);
+        const carrierMat = new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 0.8, roughness: 0.5 });
+        const carrier = new THREE.Mesh(carrierGeo, carrierMat); carrier.position.z = 1.85;
         brakeGroup.add(disc); brakeGroup.add(discBack); brakeGroup.add(carrier);
-        const boltGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.2, 8); const boltMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa }); for(let i=0; i<5; i++){ const angle = (i/5) * Math.PI * 2; const bolt = new THREE.Mesh(boltGeo, boltMat); bolt.rotateX(Math.PI/2); bolt.position.set(Math.cos(angle)*2.5, Math.sin(angle)*2.5, 1.9); brakeGroup.add(bolt); }
+        const boltGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.2, 8);
+        const boltMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+        for(let i=0; i<5; i++){
+            const angle = (i/5) * Math.PI * 2;
+            const bolt = new THREE.Mesh(boltGeo, boltMat); bolt.rotateX(Math.PI/2);
+            bolt.position.set(Math.cos(angle)*2.5, Math.sin(angle)*2.5, 1.9); brakeGroup.add(bolt);
+        }
+
+        // Lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); scene.add(ambientLight);
         const spotLight = new THREE.SpotLight(0xffffff, 500); spotLight.position.set(-10, 20, 10); spotLight.angle = Math.PI / 6; spotLight.penumbra = 0.5; spotLight.castShadow = true; scene.add(spotLight);
         const rimLight1 = new THREE.PointLight(0xffffff, 200); rimLight1.position.set(15, 5, 5); scene.add(rimLight1);
         const rimLight2 = new THREE.PointLight(0xff0000, 300); rimLight2.position.set(-5, -10, 5); scene.add(rimLight2);
-        const clock = new THREE.Clock(); let smoothedScroll = 0;
-        function animate() { requestAnimationFrame(animate); const time = clock.getElapsedTime(); rotatingGroup.rotation.z = time * -0.5; const maxScroll = document.body.scrollHeight - window.innerHeight; const scrollPercent = Math.min(Math.max(window.scrollY / maxScroll, 0), 1); smoothedScroll += (scrollPercent - smoothedScroll) * 0.04; const standProgress = Math.min(smoothedScroll / 0.15, 1); wheelAssembly.rotation.x = THREE.MathUtils.lerp(-Math.PI / 2, 0, standProgress);
-            if (themeConcept && themeEngineering && themeConfigure) { themeConcept.classList.remove('active'); themeEngineering.classList.remove('active'); themeConfigure.classList.remove('active'); if (smoothedScroll < 0.18) { themeConcept.classList.add('active'); } else if (smoothedScroll >= 0.22 && smoothedScroll < 0.59) { themeEngineering.classList.add('active'); } else if (smoothedScroll >= 0.59) { themeConfigure.classList.add('active'); } }
-            const tireScroll = Math.max(0, smoothedScroll - 0.08); tireGroup.position.z = tireScroll * 320.0; const rimScroll = Math.max(0, smoothedScroll - 0.22); rimGroup.position.z = rimScroll * 122.0; const brakeScroll = Math.max(0, smoothedScroll - 0.59); brakeGroup.position.z = brakeScroll * 30.0;
-            if(standProgress >= 1.0) { wheelAssembly.rotation.y = Math.sin(time * 0.5) * 0.1 + (smoothedScroll * 0.5); } else { wheelAssembly.rotation.y = 0; }
-            controls.update(); renderer.render(scene, camera);
+
+        // --- Animation Loop ---
+        const clock = new THREE.Clock();
+        let smoothedScroll = 0;
+        const animationRange = 4000; // Fixed pixel height for animation sequence
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+            rotatingGroup.rotation.z = time * -0.5;
+
+            // NEW SCROLL LOGIC: Use fixed range
+            const currentScrollY = window.scrollY;
+            const animationProgress = Math.min(Math.max(currentScrollY / animationRange, 0), 1);
+            
+            smoothedScroll += (animationProgress - smoothedScroll) * 0.04;
+
+            // ANIMATION: Stand Up (0-15%)
+            const standProgress = Math.min(smoothedScroll / 0.15, 1);
+            wheelAssembly.rotation.x = THREE.MathUtils.lerp(-Math.PI / 2, 0, standProgress);
+
+            // HEADER FADE
+            if(mainHeader) mainHeader.style.opacity = 1 - Math.min(smoothedScroll * 10, 1);
+
+            // TEXT FADE OUT (If scrolling into marketplace)
+            if (currentScrollY > animationRange) {
+                overlayContainer.style.opacity = 0;
+                overlayContainer.style.transition = 'opacity 0.5s ease';
+            } else {
+                overlayContainer.style.opacity = 1;
+            }
+
+            // TEXT & TRANSITION LOGIC
+            if (themeConcept && themeEngineering && themeConfigure) {
+                themeConcept.classList.remove('active');
+                themeEngineering.classList.remove('active');
+                themeConfigure.classList.remove('active');
+
+                if (smoothedScroll < 0.18) {
+                    themeConcept.classList.add('active');
+                } else if (smoothedScroll >= 0.22 && smoothedScroll < 0.59) {
+                    themeEngineering.classList.add('active');
+                } else if (smoothedScroll >= 0.59 && currentScrollY <= animationRange) { // Only show if not past animation
+                    themeConfigure.classList.add('active');
+                }
+            }
+
+            // DISINTEGRATION
+            const tireScroll = Math.max(0, smoothedScroll - 0.08); 
+            tireGroup.position.z = tireScroll * 320.0; 
+            
+            const rimScroll = Math.max(0, smoothedScroll - 0.22);
+            rimGroup.position.z = rimScroll * 122.0;
+
+            const brakeScroll = Math.max(0, smoothedScroll - 0.59);
+            brakeGroup.position.z = brakeScroll * 30.0; 
+
+            // WOBBLE
+            if(standProgress >= 1.0) {
+                wheelAssembly.rotation.y = Math.sin(time * 0.5) * 0.1 + (smoothedScroll * 0.5);
+            } else {
+                wheelAssembly.rotation.y = 0; 
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
         }
-        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
         animate();
+
     <\/script>
 </body>
 </html>`;
