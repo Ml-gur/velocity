@@ -367,6 +367,10 @@
 
             /* Glassmorphism edge */
             backdrop-filter: blur(8px);
+
+            /* restore native touch actions for the scrollable area */
+            touch-action: pan-y;
+            overscroll-behavior-y: none;
         }
 
         /* Content Stagger Logic */
@@ -591,14 +595,14 @@
     <nav
         class="fixed top-0 left-0 w-full z-[200] px-4 md:px-8 py-4 md:py-6 flex justify-between items-center pointer-events-none">
         <!-- Logo -->
-        <div class="pointer-events-auto cursor-pointer group">
+        <div class="pointer-events-auto cursor-pointer group" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
             <h1
                 class="font-['Michroma'] text-lg md:text-xl tracking-widest transition-all duration-500 bg-[length:200%_auto] hover:bg-right bg-gradient-to-r from-white via-red-500 to-white bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
                 VELOCITY<span class="text-white group-hover:text-transparent transition-colors duration-500">.OS</span>
             </h1>
         </div>
         <!-- Center Menu -->
-        <div
+        <div id="nav-center"
             class="hidden md:flex pointer-events-auto bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-10 py-3 space-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
             <a href="javascript:void(0)" onclick="openPage('concept')"
                 class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Concept</a>
@@ -608,7 +612,7 @@
                 class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Configure</a>
         </div>
         <!-- Right Action -->
-        <div class="pointer-events-auto flex items-center gap-6">
+        <div id="nav-right" class="pointer-events-auto flex items-center gap-6">
             <a href="javascript:void(0)" onclick="openPage('login')"
                 class="hidden md:block text-xs font-['Michroma'] text-white tracking-wider transition-all duration-300 ease-in-out hover:text-red-400 hover:scale-110 hover:drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]">
                 LOGIN
@@ -1073,6 +1077,9 @@
         let heroSectionElement, heroTitleElement, heroSpanElement;
         let whySectionElement, whyTitleElement, whySub1Element, whySub2Element;
         let marqueeSectionElement, marqueeTrackElement;
+        
+        // Navbar Elements
+        let navCenter, navRight;
 
         // New Dual Grid DOM
         let dualGridSectionElement;
@@ -1366,34 +1373,43 @@
         function onScroll(event) {
             if (isPageOpen) return; // Allow natural scroll if overlay is active
 
-            event.preventDefault();
-            const now = Date.now();
-
+            // Check if we are in the Marketplace view
             if (marketplaceOpen) {
-                // If in marketplace, check if scrolling back up to top
-                if (marketplaceWrapper.scrollTop <= 0 && event.deltaY < 0) {
+                // Determine if we are at the top boundary
+                const isAtTop = marketplaceWrapper.scrollTop <= 0;
+                // Check if user is trying to scroll UP (negative deltaY)
+                const isScrollingUp = event.deltaY < 0;
+
+                if (isAtTop && isScrollingUp) {
+                    // We are at the top and pulling down -> Trigger transition back to 3D
+                    event.preventDefault(); 
+                    const now = Date.now();
+                    
                     if (now - lastTransitionTime > 1000) {
                         marketplaceOpen = false;
                         lastTransitionTime = now;
-                        currentScroll = MAX_SCROLL_AMOUNT - 500; // Nudge back
+                        currentScroll = MAX_SCROLL_AMOUNT - 500; // Nudge back slightly into 3D space
                         scrollAmount = currentScroll / MAX_SCROLL_AMOUNT;
                     }
-                } else {
-                    // Manual scroll logic for the overlay to prevent body scroll
-                    marketplaceWrapper.scrollTop += event.deltaY;
                 }
+                // ELSE: Do nothing. Let the browser handle the scroll natively (preserves inertia).
             } else {
-                // Normal 3D scroll
+                // 3D Timeline Mode - Hijack everything
+                event.preventDefault();
+                
+                // Normal 3D scroll logic
                 currentScroll = Math.max(0, Math.min(MAX_SCROLL_AMOUNT, currentScroll + event.deltaY));
                 scrollAmount = currentScroll / MAX_SCROLL_AMOUNT;
 
                 if (sphereObject) sphereObject.rotation.y += event.deltaY * scrollRotationSpeed;
-                // --- FIXED: Rotate Wheel on Scroll during Grid Phase ---
+                
+                // Rotate Wheel on Scroll during Grid Phase
                 if (wheelObject && wheelObject.visible) {
                     wheelObject.rotation.y += event.deltaY * scrollRotationSpeed;
                 }
 
                 // Check transition trigger: Opens at very end
+                const now = Date.now();
                 if (scrollAmount >= 0.995) {
                     if (now - lastTransitionTime > 1000) {
                         marketplaceOpen = true;
@@ -1405,13 +1421,36 @@
 
         let touchStartY = 0;
         document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: false });
+        
         document.addEventListener('touchmove', e => {
             if (isPageOpen) return;
-            e.preventDefault();
-            const touchY = e.touches[0].clientY;
-            const deltaY = (touchStartY - touchY) * 2;
-            touchStartY = touchY;
-            onScroll({ preventDefault: () => { }, deltaY: deltaY });
+            
+            if (marketplaceOpen) {
+                // MARKETPLACE MODE (Native Scroll with Boundary Check)
+                const touchY = e.touches[0].clientY;
+                const deltaY = (touchStartY - touchY) * 2; // Positive = Scrolling Down
+                
+                const isAtTop = marketplaceWrapper.scrollTop <= 0;
+                const isScrollingUp = deltaY < 0;
+
+                if (isAtTop && isScrollingUp) {
+                    // Boundary hit: Transition back to 3D
+                    e.preventDefault(); 
+                    onScroll({ preventDefault: () => { }, deltaY: deltaY });
+                    touchStartY = touchY;
+                } else {
+                    // Allow native scroll. 
+                    // We update touchStartY so if the user reverses direction without lifting finger, logic holds.
+                    touchStartY = touchY;
+                }
+            } else {
+                // 3D MODE (Hijack)
+                e.preventDefault();
+                const touchY = e.touches[0].clientY;
+                const deltaY = (touchStartY - touchY) * 2;
+                touchStartY = touchY;
+                onScroll({ preventDefault: () => { }, deltaY: deltaY });
+            }
         }, { passive: false });
 
         function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
@@ -1448,6 +1487,10 @@
             marketplaceWrapper = document.getElementById('marketplace-wrapper');
             cardsContainer = document.getElementById('cards-container');
             renderCards('trending');
+
+            // Navbar Init
+            navCenter = document.getElementById('nav-center');
+            navRight = document.getElementById('nav-right');
 
             scene = new THREE.Scene(); scene.background = new THREE.Color(0x000000);
             // Optimized camera settings for mobile
@@ -1516,6 +1559,20 @@
                 } else {
                     heroSectionElement.style.display = 'none';
                 }
+            }
+            
+            // --- NAVBAR LOGIC ---
+            if (navCenter && navRight) {
+                 let navAlpha = 1;
+                 if (s > 0.05) {
+                     navAlpha = mapRange(s, 0.05, 0.15, 1, 0);
+                 }
+                 navCenter.style.opacity = navAlpha;
+                 navRight.style.opacity = navAlpha;
+                 // Prevent interaction when hidden
+                 const ptr = navAlpha < 0.1 ? 'none' : 'auto';
+                 navCenter.style.pointerEvents = ptr;
+                 navRight.style.pointerEvents = ptr;
             }
 
             // --- CAMERA ---
