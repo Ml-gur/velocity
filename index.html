@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>3D Sphere to Wheel Transition</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,9 +25,11 @@
         body {
             margin: 0;
             overflow: hidden;
-            /* Hide scrollbars as animation is driven by wheel event */
+            /* Hide scrollbars as animation is driven by wheel/touch event */
             font-family: 'Inter', sans-serif;
             background-color: #000;
+            touch-action: none;
+            /* Prevent browser bounce/zoom handling */
         }
 
         /* --- 3D CANVAS STYLES (Fixed to viewport) --- */
@@ -75,6 +77,7 @@
         /* Hero Text Styles */
         #hero-section {
             mix-blend-mode: screen;
+            will-change: transform, opacity;
         }
 
         #hero-title {
@@ -96,6 +99,7 @@
             mix-blend-mode: screen;
             transform-origin: center center;
             transition: all 0.1s ease-out;
+            will-change: transform, opacity;
         }
 
         .section-label {
@@ -116,12 +120,27 @@
             margin-bottom: 1rem;
         }
 
+        /* Adjust big title on mobile */
+        @media (max-width: 768px) {
+            .unified-big-title {
+                font-size: 1.5rem;
+            }
+        }
+
         .unified-desc {
             font-size: 0.95rem;
             font-family: 'Inter', sans-serif;
             color: #9ca3af;
             line-height: 1.6;
             white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .unified-desc {
+                white-space: normal;
+                /* Allow wrap on mobile */
+                font-size: 0.85rem;
+            }
         }
 
         /* Specific Positions */
@@ -134,7 +153,7 @@
             display: none;
         }
 
-        /* --- DUAL GRID SECTION (UPDATED LAYOUT) --- */
+        /* --- DUAL GRID SECTION (UPDATED LAYOUT & MOBILE OPTIMIZATION) --- */
         #dual-grid-section {
             position: fixed;
             top: 0;
@@ -149,6 +168,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            will-change: transform, opacity;
         }
 
         .grid-container {
@@ -161,7 +181,8 @@
             grid-template-columns: 1fr 1fr;
             /* Two rows to allow diagonal placement */
             grid-template-rows: 1fr 1fr;
-            /* No Gap in grid definition, handled by alignment */
+            /* The gap the user requested */
+            gap: 20vh;
         }
 
         /* Philosophy (Top Right - Row 1, Col 2) */
@@ -204,6 +225,34 @@
             /* Constrain width for readability */
         }
 
+        /* Mobile Layout for Dual Grid */
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 5vh;
+                height: auto;
+                width: 90vw;
+            }
+
+            #phil-col {
+                grid-column: 1;
+                grid-row: 1;
+                padding-top: 0;
+                align-items: flex-end;
+                /* Still right aligned */
+            }
+
+            #meth-col {
+                grid-column: 1;
+                grid-row: 2;
+                padding-bottom: 0;
+                padding-left: 1rem;
+                align-items: flex-start;
+                /* Still left aligned */
+            }
+        }
+
         /* --- MARQUEE STYLES --- */
         #marquee-section {
             position: fixed;
@@ -238,6 +287,14 @@
             letter-spacing: 0.2em;
             display: flex;
             align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .marquee-item {
+                font-size: 2rem;
+                /* Smaller text on mobile */
+                padding-right: 2rem;
+            }
         }
 
         .marquee-item span {
@@ -304,8 +361,9 @@
             /* Subtle red glow */
             background-size: 100% 100%;
 
-            /* Improved Transition: Heavy mechanical slide, slowed down */
-            transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+            /* Improved Transition: Smooth, deliberate mechanical slide */
+            transition: transform 1.5s cubic-bezier(0.75, 0, 0.25, 1);
+            will-change: transform;
 
             /* Glassmorphism edge */
             backdrop-filter: blur(8px);
@@ -353,6 +411,9 @@
             /* Initial state for animation */
             opacity: 0;
             transform: translateY(20px);
+            cursor: pointer;
+            /* Enable pointer for whole card */
+            will-change: transform, opacity;
         }
 
         .fuel-cell-card:hover {
@@ -486,6 +547,24 @@
             transform: scale(1);
         }
 
+        /* NEW: Full Page Overlay Styles for Navbar Links */
+        #page-overlay {
+            transform: translateY(-100%);
+            transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+
+        #page-overlay.active {
+            transform: translateY(0);
+        }
+
+        /* Adjust instructions for mobile */
+        @media (max-width: 768px) {
+            .instructions-overlay {
+                display: none;
+                /* Hide on mobile to reduce clutter */
+            }
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -509,27 +588,28 @@
 <body>
 
     <!-- SLEEK NAVBAR -->
-    <nav class="fixed top-0 left-0 w-full z-[200] px-8 py-6 flex justify-between items-center pointer-events-none">
+    <nav
+        class="fixed top-0 left-0 w-full z-[200] px-4 md:px-8 py-4 md:py-6 flex justify-between items-center pointer-events-none">
         <!-- Logo -->
         <div class="pointer-events-auto cursor-pointer group">
             <h1
-                class="font-['Michroma'] text-xl tracking-widest transition-all duration-500 bg-[length:200%_auto] hover:bg-right bg-gradient-to-r from-white via-red-500 to-white bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+                class="font-['Michroma'] text-lg md:text-xl tracking-widest transition-all duration-500 bg-[length:200%_auto] hover:bg-right bg-gradient-to-r from-white via-red-500 to-white bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
                 VELOCITY<span class="text-white group-hover:text-transparent transition-colors duration-500">.OS</span>
             </h1>
         </div>
         <!-- Center Menu -->
         <div
             class="hidden md:flex pointer-events-auto bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-10 py-3 space-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-            <a href="#"
+            <a href="javascript:void(0)" onclick="openPage('concept')"
                 class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Concept</a>
-            <a href="#"
+            <a href="javascript:void(0)" onclick="openPage('engineering')"
                 class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Engineering</a>
-            <a href="#"
+            <a href="javascript:void(0)" onclick="openPage('configure')"
                 class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Configure</a>
         </div>
         <!-- Right Action -->
         <div class="pointer-events-auto flex items-center gap-6">
-            <a href="#"
+            <a href="javascript:void(0)" onclick="openPage('login')"
                 class="hidden md:block text-xs font-['Michroma'] text-white tracking-wider transition-all duration-300 ease-in-out hover:text-red-400 hover:scale-110 hover:drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]">
                 LOGIN
             </a>
@@ -634,21 +714,26 @@
     <div id="marketplace-wrapper" class="fixed inset-0 z-[190] translate-y-full overflow-y-auto">
         <!-- MARKETPLACE CONTENT -->
         <!-- Added class 'marketplace-content-enter' for staggered intro animations -->
-        <main class="marketplace-content-enter w-full max-w-[1600px] mx-auto px-8 pt-32 pb-20 relative z-10">
+        <main class="marketplace-content-enter w-full max-w-[1600px] mx-auto px-4 md:px-8 pt-32 pb-20 relative z-10">
             <!-- Header & Tabs -->
             <div class="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-white/10 pb-6">
                 <div>
-                    <h2 class="font-['Michroma'] text-5xl text-white mb-3">COMPONENT <span
+                    <h2 class="font-['Michroma'] text-3xl md:text-5xl text-white mb-3">COMPONENT <span
                             class="text-red-500">STORE</span></h2>
-                    <p class="font-['Inter'] text-sm text-gray-400 tracking-widest uppercase max-w-lg leading-relaxed">
-                        High-performance UI/UX assets for mission-critical interfaces. <br>Strictly typed. Motion-rich.
-                        Production ready.
+                    <p
+                        class="font-['Inter'] text-xs md:text-sm text-gray-400 tracking-widest uppercase max-w-lg leading-relaxed">
+                        High-performance UI/UX assets for mission-critical interfaces. <br
+                            class="hidden md:block">Strictly typed. Motion-rich. Production ready.
                     </p>
                 </div>
-                <div class="flex gap-10 mt-8 md:mt-0 font-['Rajdhani'] font-bold text-base tracking-widest">
-                    <button class="tab-btn active hover:text-white" onclick="switchTab('trending')">TRENDING</button>
-                    <button class="tab-btn hover:text-white" onclick="switchTab('new')">NEW ARRIVALS</button>
-                    <button class="tab-btn hover:text-white" onclick="switchTab('community')">COMMUNITY</button>
+                <div
+                    class="flex gap-6 md:gap-10 mt-8 md:mt-0 font-['Rajdhani'] font-bold text-sm md:text-base tracking-widest overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+                    <button class="tab-btn active hover:text-white whitespace-nowrap"
+                        onclick="switchTab('trending')">TRENDING</button>
+                    <button class="tab-btn hover:text-white whitespace-nowrap" onclick="switchTab('new')">NEW
+                        ARRIVALS</button>
+                    <button class="tab-btn hover:text-white whitespace-nowrap"
+                        onclick="switchTab('community')">COMMUNITY</button>
                 </div>
             </div>
 
@@ -756,6 +841,36 @@
         </div>
     </div>
 
+    <!-- FULL PAGE OVERLAY (FOR NAVBAR LINKS) -->
+    <div id="page-overlay" class="fixed inset-0 z-[250] bg-[#050505] flex flex-col pointer-events-none">
+        <!-- Close Button -->
+        <button onclick="closePage()"
+            class="absolute top-6 right-8 text-gray-400 hover:text-white z-50 pointer-events-auto transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <!-- Content Container -->
+        <div id="page-content"
+            class="flex-grow overflow-y-auto p-8 md:p-20 pt-32 flex flex-col items-center justify-center opacity-0 transition-opacity duration-500 pointer-events-auto">
+            <div class="max-w-4xl w-full">
+                <h1 id="page-overlay-title"
+                    class="text-4xl md:text-7xl font-['Michroma'] text-white mb-8 border-l-4 border-red-600 pl-6 leading-tight">
+                    PAGE TITLE</h1>
+                <div id="page-overlay-body"
+                    class="text-lg md:text-xl text-gray-400 font-['Inter'] leading-relaxed space-y-6">
+                    <!-- Content injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- CONCEPT IFRAME CONTAINER (For the specific Concept Page request) -->
+        <div id="concept-frame-container"
+            class="absolute inset-0 z-40 hidden w-full h-full bg-black pointer-events-auto"></div>
+    </div>
+
     <script>
         // --- 1. CONSTANTS & CONFIGURATION ---
         const TXT_TITLE = "WHY VELOCITY.OS?";
@@ -768,6 +883,101 @@
         const PHIL_TITLE = "Craftsmanship. At Scale.";
         const PHIL_DESC = "Don't just build a UI. Orchestrate an experience. Velocity.os delivers the motion-rich, accessible, and strictly typed foundations that top engineering teams rely on to ship awards, not just code.";
 
+        // --- CONCEPT PAGE HTML CODE ---
+        const CONCEPT_HTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotoGP Wheel Simulation</title>
+    <style>
+        body { margin: 0; background-color: #050505; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
+        #canvas-container { width: 100%; height: 100vh; position: fixed; top: 0; left: 0; z-index: 1; }
+        canvas { display: block; outline: none; }
+        #overlay-container { position: fixed; bottom: 5%; left: 50%; transform: translateX(-50%); z-index: 3; pointer-events: none; mix-blend-mode: difference; max-width: 600px; width: 100%; perspective: 1000px; text-align: center; }
+        .theme-section { position: absolute; bottom: 0; left: 0; width: 100%; opacity: 0; transform: rotateX(20deg) translateY(40px); transform-origin: center bottom; transition: opacity 0.2s ease, transform 0.3s ease; pointer-events: none; will-change: opacity, transform; display: flex; flex-direction: column; align-items: center; }
+        .theme-section.active { opacity: 1; transform: rotateX(0deg) translateY(0); pointer-events: auto; transition: opacity 1.0s ease, transform 1.2s cubic-bezier(0.23, 1, 0.32, 1); }
+        .theme-header { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #ff3333; margin-bottom: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; opacity: 0; transform: translateY(10px); transition: opacity 0.1s ease, transform 0.1s ease; }
+        .theme-section.active .theme-header { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease 0.1s, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.1s; }
+        .theme-header::before, .theme-header::after { content: ''; display: inline-block; width: 30px; height: 2px; background: #ff3333; transform: scaleX(0); transition: transform 0.1s ease; }
+        .theme-header::before { margin-right: 15px; transform-origin: right; }
+        .theme-header::after { margin-left: 15px; transform-origin: left; }
+        .theme-section.active .theme-header::before, .theme-section.active .theme-header::after { transform: scaleX(1); transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+        .theme-title { font-size: 56px; font-weight: 900; line-height: 0.9; margin-bottom: 15px; text-transform: uppercase; font-family: 'Arial Black', sans-serif; color: #fff; letter-spacing: -2px; clip-path: inset(0 0 100% 0); transform: translateY(10px); transition: clip-path 0.2s ease, transform 0.2s ease; }
+        .theme-section.active .theme-title { clip-path: inset(0 0 0 0); transform: translateY(0); transition: clip-path 1.0s cubic-bezier(0.19, 1, 0.22, 1) 0.2s, transform 1.0s cubic-bezier(0.19, 1, 0.22, 1) 0.2s; }
+        .theme-desc { font-size: 13px; line-height: 1.6; color: #ccc; font-family: monospace; text-transform: uppercase; letter-spacing: 1px; border-top: 1px solid #444; padding-top: 15px; opacity: 0; clip-path: inset(0 100% 0 0); transition: opacity 0.2s ease, clip-path 0.2s ease; }
+        .theme-section.active .theme-desc { opacity: 1; clip-path: inset(0 0 0 0); transition: opacity 0.8s ease 0.4s, clip-path 1.2s cubic-bezier(0.19, 1, 0.22, 1) 0.4s; }
+        #scroll-spacer { height: 500vh; position: relative; z-index: 0; pointer-events: none; }
+        .scroll-instruction { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #444; animation: pulse 2s infinite; z-index: 2; pointer-events: none; font-family: monospace; font-size: 10px; letter-spacing: 2px; }
+        @keyframes pulse { 0% { opacity: 0.1; } 50% { opacity: 0.6; } 100% { opacity: 0.1; } }
+    </style>
+    <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } } <\/script>
+</head>
+<body>
+    <div id="overlay-container">
+        <div id="theme-concept" class="theme-section"> <div class="theme-header">PHASE 01 // CONCEPT</div> <div class="theme-title">ROTATIONAL<br>DYNAMICS</div> <div class="theme-desc"> [>] MINIMIZED UNSPRUNG MASS &nbsp;&nbsp; [>] AERO-SCULPTED PROFILE </div> </div>
+        <div id="theme-engineering" class="theme-section"> <div class="theme-header">PHASE 02 // ENGINEERING</div> <div class="theme-title">FORGED<br>MAGNESIUM</div> <div class="theme-desc"> [>] AZ80 MONOBLOCK &nbsp;&nbsp; [>] FEM-DERIVED SPOKES </div> </div>
+        <div id="theme-configure" class="theme-section"> <div class="theme-header">PHASE 03 // CONFIGURE</div> <div class="theme-title">SYSTEM<br>INTERFACE</div> <div class="theme-desc"> [>] FLOATING CARBON ROTORS &nbsp;&nbsp; [>] TITANIUM HARDWARE </div> </div>
+    </div>
+    
+    <div id="canvas-container"></div>
+    <div id="scroll-spacer"></div>
+    <script type="module">
+        import * as THREE from 'three'; import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        const themeConcept = document.getElementById('theme-concept'); const themeEngineering = document.getElementById('theme-engineering'); const themeConfigure = document.getElementById('theme-configure');
+        const CONFIG = { tireRadius: 10, tireTube: 3.5, rimRadius: 5.8, rimWidth: 5, spokeCount: 7, brakeDiscRadius: 4.5 };
+        const scene = new THREE.Scene(); scene.background = new THREE.Color(0x050505); scene.fog = new THREE.FogExp2(0x050505, 0.02);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 5, 45); camera.lookAt(0, 0, 0);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; document.getElementById('canvas-container').appendChild(renderer.domElement);
+        const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.minDistance = 10; controls.maxDistance = 60; controls.enableZoom = false;
+        function createBrakeDiscTexture() { const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 512, 512); ctx.fillStyle = '#000000'; const centerX = 256; const centerY = 256; for (let r = 100; r < 230; r += 25) { const circumference = 2 * Math.PI * r; const holeCount = Math.floor(circumference / 20); for (let i = 0; i < holeCount; i++) { const angle = (i / holeCount) * Math.PI * 2; const offsetR = r + (Math.random() * 5 - 2.5); const x = centerX + Math.cos(angle) * offsetR; const y = centerY + Math.sin(angle) * offsetR; ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill(); } } const texture = new THREE.CanvasTexture(canvas); texture.anisotropy = 16; return texture; }
+        function createTireTexture() { const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 1024; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, 1024, 1024); for(let i=0; i<50000; i++){ ctx.fillStyle = \`rgba(255,255,255, \${Math.random() * 0.05})\`; ctx.fillRect(Math.random()*1024, Math.random()*1024, 2, 2); } ctx.save(); ctx.translate(512, 512); function drawCurvedText(text, radius, startAngle, color, fontSize, angleSpacing = 0.15) { ctx.font = \`900 \${fontSize}px Arial\`; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const totalAngle = text.length * angleSpacing; let currentAngle = startAngle - (totalAngle / 2); text.split('').forEach((char) => { ctx.save(); ctx.rotate(currentAngle); ctx.translate(0, -radius); ctx.fillText(char, 0, 0); ctx.restore(); currentAngle += angleSpacing; }); } drawCurvedText("DESIGNING THE INVISIBLE", 350, 0, "#ffffff", 60, 0.10); ctx.rotate(Math.PI / 4); ctx.fillStyle = '#FFCC00'; ctx.fillRect(-60, -320, 120, 40); ctx.fillStyle = '#000000'; ctx.font = 'bold 20px Arial'; ctx.fillText("WARNING", 0, -300); ctx.restore(); const texture = new THREE.CanvasTexture(canvas); texture.anisotropy = 16; return texture; }
+        const rubberMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6, metalness: 0.1, map: createTireTexture(), bumpMap: createTireTexture(), bumpScale: 0.02 });
+        const slickMaterial = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.7, metalness: 0.0 });
+        const rimMaterial = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.4, metalness: 0.8 });
+        const rimStripeMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0x990000, emissiveIntensity: 0.5, roughness: 0.2, metalness: 0.5 });
+        const brakeDiscMap = createBrakeDiscTexture(); const brakeDiscMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, map: brakeDiscMap, alphaMap: brakeDiscMap, transparent: true, side: THREE.DoubleSide, roughness: 0.3, metalness: 0.9 });
+        const hubMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.5, metalness: 0.7 });
+        const axleMaterial = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.6, metalness: 0.6 });
+        const wheelAssembly = new THREE.Group(); wheelAssembly.rotation.x = -Math.PI / 2; scene.add(wheelAssembly);
+        const axleGeo = new THREE.CylinderGeometry(0.5, 0.5, 7, 16); axleGeo.rotateX(Math.PI/2); const axle = new THREE.Mesh(axleGeo, axleMaterial); wheelAssembly.add(axle);
+        const rotatingGroup = new THREE.Group(); wheelAssembly.add(rotatingGroup);
+        const tireGroup = new THREE.Group(); const rimGroup = new THREE.Group(); const brakeGroup = new THREE.Group();
+        rotatingGroup.add(tireGroup); rotatingGroup.add(rimGroup); rotatingGroup.add(brakeGroup);
+        const tireGeo = new THREE.TorusGeometry(CONFIG.tireRadius, CONFIG.tireTube, 32, 64); const tire = new THREE.Mesh(tireGeo, rubberMaterial); tire.scale.set(1, 1, 1.8);
+        const sidewallGeo = new THREE.RingGeometry(CONFIG.rimRadius, CONFIG.tireRadius + CONFIG.tireTube/2, 64); const sidewallLeft = new THREE.Mesh(sidewallGeo, rubberMaterial); sidewallLeft.position.z = 2.5; sidewallLeft.rotation.y = Math.PI;
+        const sidewallRight = new THREE.Mesh(sidewallGeo, rubberMaterial); sidewallRight.position.z = -2.5;
+        const slickGeo = new THREE.CylinderGeometry(CONFIG.tireRadius + CONFIG.tireTube - 0.2, CONFIG.tireRadius + CONFIG.tireTube - 0.2, 5, 64, 1, true); slickGeo.rotateX(Math.PI/2); const slick = new THREE.Mesh(slickGeo, slickMaterial);
+        const edgeGeo = new THREE.TorusGeometry(CONFIG.tireRadius + 1.5, 1.8, 16, 64); const edgeMesh = new THREE.Mesh(edgeGeo, slickMaterial); edgeMesh.scale.set(1, 1, 1.4);
+        tireGroup.add(sidewallLeft); tireGroup.add(sidewallRight); tireGroup.add(slick); tireGroup.add(edgeMesh);
+        const rimCylGeo = new THREE.CylinderGeometry(CONFIG.rimRadius, CONFIG.rimRadius, CONFIG.rimWidth, 64, 1, true); rimCylGeo.rotateX(Math.PI/2); const rim = new THREE.Mesh(rimCylGeo, rimMaterial); rimGroup.add(rim);
+        const rimLipGeo = new THREE.TorusGeometry(CONFIG.rimRadius - 0.1, 0.2, 16, 64); const rimLip1 = new THREE.Mesh(rimLipGeo, rimMaterial); rimLip1.position.z = CONFIG.rimWidth / 2; const rimLip2 = rimLip1.clone(); rimLip2.position.z = -CONFIG.rimWidth / 2; rimGroup.add(rimLip1); rimGroup.add(rimLip2);
+        const rimStripeGeo = new THREE.TorusGeometry(CONFIG.rimRadius - 0.05, 0.05, 16, 100); const rimStripe1 = new THREE.Mesh(rimStripeGeo, rimStripeMaterial); rimStripe1.position.z = CONFIG.rimWidth / 2 + 0.1; const rimStripe2 = rimStripe1.clone(); rimStripe2.position.z = -CONFIG.rimWidth / 2 - 0.1; rimGroup.add(rimStripe1); rimGroup.add(rimStripe2);
+        for (let i = 0; i < CONFIG.spokeCount; i++) { const angle = (i / CONFIG.spokeCount) * Math.PI * 2; const spokeGeo = new THREE.CylinderGeometry(0.4, 0.2, CONFIG.rimRadius - 1, 8); const spoke = new THREE.Mesh(spokeGeo, rimMaterial); spoke.position.x = Math.cos(angle) * (CONFIG.rimRadius / 2); spoke.position.y = Math.sin(angle) * (CONFIG.rimRadius / 2); spoke.rotation.z = angle - Math.PI / 2; spoke.rotation.x = Math.PI / 2; spoke.rotation.set(0, 0, angle - Math.PI/2); rimGroup.add(spoke); }
+        const hubGeo = new THREE.CylinderGeometry(1.5, 1.5, 6, 32); hubGeo.rotateX(Math.PI/2); const hub = new THREE.Mesh(hubGeo, hubMaterial); rimGroup.add(hub);
+        const discGeo = new THREE.RingGeometry(2.5, CONFIG.brakeDiscRadius, 64); const disc = new THREE.Mesh(discGeo, brakeDiscMaterial); disc.position.z = 1.8;
+        const discBack = disc.clone(); discBack.rotation.y = Math.PI; discBack.position.z = 1.9;
+        const carrierGeo = new THREE.RingGeometry(1.5, 2.5, 32); const carrierMat = new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 0.8, roughness: 0.5 }); const carrier = new THREE.Mesh(carrierGeo, carrierMat); carrier.position.z = 1.85;
+        brakeGroup.add(disc); brakeGroup.add(discBack); brakeGroup.add(carrier);
+        const boltGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.2, 8); const boltMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa }); for(let i=0; i<5; i++){ const angle = (i/5) * Math.PI * 2; const bolt = new THREE.Mesh(boltGeo, boltMat); bolt.rotateX(Math.PI/2); bolt.position.set(Math.cos(angle)*2.5, Math.sin(angle)*2.5, 1.9); brakeGroup.add(bolt); }
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); scene.add(ambientLight);
+        const spotLight = new THREE.SpotLight(0xffffff, 500); spotLight.position.set(-10, 20, 10); spotLight.angle = Math.PI / 6; spotLight.penumbra = 0.5; spotLight.castShadow = true; scene.add(spotLight);
+        const rimLight1 = new THREE.PointLight(0xffffff, 200); rimLight1.position.set(15, 5, 5); scene.add(rimLight1);
+        const rimLight2 = new THREE.PointLight(0xff0000, 300); rimLight2.position.set(-5, -10, 5); scene.add(rimLight2);
+        const clock = new THREE.Clock(); let smoothedScroll = 0;
+        function animate() { requestAnimationFrame(animate); const time = clock.getElapsedTime(); rotatingGroup.rotation.z = time * -0.5; const maxScroll = document.body.scrollHeight - window.innerHeight; const scrollPercent = Math.min(Math.max(window.scrollY / maxScroll, 0), 1); smoothedScroll += (scrollPercent - smoothedScroll) * 0.04; const standProgress = Math.min(smoothedScroll / 0.15, 1); wheelAssembly.rotation.x = THREE.MathUtils.lerp(-Math.PI / 2, 0, standProgress);
+            if (themeConcept && themeEngineering && themeConfigure) { themeConcept.classList.remove('active'); themeEngineering.classList.remove('active'); themeConfigure.classList.remove('active'); if (smoothedScroll < 0.18) { themeConcept.classList.add('active'); } else if (smoothedScroll >= 0.22 && smoothedScroll < 0.59) { themeEngineering.classList.add('active'); } else if (smoothedScroll >= 0.59) { themeConfigure.classList.add('active'); } }
+            const tireScroll = Math.max(0, smoothedScroll - 0.08); tireGroup.position.z = tireScroll * 320.0; const rimScroll = Math.max(0, smoothedScroll - 0.22); rimGroup.position.z = rimScroll * 122.0; const brakeScroll = Math.max(0, smoothedScroll - 0.59); brakeGroup.position.z = brakeScroll * 30.0;
+            if(standProgress >= 1.0) { wheelAssembly.rotation.y = Math.sin(time * 0.5) * 0.1 + (smoothedScroll * 0.5); } else { wheelAssembly.rotation.y = 0; }
+            controls.update(); renderer.render(scene, camera);
+        }
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+        animate();
+    <\/script>
+</body>
+</html>`;
+
         const WHEEL_CONFIG = {
             tireRadius: 2.5,
             tireTube: 0.8,
@@ -776,6 +986,26 @@
             spokeCount: 7,
             brakeDiscRadius: 1.2,
             scaleFactor: 0.8
+        };
+
+        const pagesContent = {
+            concept: {
+                title: "CONCEPT // ZERO",
+                // Content handled by special case
+                content: ""
+            },
+            engineering: {
+                title: "ENGINEERING // CORE",
+                content: "Built on a custom WebGL render pipeline, Velocity.OS achieves 60fps interaction on standard hardware. <br><br><b>Stack:</b><br>- Three.js (Custom Shaders)<br>- React Fiber (Orchestration)<br>- Rust (WASM Modules for Physics)<br><br>Every animation is calculated in real-time. No pre-rendered videos. Pure math."
+            },
+            configure: {
+                title: "SYSTEM // CONFIG",
+                content: "Configuration options allow deep customization of the viewport.<br><br>- <b>Render Scale:</b> 0.5x - 2.0x<br>- <b>Motion Blur:</b> Adaptive<br>- <b>Bloom:</b> Gaussian<br><br>Access the developer console [~] to inject custom shader overrides."
+            },
+            login: {
+                title: "AUTHENTICATION",
+                content: "Enter your credentials to access the Velocity Mainframe.<br><br><input type='text' placeholder='USERNAME' class='bg-transparent border-b border-white/20 w-full py-2 text-white outline-none focus:border-red-600 transition-colors mb-4 font-mono'><input type='password' placeholder='PASSWORD' class='bg-transparent border-b border-white/20 w-full py-2 text-white outline-none focus:border-red-600 transition-colors mb-8 font-mono'><button class='px-8 py-3 bg-red-600 text-white font-[Michroma] text-xs tracking-widest hover:bg-red-700 transition-colors'>ACCESS</button>"
+            }
         };
 
         const IDLE_ROTATION_SPEED = 0.001;
@@ -854,6 +1084,10 @@
         let marketplaceOpen = false;
         let cardsContainer;
 
+        // Page Overlay
+        let pageOverlay, pageOverlayTitle, pageOverlayBody;
+        let isPageOpen = false;
+
         // State trackers
         let prevTitleLen = 0;
         let prevSub1Len = 0;
@@ -861,6 +1095,7 @@
         let scrollAmount = 0;
         let smoothedScrollAmount = 0;
         let currentScroll = 0;
+        let lastTransitionTime = 0;
 
         // --- 3. UTILITY FUNCTIONS ---
         function lerp(start, end, t) { return start * (1 - t) + end * t; }
@@ -876,6 +1111,59 @@
             return `rgb(${r}, ${g}, ${b})`;
         }
 
+        // --- PAGE OVERLAY FUNCTIONS ---
+        window.openPage = function (pageId) {
+            const overlay = document.getElementById('page-overlay');
+            const titleEl = document.getElementById('page-overlay-title');
+            const bodyEl = document.getElementById('page-overlay-body');
+            const contentEl = document.getElementById('page-content');
+            const conceptFrame = document.getElementById('concept-frame-container');
+
+            overlay.classList.add('active');
+            isPageOpen = true;
+
+            if (pageId === 'concept') {
+                // SPECIAL HANDLING FOR CONCEPT PAGE
+                contentEl.style.display = 'none'; // Hide text content
+                conceptFrame.style.display = 'block'; // Show Iframe container
+                conceptFrame.innerHTML = `<iframe srcdoc='${CONCEPT_HTML.replace(/'/g, "&apos;")}' style="width:100%; height:100%; border:none;"></iframe>`;
+            } else {
+                // STANDARD PAGE HANDLING
+                const data = pagesContent[pageId];
+                if (!data) return;
+
+                conceptFrame.style.display = 'none'; // Hide iframe
+                conceptFrame.innerHTML = ''; // Clear iframe to stop resources
+                contentEl.style.display = 'flex'; // Show text content
+
+                titleEl.innerText = data.title;
+                bodyEl.innerHTML = data.content;
+
+                // Fade in content
+                setTimeout(() => {
+                    contentEl.style.opacity = '1';
+                    contentEl.style.transform = 'translateY(0)';
+                }, 300);
+            }
+        };
+
+        window.closePage = function () {
+            const overlay = document.getElementById('page-overlay');
+            const contentEl = document.getElementById('page-content');
+            const conceptFrame = document.getElementById('concept-frame-container');
+
+            contentEl.style.opacity = '0';
+            contentEl.style.transform = 'translateY(20px)';
+
+            // Clear iframe content after delay to allow transition, or immediately if prefer performance
+            conceptFrame.innerHTML = '';
+            conceptFrame.style.display = 'none';
+            contentEl.style.display = 'flex'; // Reset for next time
+
+            overlay.classList.remove('active');
+            isPageOpen = false;
+        };
+
         // --- 4. RENDER FUNCTIONS ---
         function renderCards(category) {
             if (!cardsContainer) return;
@@ -886,11 +1174,13 @@
 
             data.forEach((item, index) => {
                 const card = document.createElement('div');
+                // Added cursor: pointer to the card class
                 card.className = `fuel-cell-card group opacity-0`;
                 card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${index * 0.1}s, border-color 0.3s ease, background 0.3s ease`;
 
-                // Note: using onclick in HTML for simplicity in this context,
-                // binding to the global openProductModal function
+                // Added onclick to the card wrapper
+                card.onclick = () => openProductModal(category, index);
+
                 card.innerHTML = `
                     <div class="card-visual">
                         <div class="card-visual-overlay"></div>
@@ -904,8 +1194,8 @@
                             <p class="font-['Inter'] text-xs text-gray-400 leading-relaxed opacity-80 mt-2 line-clamp-3">${item.desc}</p>
                         </div>
                         <div class="flex gap-3 mt-4 pt-4 border-t border-white/5">
-                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] border border-white/20 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-300 rounded-sm" onclick="openProductModal('${category}', ${index})">PREVIEW</button>
-                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] bg-red-600/10 text-red-500 border border-red-600/30 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300 rounded-sm shadow-[0_0_10px_rgba(220,38,38,0.1)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]">ACQUIRE</button>
+                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] border border-white/20 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-300 rounded-sm hover:scale-105 active:scale-95">PREVIEW</button>
+                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] bg-red-600/10 text-red-500 border border-red-600/30 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300 rounded-sm shadow-[0_0_10px_rgba(220,38,38,0.1)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:scale-105 active:scale-95" onclick="event.stopPropagation()">ACQUIRE</button>
                         </div>
                     </div>
                 `;
@@ -981,7 +1271,7 @@
 
         const textureCache = {};
         function createKeyTexture(label, fontSize = 40) {
-            const size = 512; const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size; const ctx = canvas.getContext('2d');
+            const size = 256; const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size; const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, size, size);
             if (label) { ctx.fillStyle = '#ffffff'; ctx.font = `bold ${fontSize * 4}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 10; ctx.fillText(label, size / 2, size / 2); }
             const texture = new THREE.CanvasTexture(canvas); if (renderer) texture.anisotropy = renderer.capabilities.getMaxAnisotropy(); return texture;
@@ -998,13 +1288,28 @@
 
         function createIsolatedKeyboard() {
             const group = new THREE.Group(); const u = 0.65; const gap = 0.12;
+            // Create shared base geometry for standard keys
+            const sharedKeyGeo = new THREE.BoxGeometry(1, 0.05, 1);
+
             function createRow(keysData, zPos) {
                 let totalRowWidth = 0; keysData.forEach(k => { totalRowWidth += (k.w * u) + gap; }); totalRowWidth -= gap;
                 let currentX = -totalRowWidth / 2 + (keysData[0].w * u) / 2;
                 keysData.forEach((key) => {
-                    const width = key.w * u; const keyGeo = new THREE.BoxGeometry(width, 0.05, u);
-                    let fs = 40; if (key.l.length > 1) fs = 25; const mat = getKeyMaterial(key.l, fs);
-                    const mesh = new THREE.Mesh(keyGeo, mat);
+                    const width = key.w * u;
+                    let mesh;
+
+                    // For standard keys, use shared geometry to optimize
+                    if (key.w === 1 && u === 0.65) {
+                        const keyGeo = new THREE.BoxGeometry(width, 0.05, u);
+                        let fs = 40; if (key.l.length > 1) fs = 25; const mat = getKeyMaterial(key.l, fs);
+                        mesh = new THREE.Mesh(keyGeo, mat);
+                    } else {
+                        // Fallback for non-standard or just keep it simple
+                        const keyGeo = new THREE.BoxGeometry(width, 0.05, u);
+                        let fs = 40; if (key.l.length > 1) fs = 25; const mat = getKeyMaterial(key.l, fs);
+                        mesh = new THREE.Mesh(keyGeo, mat);
+                    }
+
                     if (key.l.length === 1) keysRegistry[key.l.toUpperCase()] = mesh;
                     mesh.userData.pressOffset = 0; mesh.userData.finalPos = new THREE.Vector3(currentX, 0, zPos);
                     mesh.userData.startPos = new THREE.Vector3((Math.random() - 0.5) * 8, (Math.random() * 3) + 4, (Math.random() - 0.5) * 5);
@@ -1029,7 +1334,7 @@
 
         function createWheel() {
             const brakeDiscMap = (function () { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const x = c.getContext('2d'); x.fillStyle = '#FFF'; x.fillRect(0, 0, 512, 512); x.fillStyle = '#000'; for (let r = 100; r < 230; r += 25) { for (let i = 0; i < Math.PI * 2 * r / 20; i++) { const a = i / (Math.PI * 2 * r / 20) * Math.PI * 2; x.beginPath(); x.arc(256 + Math.cos(a) * r, 256 + Math.sin(a) * r, 4, 0, Math.PI * 2); x.fill(); } } return new THREE.CanvasTexture(c); })();
-            const tireMap = (function () { const c = document.createElement('canvas'); c.width = 1024; c.height = 1024; const x = c.getContext('2d'); x.fillStyle = '#111'; x.fillRect(0, 0, 1024, 1024); for (let i = 0; i < 50000; i++) { x.fillStyle = `rgba(255,255,255,${Math.random() * 0.05})`; x.fillRect(Math.random() * 1024, Math.random() * 1024, 2, 2); } return new THREE.CanvasTexture(c); })();
+            const tireMap = (function () { const c = document.createElement('canvas'); c.width = 1024; c.height = 1024; const x = c.getContext('2d'); x.fillStyle = '#111'; x.fillRect(0, 0, 1024, 1024); for (let i = 0; i < 2000; i++) { x.fillStyle = `rgba(255,255,255,${Math.random() * 0.05})`; x.fillRect(Math.random() * 1024, Math.random() * 1024, 2, 2); } return new THREE.CanvasTexture(c); })();
 
             const group = new THREE.Group();
             const rubberMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6, metalness: 0.1, map: tireMap, bumpMap: tireMap, bumpScale: 0.02, transparent: true, opacity: 1.0 });
@@ -1059,14 +1364,20 @@
         function onMouseMove(event) { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = - (event.clientY / window.innerHeight) * 2 + 1; }
 
         function onScroll(event) {
+            if (isPageOpen) return; // Allow natural scroll if overlay is active
+
             event.preventDefault();
+            const now = Date.now();
 
             if (marketplaceOpen) {
                 // If in marketplace, check if scrolling back up to top
                 if (marketplaceWrapper.scrollTop <= 0 && event.deltaY < 0) {
-                    marketplaceOpen = false;
-                    currentScroll = MAX_SCROLL_AMOUNT - 200; // Nudge back
-                    scrollAmount = currentScroll / MAX_SCROLL_AMOUNT;
+                    if (now - lastTransitionTime > 1000) {
+                        marketplaceOpen = false;
+                        lastTransitionTime = now;
+                        currentScroll = MAX_SCROLL_AMOUNT - 500; // Nudge back
+                        scrollAmount = currentScroll / MAX_SCROLL_AMOUNT;
+                    }
                 } else {
                     // Manual scroll logic for the overlay to prevent body scroll
                     marketplaceWrapper.scrollTop += event.deltaY;
@@ -1084,10 +1395,24 @@
 
                 // Check transition trigger: Opens at very end
                 if (scrollAmount >= 0.995) {
-                    marketplaceOpen = true;
+                    if (now - lastTransitionTime > 1000) {
+                        marketplaceOpen = true;
+                        lastTransitionTime = now;
+                    }
                 }
             }
         }
+
+        let touchStartY = 0;
+        document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: false });
+        document.addEventListener('touchmove', e => {
+            if (isPageOpen) return;
+            e.preventDefault();
+            const touchY = e.touches[0].clientY;
+            const deltaY = (touchStartY - touchY) * 2;
+            touchStartY = touchY;
+            onScroll({ preventDefault: () => { }, deltaY: deltaY });
+        }, { passive: false });
 
         function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
 
@@ -1125,10 +1450,13 @@
             renderCards('trending');
 
             scene = new THREE.Scene(); scene.background = new THREE.Color(0x000000);
+            // Optimized camera settings for mobile
+            const isMobile = window.innerWidth < 768;
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, TOP_SPHERE_Y + 3.5, CAMERA_Z_START);
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio);
+            camera.position.set(0, TOP_SPHERE_Y + 3.5, isMobile ? CAMERA_Z_START + 2 : CAMERA_Z_START);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             container.appendChild(renderer.domElement);
             raycaster = new THREE.Raycaster(); mouse = new THREE.Vector2();
@@ -1136,7 +1464,7 @@
             const ambientLight = new THREE.AmbientLight(AMBIENT_COLOR); scene.add(ambientLight);
             const spotLight = new THREE.SpotLight(SPOTLIGHT_COLOR, 30); spotLight.position.set(0, 10, 0);
             spotLight.angle = Math.PI / 8; spotLight.penumbra = 0.5; spotLight.decay = 2; spotLight.distance = 50; spotLight.castShadow = true;
-            spotLight.shadow.mapSize.width = 2048; spotLight.shadow.mapSize.height = 2048; spotLight.shadow.camera.near = 1; spotLight.shadow.camera.far = 20;
+            spotLight.shadow.mapSize.width = 1024; spotLight.shadow.mapSize.height = 1024; spotLight.shadow.camera.near = 1; spotLight.shadow.camera.far = 20;
             spotLight.target.position.set(0, 0, 0); scene.add(spotLight); scene.add(spotLight.target);
 
             sphereObject = new THREE.Group(); sphereObject.add(createSphere()); sphereObject.position.y = TOP_SPHERE_Y; scene.add(sphereObject);
