@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Sphere to Wheel Transition</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Three.js and OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Load Michroma Font for Gamified Text -->
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
+    <!-- Load Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Load Rajdhani Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #050505;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            /* Hide scrollbars as animation is driven by wheel event */
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+        }
+
+        /* --- 3D CANVAS STYLES (Fixed to viewport) --- */
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* --- NEW HOVER EFFECTS --- */
+
+        .hover-underline-animation {
+            display: inline-block;
+            position: relative;
+        }
+
+        .hover-underline-animation::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 1px;
+            bottom: -4px;
+            left: 0;
+            background-color: #ffffff;
+            transform-origin: bottom right;
+            transition: transform 0.3s ease-out;
+        }
+
+        .hover-underline-animation:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        /* Hero Text Styles */
+        #hero-section {
+            mix-blend-mode: screen;
+        }
+
+        #hero-title {
+            transition: color 0.1s linear;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        #hero-span {
+            transition: color 0.1s linear;
+        }
+
+        /* --- UNIFIED SECTION STYLES --- */
+
+        .section-container {
+            position: fixed;
+            z-index: 140;
+            text-align: left;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            transform-origin: center center;
+            transition: all 0.1s ease-out;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            line-height: 1rem;
+            color: #ef4444;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+
+        .unified-big-title {
+            font-family: 'Michroma', sans-serif;
+            font-size: 2.2rem;
+            line-height: 1.15;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .unified-desc {
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            color: #9ca3af;
+            line-height: 1.6;
+            white-space: nowrap;
+        }
+
+        /* Specific Positions */
+        #why-section {
+            top: 50%;
+            left: 5%;
+            transform: translate(0, -50%);
+            width: 90vw;
+            max-width: 1600px;
+            display: none;
+        }
+
+        /* --- DUAL GRID SECTION (UPDATED LAYOUT) --- */
+        #dual-grid-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 140;
+            display: none;
+            /* Controlled by JS */
+            pointer-events: none;
+            /* Flex to center the grid container vertically */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-container {
+            width: 85vw;
+            max-width: 1600px;
+            height: 80vh;
+            /* Contain within vertical space */
+            display: grid;
+            /* Two columns */
+            grid-template-columns: 1fr 1fr;
+            /* Two rows to allow diagonal placement */
+            grid-template-rows: 1fr 1fr;
+            /* No Gap in grid definition, handled by alignment */
+        }
+
+        /* Philosophy (Top Right - Row 1, Col 2) */
+        #phil-col {
+            grid-column: 2;
+            grid-row: 1;
+            text-align: right;
+            border: none;
+            /* Align to top but give space from Marquee */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            /* Center in its cell vertically */
+            padding-top: 10vh;
+            /* Push down from Marquee area */
+        }
+
+        /* Methodology (Bottom Left - Row 2, Col 1) */
+        #meth-col {
+            grid-column: 1;
+            grid-row: 2;
+            text-align: left;
+            border: none;
+            padding-left: 2rem;
+            border-left: 4px solid white;
+            /* Align to bottom but give space from Marketplace */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* Center in its cell vertically */
+            padding-bottom: 10vh;
+            /* Push up from Marketplace area */
+        }
+
+        #phil-col .unified-desc,
+        #meth-col .unified-desc {
+            white-space: normal;
+            max-width: 450px;
+            /* Constrain width for readability */
+        }
+
+        /* --- MARQUEE STYLES --- */
+        #marquee-section {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            width: 100vw;
+            transform: translateY(-50%);
+            z-index: 130;
+            pointer-events: none;
+            overflow: hidden;
+            display: none;
+            background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 20%, rgba(0, 0, 0, 0.5) 80%, transparent 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2vh 0;
+            mix-blend-mode: screen;
+        }
+
+        .marquee-track {
+            display: flex;
+            white-space: nowrap;
+            will-change: transform;
+        }
+
+        .marquee-item {
+            font-family: 'Michroma', sans-serif;
+            font-size: 4rem;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+            padding-right: 4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            display: flex;
+            align-items: center;
+        }
+
+        .marquee-item span {
+            color: #ef4444;
+            margin-left: 2rem;
+            font-weight: bold;
+        }
+
+        /* HIGHLIGHTER ANIMATION */
+        .highlight-word {
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+            padding: 0 4px;
+            margin: 0 2px;
+            color: #ffffff;
+        }
+
+        .highlight-word::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0%;
+            height: 100%;
+            background-color: #ef4444;
+            z-index: -1;
+            transition: width 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+            transform: skewX(-10deg);
+        }
+
+        .highlight-word.active::before {
+            width: 100%;
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background-color: #ef4444;
+            animation: blink 1s step-end infinite;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* --- MARKETPLACE STYLES --- */
+        #marketplace-wrapper {
+            /* Background updated to be semi-transparent black to show the wheel behind it */
+            background-color: rgba(3, 3, 3, 0.85);
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.1), transparent 60%);
+            /* Subtle red glow */
+            background-size: 100% 100%;
+
+            /* Improved Transition: Heavy mechanical slide, slowed down */
+            transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+
+            /* Glassmorphism edge */
+            backdrop-filter: blur(8px);
+        }
+
+        /* Content Stagger Logic */
+        .marketplace-content-enter>* {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* When wrapper is active, we add a class to trigger these */
+        .marketplace-active .marketplace-content-enter>* {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Stagger delays */
+        .marketplace-active .marketplace-content-enter>*:nth-child(1) {
+            transition-delay: 0.4s;
+        }
+
+        .marketplace-active .marketplace-content-enter>*:nth-child(2) {
+            transition-delay: 0.5s;
+        }
+
+        .marketplace-active .marketplace-content-enter>*:nth-child(3) {
+            transition-delay: 0.6s;
+        }
+
+
+        /* JERRYCAN / FUEL CELL CARD STYLES */
+        .fuel-cell-card {
+            /* Robust Jerrycan Shape */
+            clip-path: polygon(20px 0, 100% 0,
+                    100% calc(100% - 20px), calc(100% - 20px) 100%,
+                    0 100%, 0 20px);
+            background: rgba(20, 20, 20, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            /* Initial state for animation */
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .fuel-cell-card:hover {
+            border-color: rgba(239, 68, 68, 0.6);
+            transform: translateY(-5px) !important;
+            /* Override inline style on hover */
+            background: rgba(30, 30, 30, 0.9);
+            z-index: 10;
+            box-shadow: 0 10px 40px -10px rgba(239, 68, 68, 0.15);
+        }
+
+        /* "Handle" Indication Top Bar */
+        .fuel-cell-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ef4444 0%, transparent 20%);
+            opacity: 0.7;
+            z-index: 20;
+        }
+
+        /* Structural Ribs on side */
+        .fuel-cell-card::after {
+            content: '';
+            position: absolute;
+            bottom: 20px;
+            right: 0;
+            width: 4px;
+            height: 30px;
+            background: #333;
+            box-shadow: -6px 0 0 #333, -12px 0 0 #333;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .card-visual {
+            height: 180px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0.8;
+            filter: grayscale(40%) contrast(1.1);
+        }
+
+        .fuel-cell-card:hover .card-visual img {
+            transform: scale(1.05);
+            opacity: 1;
+            filter: grayscale(0%) contrast(1);
+        }
+
+        .card-visual-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .price-stamp {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #ef4444;
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 800;
+            font-size: 16px;
+            padding: 4px 12px;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 15px 100%);
+            z-index: 10;
+        }
+
+        /* Tab Styles */
+        .tab-btn {
+            position: relative;
+            padding-bottom: 8px;
+            color: #6b7280;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: #ef4444;
+            transition: width 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: white;
+        }
+
+        .tab-btn.active::after {
+            width: 100%;
+        }
+
+        /* Modal Styles */
+        #product-modal {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #product-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #product-modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ef4444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SLEEK NAVBAR -->
+    <nav class="fixed top-0 left-0 w-full z-[200] px-8 py-6 flex justify-between items-center pointer-events-none">
+        <!-- Logo -->
+        <div class="pointer-events-auto cursor-pointer group">
+            <h1
+                class="font-['Michroma'] text-xl tracking-widest transition-all duration-500 bg-[length:200%_auto] hover:bg-right bg-gradient-to-r from-white via-red-500 to-white bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+                VELOCITY<span class="text-white group-hover:text-transparent transition-colors duration-500">.OS</span>
+            </h1>
+        </div>
+        <!-- Center Menu -->
+        <div
+            class="hidden md:flex pointer-events-auto bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-10 py-3 space-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+            <a href="#"
+                class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Concept</a>
+            <a href="#"
+                class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Engineering</a>
+            <a href="#"
+                class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Configure</a>
+        </div>
+        <!-- Right Action -->
+        <div class="pointer-events-auto flex items-center gap-6">
+            <a href="#"
+                class="hidden md:block text-xs font-['Michroma'] text-white tracking-wider transition-all duration-300 ease-in-out hover:text-red-400 hover:scale-110 hover:drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]">
+                LOGIN
+            </a>
+            <button class="group flex flex-col justify-center items-end gap-1.5 w-8 h-8 cursor-pointer">
+                <span
+                    class="block w-8 h-[2px] bg-white group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-colors duration-300"></span>
+                <span
+                    class="block w-5 h-[2px] bg-white group-hover:w-8 group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all duration-300"></span>
+                <span
+                    class="block w-8 h-[2px] bg-white group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-colors duration-300"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION TEXT -->
+    <div id="hero-section"
+        class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-[150] w-full px-4 pointer-events-none">
+        <h1 id="hero-title"
+            class="font-['Michroma'] text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-8 drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]">
+            DESIGNING THE<br /><span id="hero-span">INVISIBLE</span>
+        </h1>
+        <div class="space-y-2">
+            <p
+                class="font-['Inter'] text-[10px] md:text-xs text-gray-400 tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed">
+                A CURATED MARKETPLACE FOR THE NEXT GENERATION
+            </p>
+            <p
+                class="font-['Inter'] text-[10px] md:text-xs text-gray-400 tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed">
+                OF DIGITAL EXPERIENCES. CRAFTED WITH PRECISION.
+            </p>
+            <p
+                class="font-['Inter'] text-[10px] md:text-xs text-red-500 tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed font-semibold drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">
+                POWERED BY VIBE.
+            </p>
+        </div>
+    </div>
+
+    <!-- PHASE 2: "WHY" SECTION TEXT -->
+    <div id="why-section" class="section-container">
+        <h2 id="why-title" class="section-label"></h2>
+        <div>
+            <p id="why-sub1" class="unified-big-title"></p>
+            <p id="why-sub2" class="unified-desc"></p>
+            <span class="cursor-blink"></span>
+        </div>
+    </div>
+
+    <!-- MARQUEE SECTION -->
+    <div id="marquee-section">
+        <div class="marquee-track" id="marquee-track">
+            <div class="marquee-item">VELOCITY.OS <span>///</span></div>
+            <div class="marquee-item">PRECISION <span>///</span></div>
+            <div class="marquee-item">PERFORMANCE <span>///</span></div>
+            <div class="marquee-item">SCALABILITY <span>///</span></div>
+            <div class="marquee-item">VELOCITY.OS <span>///</span></div>
+            <div class="marquee-item">PRECISION <span>///</span></div>
+        </div>
+    </div>
+
+    <!-- NEW: DUAL GRID SECTION (Diagonal Layout) -->
+    <div id="dual-grid-section">
+        <div class="grid-container">
+            <!-- Philosophy (Top Right) -->
+            <div class="grid-col right" id="phil-col">
+                <h2 class="section-label" style="text-align: right;">The Philosophy</h2>
+                <div>
+                    <p id="phil-title" class="unified-big-title"></p>
+                    <p id="phil-desc" class="unified-desc text-gray-400 text-sm leading-relaxed"></p>
+                    <div id="phil-quote-container"
+                        class="mt-4 text-sm font-semibold tracking-widest uppercase opacity-0 transition-opacity duration-500 text-right">
+                        <span id="phil-quote" class="highlight-word">Function creates form.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methodology (Bottom Left) -->
+            <div class="grid-col" id="meth-col">
+                <h2 class="section-label">The Methodology</h2>
+                <div>
+                    <p id="meth-title" class="unified-big-title"></p>
+                    <p id="meth-desc" class="unified-desc text-gray-400 text-sm leading-relaxed"></p>
+                    <div id="meth-keywords"
+                        class="mt-4 text-sm font-semibold tracking-widest uppercase opacity-0 transition-opacity duration-500">
+                        <span id="kw-1" class="highlight-word">Lightweight,</span>
+                        <span id="kw-2" class="highlight-word">rigid,</span>
+                        <span id="kw-3" class="highlight-word">and ready to race.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D SCENE CONTAINER -->
+    <div id="webgl-container"></div>
+
+    <!-- Optional: Scroll Hint -->
+    <div class="instructions-overlay font-['Michroma'] text-xs tracking-widest border border-white/20 backdrop-blur-sm">
+        SCROLL TO TRANSFORM
+    </div>
+
+    <!-- MARKETPLACE OVERLAY (Initially Hidden/Below) -->
+    <div id="marketplace-wrapper" class="fixed inset-0 z-[190] translate-y-full overflow-y-auto">
+        <!-- MARKETPLACE CONTENT -->
+        <!-- Added class 'marketplace-content-enter' for staggered intro animations -->
+        <main class="marketplace-content-enter w-full max-w-[1600px] mx-auto px-8 pt-32 pb-20 relative z-10">
+            <!-- Header & Tabs -->
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-white/10 pb-6">
+                <div>
+                    <h2 class="font-['Michroma'] text-5xl text-white mb-3">COMPONENT <span
+                            class="text-red-500">STORE</span></h2>
+                    <p class="font-['Inter'] text-sm text-gray-400 tracking-widest uppercase max-w-lg leading-relaxed">
+                        High-performance UI/UX assets for mission-critical interfaces. <br>Strictly typed. Motion-rich.
+                        Production ready.
+                    </p>
+                </div>
+                <div class="flex gap-10 mt-8 md:mt-0 font-['Rajdhani'] font-bold text-base tracking-widest">
+                    <button class="tab-btn active hover:text-white" onclick="switchTab('trending')">TRENDING</button>
+                    <button class="tab-btn hover:text-white" onclick="switchTab('new')">NEW ARRIVALS</button>
+                    <button class="tab-btn hover:text-white" onclick="switchTab('community')">COMMUNITY</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Grid Container -->
+            <div id="cards-container"
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 min-h-[600px]">
+                <!-- Cards injected via JS -->
+            </div>
+
+            <!-- View More Button -->
+            <div class="mt-16 flex justify-center">
+                <button id="view-all-btn"
+                    class="px-12 py-4 border border-white/20 text-white font-['Michroma'] text-xs tracking-widest hover:bg-white hover:text-black hover:border-white transition-all duration-300">
+                    VIEW ALL TRENDING
+                </button>
+            </div>
+        </main>
+
+        <!-- SYSTEM FOOTER -->
+        <footer class="w-full border-t border-white/10 bg-black pt-16 pb-12 relative z-20">
+            <div class="max-w-[1600px] mx-auto px-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-center md:text-left items-start">
+                    <div>
+                        <h3 class="font-['Michroma'] text-3xl mb-4 text-white">SYSTEM STATUS</h3>
+                        <div class="h-1 w-20 bg-red-600 mb-6 mx-auto md:mx-0"></div>
+                        <p class="font-['Inter'] text-sm text-gray-500 leading-relaxed mb-4 max-w-md">
+                            ALL SYSTEMS NOMINAL. VELOCITY.OS v2.0 IS LIVE AND READY FOR INTEGRATION.
+                            CONNECTING THE PHYSICAL AND DIGITAL REALMS WITH UNPRECEDENTED PRECISION.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
+                        <div>
+                            <h4 class="section-label">LATENCY</h4>
+                            <p class="font-['Michroma'] text-xl text-white">1.2ms</p>
+                        </div>
+                        <div>
+                            <h4 class="section-label">THROUGHPUT</h4>
+                            <p class="font-['Michroma'] text-xl text-white">50GB/s</p>
+                        </div>
+                        <div>
+                            <h4 class="section-label">UPTIME</h4>
+                            <p class="font-['Michroma'] text-xl text-white">99.99%</p>
+                        </div>
+                        <div>
+                            <h4 class="section-label">ENCRYPTION</h4>
+                            <p class="font-['Michroma'] text-xl text-white">AES-256</p>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-600 font-['Michroma'] tracking-widest">
+                    <p>© 2024 VELOCITY SYSTEMS. ALL RIGHTS RESERVED.</p>
+                    <div class="flex gap-8 mt-4 md:mt-0">
+                        <a href="#" class="hover:text-red-500 transition-colors">PRIVACY POLICY</a>
+                        <a href="#" class="hover:text-red-500 transition-colors">TERMS OF SERVICE</a>
+                        <a href="#" class="hover:text-red-500 transition-colors">CONTACT SUPPORT</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- PRODUCT MODAL -->
+    <div id="product-modal"
+        class="fixed inset-0 z-[210] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div
+            class="modal-content bg-[#0a0a0a] border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row relative">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 text-white hover:text-red-500 z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="w-full md:w-1/2 h-64 md:h-auto relative">
+                <img id="modal-img" src="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+            </div>
+            <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                <div id="modal-cat" class="text-red-500 font-['Michroma'] text-xs tracking-widest mb-2">CATEGORY</div>
+                <h2 id="modal-title"
+                    class="text-4xl md:text-5xl font-['Rajdhani'] font-bold text-white mb-6 leading-none">TITLE</h2>
+                <p id="modal-desc" class="text-gray-400 font-['Inter'] text-sm leading-relaxed mb-8">Description...</p>
+                <div class="flex items-center justify-between mb-8 border-y border-white/10 py-4">
+                    <div class="text-center">
+                        <div class="text-xs text-gray-500 font-['Michroma'] mb-1">VERSION</div>
+                        <div class="text-white font-['Rajdhani'] font-bold">2.4.0</div>
+                    </div>
+                    <div class="text-center border-l border-white/10 pl-6">
+                        <div class="text-xs text-gray-500 font-['Michroma'] mb-1">SIZE</div>
+                        <div class="text-white font-['Rajdhani'] font-bold">45KB</div>
+                    </div>
+                    <div class="text-center border-l border-white/10 pl-6">
+                        <div class="text-xs text-gray-500 font-['Michroma'] mb-1">LICENSE</div>
+                        <div class="text-white font-['Rajdhani'] font-bold">MIT</div>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div id="modal-price" class="text-3xl font-['Rajdhani'] font-bold text-white flex items-center">$99
+                    </div>
+                    <button
+                        class="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white font-['Michroma'] text-xs tracking-widest transition-colors">ADD
+                        TO CART</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONSTANTS & CONFIGURATION ---
+        const TXT_TITLE = "WHY VELOCITY.OS?";
+        const TXT_SUB1 = "Built for the future of web.";
+        const TXT_SUB2 = "We don't just sell code. We sell an implementation strategy that scales.";
+
+        const METH_TITLE = "Race-Spec Architecture.";
+        const METH_DESC = "Built with the same precision engineering found in the paddock.";
+
+        const PHIL_TITLE = "Craftsmanship. At Scale.";
+        const PHIL_DESC = "Don't just build a UI. Orchestrate an experience. Velocity.os delivers the motion-rich, accessible, and strictly typed foundations that top engineering teams rely on to ship awards, not just code.";
+
+        const WHEEL_CONFIG = {
+            tireRadius: 2.5,
+            tireTube: 0.8,
+            rimRadius: 1.5,
+            rimWidth: 0.5,
+            spokeCount: 7,
+            brakeDiscRadius: 1.2,
+            scaleFactor: 0.8
+        };
+
+        const IDLE_ROTATION_SPEED = 0.001;
+        const HOVER_LIFT_AMOUNT = 0.1;
+        const scrollRotationSpeed = 0.005;
+        const SMOOTHING_FACTOR = 0.1;
+        const MAX_SCROLL_AMOUNT = 10000;
+
+        const AMBIENT_COLOR = 0x111111;
+        const SPOTLIGHT_COLOR = 0x880000;
+        const GROUND_COLOR = 0x010101;
+        const SPHERE_COLOR_START = new THREE.Color(0xaa0000);
+        const SPHERE_COLOR_END = new THREE.Color(0xffffff);
+
+        const TOP_SPHERE_Y = 1.5;
+        const KEYBOARD_Y = -4.0;
+        const WHEEL_Y = -12.0;
+        const LOWEST_TARGET_Y = WHEEL_Y;
+        const KEYBOARD_X_POSITION = 0.5;
+        const CAMERA_Z_START = 5.0;
+        const CAMERA_Z_END = 3.5;
+
+        // --- MARKETPLACE DATA ---
+        const products = {
+            trending: [
+                { title: "VELOCITY_MOTION", cat: "LIBRARY", price: "$99", img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80", desc: "Production-grade animation primitives for React." },
+                { title: "GLASS_UI_KIT", cat: "DESIGN", price: "$49", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80", desc: "Frosted glass morphism component library." },
+                { title: "GRID_SYSTEM_PRO", cat: "LAYOUT", price: "$29", img: "https://images.unsplash.com/photo-1558655146-d09347e0b7a9?auto=format&fit=crop&w=600&q=80", desc: "Responsive, sub-grid compatible layout engine." },
+                { title: "CHART_WRAPPER", cat: "DATA", price: "$35", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80", desc: "Canvas-accelerated financial charting suite." },
+                { title: "NEON_BUTTONS", cat: "UI", price: "$15", img: "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80", desc: "Glow-effect interactive button set." },
+                { title: "DARK_MODE_THEME", cat: "THEME", price: "$25", img: "https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&w=600&q=80", desc: "Optimized OLED-black color palettes." },
+                { title: "THREE_FIBER_STARTER", cat: "3D", price: "FREE", img: "https://images.unsplash.com/photo-1614854262318-831574f15f1f?auto=format&fit=crop&w=600&q=80", desc: "Boilerplate for WebGL experiences." },
+                { title: "AUTH_MODAL_PACK", cat: "SECURITY", price: "$20", img: "https://images.unsplash.com/photo-1614064641938-3e821efd8536?auto=format&fit=crop&w=600&q=80", desc: "Secure, accessible login/signup flows." }
+            ],
+            new: [
+                { title: "3D_MODEL_VIEWER", cat: "3D", price: "$59", img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80", desc: "Drag-and-drop GLTF/OBJ viewer component." },
+                { title: "AUDIO_VISUALIZER", cat: "AUDIO", price: "$45", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80", desc: "Real-time frequency analysis canvas." },
+                { title: "HAPTIC_FEEDBACK", cat: "INTERACTION", price: "$30", img: "https://images.unsplash.com/photo-1621360841013-c768371e93cf?auto=format&fit=crop&w=600&q=80", desc: "Vibration API patterns for mobile web." },
+                { title: "PAYMENT_MODAL", cat: "ECOMMERCE", price: "$40", img: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&w=600&q=80", desc: "Stripe-integrated checkout overlay." },
+                { title: "CONFETTI_CANNON", cat: "EFFECTS", price: "$10", img: "https://images.unsplash.com/photo-1514525253440-b393452e8d26?auto=format&fit=crop&w=600&q=80", desc: "High-performance particle celebration." },
+                { title: "SCROLL_SNAP_PRO", cat: "LAYOUT", price: "$25", img: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?auto=format&fit=crop&w=600&q=80", desc: "Smoothed scroll-snapping logic." },
+                { title: "DATE_PICKER_X", cat: "FORM", price: "$20", img: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=600&q=80", desc: "Accessible, keyboard-navigable calendar." },
+                { title: "TOAST_NOTIFY", cat: "UI", price: "$15", img: "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&w=600&q=80", desc: "Stackable notification system." }
+            ],
+            community: [
+                { title: "REACT_SPRING_FORK", cat: "ANIMATION", price: "FREE", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80", desc: "Community maintained physics spring lib." },
+                { title: "VUE_ADAPTER", cat: "INTEGRATION", price: "FREE", img: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=600&q=80", desc: "Use Velocity components in Vue apps." },
+                { title: "SVELTE_TRANSITIONS", cat: "ANIMATION", price: "FREE", img: "https://images.unsplash.com/photo-1550439062-609e1531270e?auto=format&fit=crop&w=600&q=80", desc: "Port of core transitions to Svelte." },
+                { title: "FIGMA_DESIGN_SYSTEM", cat: "DESIGN", price: "$20", img: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=600&q=80", desc: "Complete UI kit for Figma." },
+                { title: "VSCODE_THEME", cat: "DEV_TOOL", price: "FREE", img: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=600&q=80", desc: "Velocity OS syntax highlighting." },
+                { title: "CLI_TOOL", cat: "DEV_TOOL", price: "FREE", img: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&w=600&q=80", desc: "Scaffold projects from the terminal." },
+                { title: "ICON_PACK_V2", cat: "ASSETS", price: "$10", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80", desc: "200+ SVG vector icons." },
+                { title: "DOCS_TEMPLATE", cat: "CONTENT", price: "$25", img: "https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=600&q=80", desc: "Markdown-driven documentation site." }
+            ]
+        };
+
+        // --- 2. GLOBAL STATE ---
+        let scene, camera, renderer, controls;
+        let sphereObject, keyboardGroup, wheelObject;
+        let raycaster, mouse = new THREE.Vector2(), INTERSECTED = null;
+        let clock = new THREE.Clock();
+        let keysRegistry = {};
+
+        // DOM Elements
+        let heroSectionElement, heroTitleElement, heroSpanElement;
+        let whySectionElement, whyTitleElement, whySub1Element, whySub2Element;
+        let marqueeSectionElement, marqueeTrackElement;
+
+        // New Dual Grid DOM
+        let dualGridSectionElement;
+        let methTitleElement, methDescElement, methKeywordsContainer;
+        let methKw1, methKw2, methKw3;
+        let philTitleElement, philDescElement, philQuoteContainer, philQuote;
+
+        let marketplaceWrapper;
+        let marketplaceOpen = false;
+        let cardsContainer;
+
+        // State trackers
+        let prevTitleLen = 0;
+        let prevSub1Len = 0;
+        let prevSub2Len = 0;
+        let scrollAmount = 0;
+        let smoothedScrollAmount = 0;
+        let currentScroll = 0;
+
+        // --- 3. UTILITY FUNCTIONS ---
+        function lerp(start, end, t) { return start * (1 - t) + end * t; }
+        function mapRange(value, inMin, inMax, outMin, outMax) {
+            const clampedValue = THREE.MathUtils.clamp(value, inMin, inMax);
+            return outMin + (outMax - outMin) * (clampedValue - inMin) / (inMax - inMin);
+        }
+        function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+        function interpolateColorStyles(startRGB, endRGB, factor) {
+            const r = Math.round(lerp(startRGB[0], endRGB[0], factor));
+            const g = Math.round(lerp(startRGB[1], endRGB[1], factor));
+            const b = Math.round(lerp(startRGB[2], endRGB[2], factor));
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // --- 4. RENDER FUNCTIONS ---
+        function renderCards(category) {
+            if (!cardsContainer) return;
+            cardsContainer.innerHTML = '';
+            const data = products[category];
+            const viewAllBtn = document.getElementById('view-all-btn');
+            if (viewAllBtn) viewAllBtn.innerText = `VIEW ALL ${category.toUpperCase()}`;
+
+            data.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `fuel-cell-card group opacity-0`;
+                card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${index * 0.1}s, border-color 0.3s ease, background 0.3s ease`;
+
+                // Note: using onclick in HTML for simplicity in this context,
+                // binding to the global openProductModal function
+                card.innerHTML = `
+                    <div class="card-visual">
+                        <div class="card-visual-overlay"></div>
+                        <img src="${item.img}" alt="${item.title}">
+                        <div class="price-stamp">${item.price}</div>
+                    </div>
+                    <div class="p-6 flex flex-col justify-between h-[200px] bg-gradient-to-b from-transparent to-black/80">
+                        <div>
+                            <div class="text-[10px] font-['Michroma'] text-red-500 mb-2 tracking-widest opacity-80">${item.cat}</div>
+                            <h3 class="font-['Rajdhani'] font-bold text-2xl text-white mb-2 leading-none tracking-wide group-hover:text-red-500 transition-colors">${item.title}</h3>
+                            <p class="font-['Inter'] text-xs text-gray-400 leading-relaxed opacity-80 mt-2 line-clamp-3">${item.desc}</p>
+                        </div>
+                        <div class="flex gap-3 mt-4 pt-4 border-t border-white/5">
+                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] border border-white/20 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-300 rounded-sm" onclick="openProductModal('${category}', ${index})">PREVIEW</button>
+                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] bg-red-600/10 text-red-500 border border-red-600/30 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300 rounded-sm shadow-[0_0_10px_rgba(220,38,38,0.1)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]">ACQUIRE</button>
+                        </div>
+                    </div>
+                `;
+                cardsContainer.appendChild(card);
+            });
+            requestAnimationFrame(() => {
+                Array.from(cardsContainer.children).forEach(c => {
+                    c.style.opacity = '1';
+                    c.style.transform = 'translateY(0)';
+                });
+            });
+        }
+
+        window.openProductModal = function (cat, index) {
+            const item = products[cat][index];
+            document.getElementById('modal-img').src = item.img;
+            document.getElementById('modal-cat').innerText = item.cat;
+            document.getElementById('modal-title').innerText = item.title;
+            document.getElementById('modal-desc').innerText = item.desc;
+            document.getElementById('modal-price').innerText = item.price;
+
+            const modal = document.getElementById('product-modal');
+            modal.classList.add('active');
+        }
+
+        window.closeProductModal = function () {
+            const modal = document.getElementById('product-modal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal on outside click
+        window.addEventListener('click', function (e) {
+            const modal = document.getElementById('product-modal');
+            if (e.target === modal) {
+                closeProductModal();
+            }
+        });
+
+        window.switchTab = function (cat) {
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            if (cardsContainer) {
+                const cards = Array.from(cardsContainer.children);
+                cards.forEach((c, i) => {
+                    c.style.transition = `opacity 0.3s ease, transform 0.3s ease`;
+                    c.style.opacity = '0';
+                    c.style.transform = 'translateY(10px)';
+                });
+                setTimeout(() => { renderCards(cat); }, 300);
+            }
+        }
+
+        function pressKey(char) {
+            if (!char) return;
+            const keyChar = char.toUpperCase();
+            const mesh = keysRegistry[keyChar];
+            if (mesh) {
+                mesh.userData.pressOffset = -0.08;
+                if (mesh.material) {
+                    mesh.material.emissive.setHex(0xff0000);
+                    mesh.material.emissiveIntensity = 4.0;
+                }
+            }
+        }
+
+        // --- 5. 3D ASSETS ---
+        function createSphere() {
+            const sphereGeometry = new THREE.SphereGeometry(1.5, 64, 64);
+            const sphereMaterial = new THREE.MeshPhysicalMaterial({ color: SPHERE_COLOR_START, metalness: 0.5, roughness: 0.2, clearcoat: 0.5, clearcoatRoughness: 0.1, transparent: true, opacity: 1.0 });
+            return new THREE.Mesh(sphereGeometry, sphereMaterial);
+        }
+
+        const textureCache = {};
+        function createKeyTexture(label, fontSize = 40) {
+            const size = 512; const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size; const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, size, size);
+            if (label) { ctx.fillStyle = '#ffffff'; ctx.font = `bold ${fontSize * 4}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 10; ctx.fillText(label, size / 2, size / 2); }
+            const texture = new THREE.CanvasTexture(canvas); if (renderer) texture.anisotropy = renderer.capabilities.getMaxAnisotropy(); return texture;
+        }
+
+        function getKeyMaterial(label, fontSize) {
+            const keyId = label + (fontSize || 40);
+            if (!textureCache[keyId]) {
+                const texture = createKeyTexture(label, fontSize);
+                textureCache[keyId] = new THREE.MeshStandardMaterial({ color: 0x000000, map: texture, emissive: 0xffffff, emissiveMap: texture, emissiveIntensity: 1.5, roughness: 0.6, metalness: 0.1, transparent: true, opacity: 1.0 });
+            }
+            return textureCache[keyId].clone();
+        }
+
+        function createIsolatedKeyboard() {
+            const group = new THREE.Group(); const u = 0.65; const gap = 0.12;
+            function createRow(keysData, zPos) {
+                let totalRowWidth = 0; keysData.forEach(k => { totalRowWidth += (k.w * u) + gap; }); totalRowWidth -= gap;
+                let currentX = -totalRowWidth / 2 + (keysData[0].w * u) / 2;
+                keysData.forEach((key) => {
+                    const width = key.w * u; const keyGeo = new THREE.BoxGeometry(width, 0.05, u);
+                    let fs = 40; if (key.l.length > 1) fs = 25; const mat = getKeyMaterial(key.l, fs);
+                    const mesh = new THREE.Mesh(keyGeo, mat);
+                    if (key.l.length === 1) keysRegistry[key.l.toUpperCase()] = mesh;
+                    mesh.userData.pressOffset = 0; mesh.userData.finalPos = new THREE.Vector3(currentX, 0, zPos);
+                    mesh.userData.startPos = new THREE.Vector3((Math.random() - 0.5) * 8, (Math.random() * 3) + 4, (Math.random() - 0.5) * 5);
+                    mesh.userData.startRot = new THREE.Euler(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
+                    mesh.position.copy(mesh.userData.startPos); mesh.rotation.copy(mesh.userData.startRot);
+                    group.add(mesh);
+                    if (keysData.indexOf(key) < keysData.length - 1) currentX += (key.w * u) / 2 + gap + (keysData[keysData.indexOf(key) + 1].w * u) / 2;
+                });
+            }
+            const keyLayout = [
+                [{ l: "esc", w: 1.6 }, { l: "F1", w: 1 }, { l: "F2", w: 1 }, { l: "F3", w: 1 }, { l: "F4", w: 1 }, { l: "F5", w: 1 }, { l: "F6", w: 1 }, { l: "F7", w: 1 }, { l: "F8", w: 1 }, { l: "F9", w: 1 }, { l: "F10", w: 1 }, { l: "F11", w: 1 }, { l: "F12", w: 1 }, { l: "", w: 1.1 }],
+                [{ l: "ù", w: 1 }, { l: "1", w: 1 }, { l: "2", w: 1 }, { l: "3", w: 1 }, { l: "4", w: 1 }, { l: "5", w: 1 }, { l: "6", w: 1 }, { l: "7", w: 1 }, { l: "8", w: 1 }, { l: "9", w: 1 }, { l: "0", w: 1 }, { l: "-", w: 1 }, { l: "=", w: 1 }, { l: "delete", w: 1.6 }],
+                [{ l: "tab", w: 1.6 }, { l: "Q", w: 1 }, { l: "W", w: 1 }, { l: "E", w: 1 }, { l: "R", w: 1 }, { l: "T", w: 1 }, { l: "Y", w: 1 }, { l: "U", w: 1 }, { l: "I", w: 1 }, { l: "O", w: 1 }, { l: "P", w: 1 }, { l: "[", w: 1 }, { l: "]", w: 1 }, { l: "\\", w: 1 }],
+                [{ l: "caps lock", w: 1.85 }, { l: "A", w: 1 }, { l: "S", w: 1 }, { l: "D", w: 1 }, { l: "F", w: 1 }, { l: "G", w: 1 }, { l: "H", w: 1 }, { l: "J", w: 1 }, { l: "K", w: 1 }, { l: "L", w: 1 }, { l: ";", w: 1 }, { l: "'", w: 1 }, { l: "return", w: 1.75 }],
+                [{ l: "shift", w: 2.3 }, { l: "Z", w: 1 }, { l: "X", w: 1 }, { l: "C", w: 1 }, { l: "V", w: 1 }, { l: "B", w: 1 }, { l: "N", w: 1 }, { l: "M", w: 1 }, { l: ",", w: 1 }, { l: ".", w: 1 }, { l: "/", w: 1 }, { l: "shift", w: 2.3 }],
+                [{ l: "fn", w: 1 }, { l: "control", w: 1 }, { l: "option", w: 1 }, { l: "command", w: 1.25 }, { l: "", w: 5.5 }, { l: "command", w: 1.25 }, { l: "option", w: 1 }]
+            ];
+            const startZ = -2.6; let z = startZ;
+            keyLayout.forEach(row => { createRow(row, z); z += u + gap; });
+            return group;
+        }
+
+        function createWheel() {
+            const brakeDiscMap = (function () { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const x = c.getContext('2d'); x.fillStyle = '#FFF'; x.fillRect(0, 0, 512, 512); x.fillStyle = '#000'; for (let r = 100; r < 230; r += 25) { for (let i = 0; i < Math.PI * 2 * r / 20; i++) { const a = i / (Math.PI * 2 * r / 20) * Math.PI * 2; x.beginPath(); x.arc(256 + Math.cos(a) * r, 256 + Math.sin(a) * r, 4, 0, Math.PI * 2); x.fill(); } } return new THREE.CanvasTexture(c); })();
+            const tireMap = (function () { const c = document.createElement('canvas'); c.width = 1024; c.height = 1024; const x = c.getContext('2d'); x.fillStyle = '#111'; x.fillRect(0, 0, 1024, 1024); for (let i = 0; i < 50000; i++) { x.fillStyle = `rgba(255,255,255,${Math.random() * 0.05})`; x.fillRect(Math.random() * 1024, Math.random() * 1024, 2, 2); } return new THREE.CanvasTexture(c); })();
+
+            const group = new THREE.Group();
+            const rubberMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6, metalness: 0.1, map: tireMap, bumpMap: tireMap, bumpScale: 0.02, transparent: true, opacity: 1.0 });
+            const rimMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.4, metalness: 0.8, transparent: true, opacity: 1.0 });
+            const brakeDiscMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, map: brakeDiscMap, alphaMap: brakeDiscMap, transparent: true, side: THREE.DoubleSide, roughness: 0.3, metalness: 0.9, opacity: 1.0 });
+            const hubMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.5, metalness: 0.7, transparent: true, opacity: 1.0 });
+
+            const tire = new THREE.Mesh(new THREE.TorusGeometry(WHEEL_CONFIG.tireRadius, WHEEL_CONFIG.tireTube / 1.8, 32, 64), rubberMaterial); tire.scale.set(1, 1, 1.8); group.add(tire);
+            const sl = new THREE.Mesh(new THREE.RingGeometry(WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.tireRadius + WHEEL_CONFIG.tireTube / 3.6, 64), rubberMaterial); sl.position.z = WHEEL_CONFIG.rimWidth / 2; sl.rotation.y = Math.PI; group.add(sl);
+            const sr = new THREE.Mesh(new THREE.RingGeometry(WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.tireRadius + WHEEL_CONFIG.tireTube / 3.6, 64), rubberMaterial); sr.position.z = -WHEEL_CONFIG.rimWidth / 2; group.add(sr);
+            const rim = new THREE.Mesh(new THREE.CylinderGeometry(WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.rimWidth, 64, 1, true).rotateX(Math.PI / 2), rimMaterial); group.add(rim);
+            const spokeGroup = new THREE.Group();
+            for (let i = 0; i < WHEEL_CONFIG.spokeCount; i++) {
+                const angle = (i / WHEEL_CONFIG.spokeCount) * Math.PI * 2;
+                const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.2, WHEEL_CONFIG.rimRadius - 1, 8), rimMaterial);
+                spoke.rotation.set(0, 0, angle - Math.PI / 2); spoke.position.set(Math.cos(angle) * (WHEEL_CONFIG.rimRadius / 2), Math.sin(angle) * (WHEEL_CONFIG.rimRadius / 2), 0); spokeGroup.add(spoke);
+            }
+            group.add(spokeGroup);
+            group.add(new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 6, 32).rotateX(Math.PI / 2), hubMaterial));
+            const disc = new THREE.Mesh(new THREE.RingGeometry(0.8, WHEEL_CONFIG.brakeDiscRadius, 64), brakeDiscMaterial); disc.position.z = 1.8; group.add(disc);
+            const discBack = disc.clone(); discBack.rotation.y = Math.PI; discBack.position.z = 1.9; group.add(discBack);
+            group.scale.set(WHEEL_CONFIG.scaleFactor, WHEEL_CONFIG.scaleFactor, WHEEL_CONFIG.scaleFactor);
+            return group;
+        }
+
+        // --- 6. INIT & LOOP ---
+        function onMouseMove(event) { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = - (event.clientY / window.innerHeight) * 2 + 1; }
+
+        function onScroll(event) {
+            event.preventDefault();
+
+            if (marketplaceOpen) {
+                // If in marketplace, check if scrolling back up to top
+                if (marketplaceWrapper.scrollTop <= 0 && event.deltaY < 0) {
+                    marketplaceOpen = false;
+                    currentScroll = MAX_SCROLL_AMOUNT - 200; // Nudge back
+                    scrollAmount = currentScroll / MAX_SCROLL_AMOUNT;
+                } else {
+                    // Manual scroll logic for the overlay to prevent body scroll
+                    marketplaceWrapper.scrollTop += event.deltaY;
+                }
+            } else {
+                // Normal 3D scroll
+                currentScroll = Math.max(0, Math.min(MAX_SCROLL_AMOUNT, currentScroll + event.deltaY));
+                scrollAmount = currentScroll / MAX_SCROLL_AMOUNT;
+
+                if (sphereObject) sphereObject.rotation.y += event.deltaY * scrollRotationSpeed;
+                // --- FIXED: Rotate Wheel on Scroll during Grid Phase ---
+                if (wheelObject && wheelObject.visible) {
+                    wheelObject.rotation.y += event.deltaY * scrollRotationSpeed;
+                }
+
+                // Check transition trigger: Opens at very end
+                if (scrollAmount >= 0.995) {
+                    marketplaceOpen = true;
+                }
+            }
+        }
+
+        function onWindowResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }
+
+        function init() {
+            const container = document.getElementById('webgl-container');
+            heroSectionElement = document.getElementById('hero-section');
+            heroTitleElement = document.getElementById('hero-title');
+            heroSpanElement = document.getElementById('hero-span');
+            whySectionElement = document.getElementById('why-section');
+            whyTitleElement = document.getElementById('why-title');
+            whySub1Element = document.getElementById('why-sub1');
+            whySub2Element = document.getElementById('why-sub2');
+
+            marqueeSectionElement = document.getElementById('marquee-section');
+            marqueeTrackElement = document.getElementById('marquee-track');
+
+            // Get new Dual Grid Elements
+            dualGridSectionElement = document.getElementById('dual-grid-section');
+
+            methTitleElement = document.getElementById('meth-title');
+            methDescElement = document.getElementById('meth-desc');
+            methKeywordsContainer = document.getElementById('meth-keywords');
+            methKw1 = document.getElementById('kw-1');
+            methKw2 = document.getElementById('kw-2');
+            methKw3 = document.getElementById('kw-3');
+
+            philTitleElement = document.getElementById('phil-title');
+            philDescElement = document.getElementById('phil-desc');
+            philQuoteContainer = document.getElementById('phil-quote-container');
+            philQuote = document.getElementById('phil-quote');
+
+            // Marketplace Init
+            marketplaceWrapper = document.getElementById('marketplace-wrapper');
+            cardsContainer = document.getElementById('cards-container');
+            renderCards('trending');
+
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x000000);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, TOP_SPHERE_Y + 3.5, CAMERA_Z_START);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+            raycaster = new THREE.Raycaster(); mouse = new THREE.Vector2();
+
+            const ambientLight = new THREE.AmbientLight(AMBIENT_COLOR); scene.add(ambientLight);
+            const spotLight = new THREE.SpotLight(SPOTLIGHT_COLOR, 30); spotLight.position.set(0, 10, 0);
+            spotLight.angle = Math.PI / 8; spotLight.penumbra = 0.5; spotLight.decay = 2; spotLight.distance = 50; spotLight.castShadow = true;
+            spotLight.shadow.mapSize.width = 2048; spotLight.shadow.mapSize.height = 2048; spotLight.shadow.camera.near = 1; spotLight.shadow.camera.far = 20;
+            spotLight.target.position.set(0, 0, 0); scene.add(spotLight); scene.add(spotLight.target);
+
+            sphereObject = new THREE.Group(); sphereObject.add(createSphere()); sphereObject.position.y = TOP_SPHERE_Y; scene.add(sphereObject);
+            keyboardGroup = createIsolatedKeyboard(); keyboardGroup.position.set(KEYBOARD_X_POSITION, KEYBOARD_Y, 0); keyboardGroup.rotation.x = -Math.PI / 4; keyboardGroup.scale.set(0.6, 0.6, 0.6); scene.add(keyboardGroup);
+            wheelObject = createWheel(); wheelObject.position.set(-KEYBOARD_X_POSITION, LOWEST_TARGET_Y, 0); wheelObject.rotation.x = Math.PI / 2; wheelObject.rotation.y = Math.PI / 4; scene.add(wheelObject);
+            const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshPhongMaterial({ color: GROUND_COLOR })); ground.rotation.x = -Math.PI / 2; ground.position.y = 0; ground.receiveShadow = true; scene.add(ground);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.08; controls.screenSpacePanning = true; controls.minDistance = 3; controls.maxDistance = 15; controls.target.set(0, TOP_SPHERE_Y, 0); controls.enableZoom = false;
+
+            window.addEventListener('resize', onWindowResize, false); window.addEventListener('mousemove', onMouseMove, false); window.addEventListener('wheel', onScroll, { passive: false });
+            animate();
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+            smoothedScrollAmount = lerp(smoothedScrollAmount, scrollAmount, SMOOTHING_FACTOR);
+            const s = smoothedScrollAmount;
+
+            // Handle Marketplace Transition
+            if (marketplaceWrapper) {
+                if (marketplaceOpen) {
+                    marketplaceWrapper.style.transform = 'translateY(0%)';
+                    marketplaceWrapper.classList.add('marketplace-active');
+                } else {
+                    marketplaceWrapper.style.transform = 'translateY(100%)';
+                    marketplaceWrapper.classList.remove('marketplace-active');
+                }
+            }
+
+            // --- 1. HERO SECTION (0.0 - 0.3) ---
+            const colorProgress = mapRange(s, 0.0, 0.3, 0.0, 1.0);
+            if (sphereObject && sphereObject.children[0].material) {
+                sphereObject.children[0].material.color.lerpColors(SPHERE_COLOR_START, SPHERE_COLOR_END, colorProgress);
+            }
+            if (heroTitleElement && heroSpanElement) {
+                const textStart = [220, 220, 220]; const textEnd = [255, 255, 255];
+                const currentColor = interpolateColorStyles(textStart, textEnd, colorProgress);
+                heroTitleElement.style.color = currentColor; heroSpanElement.style.color = currentColor;
+            }
+            if (heroSectionElement) {
+                const heroOpacity = mapRange(s, 0.0, 0.5, 1.0, 0.0);
+                heroSectionElement.style.opacity = heroOpacity;
+                if (heroOpacity > 0.01) {
+                    const scale = 1 + (s * 0.3);
+                    heroSectionElement.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                    heroSectionElement.style.display = 'block';
+                } else {
+                    heroSectionElement.style.display = 'none';
+                }
+            }
+
+            // --- CAMERA ---
+            const transitionPoint1 = 0.5;
+            const transitionPoint2 = 0.8;
+
+            let targetY, targetX;
+            if (s <= transitionPoint1) {
+                const t = mapRange(s, 0.0, transitionPoint1, 0.0, 1.0);
+                targetY = lerp(TOP_SPHERE_Y, KEYBOARD_Y, t);
+                targetX = lerp(0.0, KEYBOARD_X_POSITION, t);
+            }
+            else if (s <= transitionPoint2) {
+                targetY = KEYBOARD_Y;
+                targetX = KEYBOARD_X_POSITION;
+            }
+            else {
+                const t = mapRange(s, transitionPoint2, 0.98, 0.0, 1.0);
+                targetY = lerp(KEYBOARD_Y, LOWEST_TARGET_Y, t);
+                targetX = lerp(KEYBOARD_X_POSITION, -KEYBOARD_X_POSITION, t);
+            }
+
+            controls.target.y = targetY; controls.target.x = targetX;
+            camera.position.z = lerp(CAMERA_Z_START, CAMERA_Z_END, s);
+            camera.position.x = targetX;
+            camera.position.y = lerp(TOP_SPHERE_Y + 3.5, LOWEST_TARGET_Y + 0.5, s);
+            controls.enableZoom = (s >= 0.99);
+
+            // --- OBJECT VISIBILITY & LOGIC ---
+
+            // Sphere
+            const opacitySphere = mapRange(s, 0.0, 0.4, 1.0, 0.0);
+            if (sphereObject && sphereObject.children[0].material) {
+                sphereObject.children[0].material.opacity = opacitySphere;
+                sphereObject.visible = opacitySphere > 0.01;
+                if (sphereObject.visible) sphereObject.rotation.y += IDLE_ROTATION_SPEED;
+            }
+
+            // Keyboard & Typing Section
+            if (keyboardGroup) {
+                let currentKeyboardOpacity = 1.0;
+                const formOpacity = mapRange(s, 0.1, 0.5, 0.0, 1.0);
+                const bgPhaseOpacity = mapRange(s, 0.45, 0.55, 1.0, 0.3);
+                const exitOpacity = mapRange(s, 0.80, 0.88, 0.3, 0.0);
+
+                if (s < 0.45) currentKeyboardOpacity = formOpacity;
+                else if (s < 0.80) currentKeyboardOpacity = bgPhaseOpacity;
+                else currentKeyboardOpacity = exitOpacity;
+
+                keyboardGroup.visible = currentKeyboardOpacity > 0.01;
+
+                if (keyboardGroup.visible) {
+                    const formationRaw = mapRange(s, 0.1, 0.5, 0, 1);
+                    const easedProgress = easeOutCubic(formationRaw);
+                    const slantProgress = mapRange(s, 0.5, 0.65, 0.0, 1.0);
+                    const easedSlant = easeOutCubic(slantProgress);
+
+                    const baseRotX = lerp(-Math.PI / 2, -Math.PI / 4, easedProgress);
+                    const slantZ = lerp(0, Math.PI / 8, easedSlant);
+                    const moveX = lerp(0, 1.5, easedSlant);
+
+                    let exitRotX = 0;
+                    let exitRotZ = 0;
+                    if (s > 0.80) {
+                        const exitProg = mapRange(s, 0.80, 0.88, 0, 1);
+                        exitRotX = lerp(0, -Math.PI / 4, exitProg);
+                        exitRotZ = lerp(0, -Math.PI / 4, exitProg);
+                    }
+
+                    keyboardGroup.rotation.x = baseRotX + exitRotX;
+                    keyboardGroup.rotation.z = slantZ + exitRotZ;
+                    keyboardGroup.position.x = KEYBOARD_X_POSITION + moveX;
+
+                    keyboardGroup.children.forEach(mesh => {
+                        mesh.userData.pressOffset = lerp(mesh.userData.pressOffset, 0, 0.1);
+                        if (mesh.material) {
+                            const targetEmissive = 1.5;
+                            mesh.material.emissiveIntensity = lerp(mesh.material.emissiveIntensity, targetEmissive, 0.1);
+                            const curR = mesh.material.emissive.r;
+                            const curG = mesh.material.emissive.g;
+                            const curB = mesh.material.emissive.b;
+                            mesh.material.emissive.setRGB(lerp(curR, 1, 0.1), lerp(curG, 1, 0.1), lerp(curB, 1, 0.1));
+                        }
+                        if (mesh.userData.finalPos && mesh.userData.startPos) {
+                            mesh.position.lerpVectors(mesh.userData.startPos, mesh.userData.finalPos, easedProgress);
+                            mesh.position.y += mesh.userData.pressOffset;
+                            mesh.rotation.x = lerp(mesh.userData.startRot.x, 0, easedProgress);
+                            mesh.rotation.y = lerp(mesh.userData.startRot.y, 0, easedProgress);
+                            mesh.rotation.z = lerp(mesh.userData.startRot.z, 0, easedProgress);
+                            if (mesh.material) mesh.material.opacity = currentKeyboardOpacity;
+                        }
+                    });
+                    keyboardGroup.rotation.y += IDLE_ROTATION_SPEED;
+                }
+
+                // "WHY" Section Logic
+                if (whySectionElement) {
+                    if (s > 0.45 && s < 0.88) {
+                        whySectionElement.style.display = 'block';
+                        // ... (previous why logic)
+                        let whyOpacity = 1;
+                        if (s < 0.5) whyOpacity = mapRange(s, 0.45, 0.5, 0, 1);
+                        else if (s > 0.80) {
+                            const exitProgress = mapRange(s, 0.80, 0.88, 0, 1);
+                            const blurVal = lerp(0, 30, exitProgress);
+                            whySectionElement.style.filter = `blur(${blurVal}px)`;
+                            const scaleVal = lerp(1, 0.05, exitProgress);
+                            const xMove = lerp(0, 40, exitProgress);
+                            whySectionElement.style.transform = `translate(${xMove}vw, -50%) scale(${scaleVal})`;
+                            whySectionElement.style.opacity = lerp(1, 0, exitProgress);
+                        } else {
+                            whySectionElement.style.transform = 'translate(0, -50%) scale(1)';
+                            whySectionElement.style.filter = 'blur(0px)';
+                            whySectionElement.style.opacity = 1;
+                        }
+
+                        const titleProgress = mapRange(s, 0.5, 0.60, 0, 1);
+                        const titleCharCount = Math.floor(titleProgress * TXT_TITLE.length);
+                        whyTitleElement.textContent = TXT_TITLE.substring(0, titleCharCount);
+
+                        const sub1Progress = mapRange(s, 0.60, 0.70, 0, 1);
+                        const sub1CharCount = Math.floor(sub1Progress * TXT_SUB1.length);
+                        whySub1Element.textContent = TXT_SUB1.substring(0, sub1CharCount);
+                        const sub2Progress = mapRange(s, 0.70, 0.80, 0, 1);
+                        const sub2CharCount = Math.floor(sub2Progress * TXT_SUB2.length);
+                        whySub2Element.textContent = TXT_SUB2.substring(0, sub2CharCount);
+
+                    } else {
+                        whySectionElement.style.display = 'none';
+                    }
+                }
+            }
+
+            // Marquee Section (0.80 - 0.90)
+            if (marqueeSectionElement) {
+                if (s > 0.80 && s < 0.90) {
+                    marqueeSectionElement.style.display = 'block';
+                    let mOpacity = 1;
+                    if (s < 0.82) mOpacity = mapRange(s, 0.80, 0.82, 0, 1);
+                    else if (s > 0.88) mOpacity = mapRange(s, 0.88, 0.90, 1, 0);
+                    marqueeSectionElement.style.opacity = mOpacity;
+                    const translateX = mapRange(s, 0.80, 0.90, 100, -100);
+                    marqueeTrackElement.style.transform = `translateX(${translateX}%)`;
+                } else {
+                    marqueeSectionElement.style.display = 'none';
+                }
+            }
+
+            // Wheel Animation Logic
+            const wheelEntryProgress = mapRange(s, 0.82, 0.90, 0.0, 1.0);
+
+            // Wheel Positioning Logic: 
+            // 1. Enters normally.
+            // 2. STAYS centered for the Grid phase (0.90 - 0.95).
+            // 3. Stays centered for the Marketplace phase (0.95+).
+
+            let wheelYPos = LOWEST_TARGET_Y;
+            // Lift wheel from LOWEST_TARGET_Y to the current camera center to keep it "fixed"
+            if (s > 0.88) {
+                // We use controls.target.y to keep it fixed in the center of the camera's view
+                const fixedProgress = mapRange(s, 0.88, 0.92, 0, 1);
+                wheelYPos = lerp(LOWEST_TARGET_Y, controls.target.y, easeOutCubic(fixedProgress));
+            }
+
+            // Fade Logic for Marketplace:
+            // Visible during grid, fades to semi-transparent when marketplace opens.
+            let wheelOpacityMultiplier = 1;
+            if (s > 0.96) {
+                const fadeProg = mapRange(s, 0.96, 0.99, 0, 1);
+                wheelOpacityMultiplier = lerp(1, 0.15, fadeProg);
+            }
+
+            if (wheelObject) {
+                wheelObject.position.y = wheelYPos;
+                wheelObject.children.forEach(mesh => {
+                    if (Array.isArray(mesh.material)) {
+                        mesh.material.forEach(mat => { if (mat.transparent) mat.opacity = wheelEntryProgress * wheelOpacityMultiplier; });
+                    } else if (mesh.material) {
+                        if (mesh.material.transparent) mesh.material.opacity = wheelEntryProgress * wheelOpacityMultiplier;
+                    }
+                });
+                wheelObject.visible = (wheelEntryProgress > 0.01);
+                if (wheelObject.visible) {
+                    wheelObject.rotation.z -= 0.025;
+                    // No hard reset of Y rotation here to allow scroll influence
+                    const targetScale = WHEEL_CONFIG.scaleFactor;
+                    const currentScale = lerp(0.1, targetScale, easeOutCubic(wheelEntryProgress));
+                    wheelObject.scale.set(currentScale, currentScale, currentScale);
+                }
+            }
+
+            // --- PHASE 3: DUAL GRID SECTION (0.90 -> 0.95) ---
+            if (dualGridSectionElement) {
+                // Extended range: 0.90 -> 0.98 (leaves room before store at 0.99)
+                if (s > 0.90 && s < 0.98) {
+                    dualGridSectionElement.style.display = 'flex';
+
+                    // Fade In (0.90 - 0.92)
+                    let gridOpacity = 1;
+                    if (s < 0.92) {
+                        gridOpacity = mapRange(s, 0.90, 0.92, 0, 1);
+                    }
+                    // Fade Out (0.96 - 0.98) as marketplace enters
+                    else if (s > 0.96) {
+                        gridOpacity = mapRange(s, 0.96, 0.98, 1, 0);
+                        // Slide up on exit
+                        const exitSlide = mapRange(s, 0.96, 0.98, 0, -50);
+                        dualGridSectionElement.style.transform = `translateY(${exitSlide}px)`;
+                    } else {
+                        dualGridSectionElement.style.transform = `translateY(0px)`;
+                    }
+                    dualGridSectionElement.style.opacity = gridOpacity;
+
+                    // Content Filling Logic (Methodology)
+                    const mTitleProg = mapRange(s, 0.90, 0.92, 0, 1);
+                    const mTitleChars = Math.floor(mTitleProg * METH_TITLE.length);
+                    methTitleElement.textContent = METH_TITLE.substring(0, mTitleChars);
+
+                    const mDescProg = mapRange(s, 0.92, 0.93, 0, 1);
+                    const mDescChars = Math.floor(mDescProg * METH_DESC.length);
+                    methDescElement.textContent = METH_DESC.substring(0, mDescChars);
+
+                    if (s > 0.925) {
+                        methKeywordsContainer.style.opacity = 1;
+                        if (s > 0.928) methKw1.classList.add('active');
+                        if (s > 0.931) methKw2.classList.add('active');
+                        if (s > 0.934) methKw3.classList.add('active');
+                    } else {
+                        methKeywordsContainer.style.opacity = 0;
+                    }
+
+                    // Content Filling Logic (Philosophy)
+                    const pTitleProg = mapRange(s, 0.90, 0.92, 0, 1);
+                    const pTitleChars = Math.floor(pTitleProg * PHIL_TITLE.length);
+                    philTitleElement.textContent = PHIL_TITLE.substring(0, pTitleChars);
+
+                    const pDescProg = mapRange(s, 0.93, 0.945, 0, 1);
+                    const pDescChars = Math.floor(pDescProg * PHIL_DESC.length);
+                    philDescElement.textContent = PHIL_DESC.substring(0, pDescChars);
+
+                    if (s > 0.94) {
+                        philQuoteContainer.style.opacity = 1;
+                        philQuote.classList.add('active');
+                    } else {
+                        philQuoteContainer.style.opacity = 0;
+                    }
+
+                } else {
+                    dualGridSectionElement.style.display = 'none';
+                }
+            }
+
+            // Raycasting
+            if (controls.enabled && keyboardGroup.visible) {
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(keyboardGroup.children, true);
+                if (intersects.length > 0) {
+                    const newIntersected = intersects[0].object;
+                    if (INTERSECTED !== newIntersected) {
+                        if (INTERSECTED) INTERSECTED.userData.pressOffset = 0;
+                        INTERSECTED = newIntersected;
+                        INTERSECTED.userData.pressOffset = -0.05;
+                    }
+                } else {
+                    INTERSECTED = null;
+                }
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>
