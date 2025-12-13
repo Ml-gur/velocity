@@ -4,650 +4,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D Sphere to Wheel Transition</title>
+    <title>Velocity.OS | Sphere to Wheel Transition</title>
+    
+    <!-- PERFORMANCE: Preconnect to CDNs -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Three.js and OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <!-- Load Michroma Font for Gamified Text -->
-    <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
-    <!-- Load Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <!-- Load Rajdhani Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Load Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@300;400;600&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --bg-color: #050505;
-        }
+        :root { --bg-color: #050505; }
 
         body {
             margin: 0;
-            overflow: hidden;
-            /* Hide scrollbars as animation is driven by wheel/touch event */
+            overflow: hidden; /* Hide scrollbars as animation is driven by wheel/touch event */
             font-family: 'Inter', sans-serif;
             background-color: #000;
-            touch-action: none;
-            /* Prevent browser bounce/zoom handling */
+            touch-action: none; /* Prevent browser bounce/zoom handling */
         }
 
-        /* --- 3D CANVAS STYLES (Fixed to viewport) --- */
+        /* --- 3D CANVAS STYLES --- */
         #webgl-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 100;
         }
+        canvas { display: block; }
 
-        canvas {
-            display: block;
-        }
-
-        /* --- NEW HOVER EFFECTS --- */
-
-        .hover-underline-animation {
-            display: inline-block;
-            position: relative;
-        }
-
+        /* --- UI UTILITIES --- */
+        .hover-underline-animation { display: inline-block; position: relative; }
         .hover-underline-animation::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            transform: scaleX(0);
-            height: 1px;
-            bottom: -4px;
-            left: 0;
-            background-color: #ffffff;
-            transform-origin: bottom right;
-            transition: transform 0.3s ease-out;
+            content: ''; position: absolute; width: 100%; transform: scaleX(0); height: 1px;
+            bottom: -4px; left: 0; background-color: #ffffff;
+            transform-origin: bottom right; transition: transform 0.3s ease-out;
         }
-
-        .hover-underline-animation:hover::after {
-            transform: scaleX(1);
-            transform-origin: bottom left;
-        }
+        .hover-underline-animation:hover::after { transform: scaleX(1); transform-origin: bottom left; }
 
         /* Hero Text Styles */
-        #hero-section {
-            mix-blend-mode: screen;
-            will-change: transform, opacity;
-        }
-
-        #hero-title {
-            transition: color 0.1s linear;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-        }
-
-        #hero-span {
-            transition: color 0.1s linear;
-        }
+        #hero-section { mix-blend-mode: screen; will-change: transform, opacity; }
+        #hero-title { transition: color 0.1s linear; text-shadow: 0 0 30px rgba(255, 255, 255, 0.1); }
+        #hero-span { transition: color 0.1s linear; }
 
         /* --- UNIFIED SECTION STYLES --- */
-
         .section-container {
-            position: fixed;
-            z-index: 140;
-            text-align: left;
-            pointer-events: none;
-            mix-blend-mode: screen;
+            position: fixed; z-index: 140; text-align: left;
+            pointer-events: none; mix-blend-mode: screen;
             transform-origin: center center;
             transition: all 0.1s ease-out;
             will-change: transform, opacity;
         }
-
         .section-label {
-            font-size: 0.75rem;
-            line-height: 1rem;
-            color: #ef4444;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            font-family: 'Inter', sans-serif;
-            margin-bottom: 0.5rem;
+            font-size: 0.75rem; line-height: 1rem; color: #ef4444;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            font-family: 'Inter', sans-serif; margin-bottom: 0.5rem;
         }
-
         .unified-big-title {
-            font-family: 'Michroma', sans-serif;
-            font-size: 2.2rem;
-            line-height: 1.15;
-            color: #ffffff;
-            margin-bottom: 1rem;
+            font-family: 'Michroma', sans-serif; font-size: 2.2rem;
+            line-height: 1.15; color: #ffffff; margin-bottom: 1rem;
         }
-
-        /* Adjust big title on mobile */
-        @media (max-width: 768px) {
-            .unified-big-title {
-                font-size: 1.5rem;
-            }
-        }
-
+        @media (max-width: 768px) { .unified-big-title { font-size: 1.5rem; } }
         .unified-desc {
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            color: #9ca3af;
-            line-height: 1.6;
-            white-space: nowrap;
+            font-size: 0.95rem; font-family: 'Inter', sans-serif;
+            color: #9ca3af; line-height: 1.6; white-space: nowrap;
         }
-
-        @media (max-width: 768px) {
-            .unified-desc {
-                white-space: normal;
-                /* Allow wrap on mobile */
-                font-size: 0.85rem;
-            }
-        }
+        @media (max-width: 768px) { .unified-desc { white-space: normal; font-size: 0.85rem; } }
 
         /* Specific Positions */
         #why-section {
-            top: 50%;
-            left: 5%;
-            transform: translate(0, -50%);
-            width: 90vw;
-            max-width: 1600px;
-            display: none;
+            top: 50%; left: 5%; transform: translate(0, -50%);
+            width: 90vw; max-width: 1600px; display: none;
         }
 
-        /* --- DUAL GRID SECTION (UPDATED LAYOUT & MOBILE OPTIMIZATION) --- */
+        /* --- DUAL GRID SECTION --- */
         #dual-grid-section {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 140;
-            display: none;
-            /* Controlled by JS */
-            pointer-events: none;
-            /* Flex to center the grid container vertically */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 140; display: none; pointer-events: none;
+            display: flex; align-items: center; justify-content: center;
             will-change: transform, opacity;
         }
-
         .grid-container {
-            width: 85vw;
-            max-width: 1600px;
-            height: 80vh;
-            /* Contain within vertical space */
-            display: grid;
-            /* Two columns */
-            grid-template-columns: 1fr 1fr;
-            /* Two rows to allow diagonal placement */
-            grid-template-rows: 1fr 1fr;
-            /* The gap the user requested */
-            gap: 20vh;
+            width: 85vw; max-width: 1600px; height: 80vh;
+            display: grid; grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr; gap: 20vh;
         }
-
-        /* Philosophy (Top Right - Row 1, Col 2) */
         #phil-col {
-            grid-column: 2;
-            grid-row: 1;
-            text-align: right;
-            border: none;
-            /* Align to top but give space from Marquee */
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: center;
-            /* Center in its cell vertically */
-            padding-top: 10vh;
-            /* Push down from Marquee area */
+            grid-column: 2; grid-row: 1; text-align: right;
+            display: flex; flex-direction: column; align-items: flex-end;
+            justify-content: center; padding-top: 10vh;
         }
-
-        /* Methodology (Bottom Left - Row 2, Col 1) */
         #meth-col {
-            grid-column: 1;
-            grid-row: 2;
-            text-align: left;
-            border: none;
-            padding-left: 2rem;
-            border-left: 4px solid white;
-            /* Align to bottom but give space from Marketplace */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            /* Center in its cell vertically */
+            grid-column: 1; grid-row: 2; text-align: left;
+            padding-left: 2rem; border-left: 4px solid white;
+            display: flex; flex-direction: column; justify-content: center;
             padding-bottom: 10vh;
-            /* Push up from Marketplace area */
         }
+        #phil-col .unified-desc, #meth-col .unified-desc { white-space: normal; max-width: 450px; }
 
-        #phil-col .unified-desc,
-        #meth-col .unified-desc {
-            white-space: normal;
-            max-width: 450px;
-            /* Constrain width for readability */
-        }
-
-        /* Mobile Layout for Dual Grid */
         @media (max-width: 768px) {
             .grid-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: 1fr 1fr;
-                gap: 5vh;
-                height: auto;
-                width: 90vw;
+                grid-template-columns: 1fr; grid-template-rows: 1fr 1fr;
+                gap: 5vh; height: auto; width: 90vw;
             }
-
-            #phil-col {
-                grid-column: 1;
-                grid-row: 1;
-                padding-top: 0;
-                align-items: flex-end;
-                /* Still right aligned */
-            }
-
-            #meth-col {
-                grid-column: 1;
-                grid-row: 2;
-                padding-bottom: 0;
-                padding-left: 1rem;
-                align-items: flex-start;
-                /* Still left aligned */
-            }
+            #phil-col { grid-column: 1; grid-row: 1; padding-top: 0; align-items: flex-end; }
+            #meth-col { grid-column: 1; grid-row: 2; padding-bottom: 0; padding-left: 1rem; align-items: flex-start; }
         }
 
         /* --- MARQUEE STYLES --- */
         #marquee-section {
-            position: fixed;
-            top: 50%;
-            left: 0;
-            width: 100vw;
-            transform: translateY(-50%);
-            z-index: 130;
-            pointer-events: none;
-            overflow: hidden;
-            display: none;
+            position: fixed; top: 50%; left: 0; width: 100vw;
+            transform: translateY(-50%); z-index: 130;
+            pointer-events: none; overflow: hidden; display: none;
             background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 20%, rgba(0, 0, 0, 0.5) 80%, transparent 100%);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2vh 0;
-            mix-blend-mode: screen;
+            padding: 2vh 0; mix-blend-mode: screen;
         }
-
-        .marquee-track {
-            display: flex;
-            white-space: nowrap;
-            will-change: transform;
-        }
-
+        .marquee-track { display: flex; white-space: nowrap; will-change: transform; }
         .marquee-item {
-            font-family: 'Michroma', sans-serif;
-            font-size: 4rem;
-            color: transparent;
-            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
-            padding-right: 4rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            display: flex;
-            align-items: center;
+            font-family: 'Michroma', sans-serif; font-size: 4rem;
+            color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+            padding-right: 4rem; text-transform: uppercase; letter-spacing: 0.2em;
+            display: flex; align-items: center;
         }
-
-        @media (max-width: 768px) {
-            .marquee-item {
-                font-size: 2rem;
-                /* Smaller text on mobile */
-                padding-right: 2rem;
-            }
-        }
-
-        .marquee-item span {
-            color: #ef4444;
-            margin-left: 2rem;
-            font-weight: bold;
-        }
+        @media (max-width: 768px) { .marquee-item { font-size: 2rem; padding-right: 2rem; } }
+        .marquee-item span { color: #ef4444; margin-left: 2rem; font-weight: bold; }
 
         /* HIGHLIGHTER ANIMATION */
-        .highlight-word {
-            display: inline-block;
-            position: relative;
-            z-index: 1;
-            padding: 0 4px;
-            margin: 0 2px;
-            color: #ffffff;
-        }
-
+        .highlight-word { display: inline-block; position: relative; z-index: 1; padding: 0 4px; margin: 0 2px; color: #ffffff; }
         .highlight-word::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 0%;
-            height: 100%;
-            background-color: #ef4444;
-            z-index: -1;
+            content: ''; position: absolute; left: 0; bottom: 0; width: 0%; height: 100%;
+            background-color: #ef4444; z-index: -1;
             transition: width 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
             transform: skewX(-10deg);
         }
-
-        .highlight-word.active::before {
-            width: 100%;
-        }
-
+        .highlight-word.active::before { width: 100%; }
         .cursor-blink {
-            display: inline-block;
-            width: 8px;
-            height: 24px;
-            background-color: #ef4444;
-            animation: blink 1s step-end infinite;
-            margin-left: 4px;
-            vertical-align: middle;
+            display: inline-block; width: 8px; height: 24px;
+            background-color: #ef4444; animation: blink 1s step-end infinite;
+            margin-left: 4px; vertical-align: middle;
         }
-
-        @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0;
-            }
-        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         /* --- MARKETPLACE STYLES --- */
         #marketplace-wrapper {
-            /* Background updated to be semi-transparent black to show the wheel behind it */
             background-color: rgba(3, 3, 3, 0.85);
-            background-image:
-                radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.1), transparent 60%);
-            /* Subtle red glow */
+            background-image: radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.1), transparent 60%);
             background-size: 100% 100%;
-
-            /* Improved Transition: Smooth, deliberate mechanical slide */
             transition: transform 1.5s cubic-bezier(0.75, 0, 0.25, 1);
             will-change: transform;
-
-            /* Glassmorphism edge */
             backdrop-filter: blur(8px);
-
-            /* restore native touch actions for the scrollable area */
-            touch-action: pan-y;
+            touch-action: pan-y; /* Restore native scroll interaction */
             overscroll-behavior-y: none;
         }
+        .marketplace-content-enter > * { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .marketplace-active .marketplace-content-enter > * { opacity: 1; transform: translateY(0); }
+        .marketplace-active .marketplace-content-enter > *:nth-child(1) { transition-delay: 0.4s; }
+        .marketplace-active .marketplace-content-enter > *:nth-child(2) { transition-delay: 0.5s; }
+        .marketplace-active .marketplace-content-enter > *:nth-child(3) { transition-delay: 0.6s; }
 
-        /* Content Stagger Logic */
-        .marketplace-content-enter>* {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        /* When wrapper is active, we add a class to trigger these */
-        .marketplace-active .marketplace-content-enter>* {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Stagger delays */
-        .marketplace-active .marketplace-content-enter>*:nth-child(1) {
-            transition-delay: 0.4s;
-        }
-
-        .marketplace-active .marketplace-content-enter>*:nth-child(2) {
-            transition-delay: 0.5s;
-        }
-
-        .marketplace-active .marketplace-content-enter>*:nth-child(3) {
-            transition-delay: 0.6s;
-        }
-
-
-        /* JERRYCAN / FUEL CELL CARD STYLES */
+        /* JERRYCAN CARD STYLES */
         .fuel-cell-card {
-            /* Robust Jerrycan Shape */
-            clip-path: polygon(20px 0, 100% 0,
-                    100% calc(100% - 20px), calc(100% - 20px) 100%,
-                    0 100%, 0 20px);
-            background: rgba(20, 20, 20, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            background: rgba(20, 20, 20, 0.4); border: 1px solid rgba(255, 255, 255, 0.08);
             transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(12px);
-            /* Initial state for animation */
-            opacity: 0;
-            transform: translateY(20px);
-            cursor: pointer;
-            /* Enable pointer for whole card */
-            will-change: transform, opacity;
+            position: relative; overflow: hidden; backdrop-filter: blur(12px);
+            opacity: 0; transform: translateY(20px); cursor: pointer; will-change: transform, opacity;
         }
-
         .fuel-cell-card:hover {
-            border-color: rgba(239, 68, 68, 0.6);
-            transform: translateY(-5px) !important;
-            /* Override inline style on hover */
-            background: rgba(30, 30, 30, 0.9);
-            z-index: 10;
+            border-color: rgba(239, 68, 68, 0.6); transform: translateY(-5px) !important;
+            background: rgba(30, 30, 30, 0.9); z-index: 10;
             box-shadow: 0 10px 40px -10px rgba(239, 68, 68, 0.15);
         }
-
-        /* "Handle" Indication Top Bar */
         .fuel-cell-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #ef4444 0%, transparent 20%);
-            opacity: 0.7;
-            z-index: 20;
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #ef4444 0%, transparent 20%); opacity: 0.7; z-index: 20;
         }
-
-        /* Structural Ribs on side */
-        .fuel-cell-card::after {
-            content: '';
-            position: absolute;
-            bottom: 20px;
-            right: 0;
-            width: 4px;
-            height: 30px;
-            background: #333;
-            box-shadow: -6px 0 0 #333, -12px 0 0 #333;
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
-        .card-visual {
-            height: 180px;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .card-visual img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            opacity: 0.8;
-            filter: grayscale(40%) contrast(1.1);
-        }
-
-        .fuel-cell-card:hover .card-visual img {
-            transform: scale(1.05);
-            opacity: 1;
-            filter: grayscale(0%) contrast(1);
-        }
-
-        .card-visual-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-            pointer-events: none;
-            z-index: 1;
-        }
-
+        .card-visual { height: 180px; width: 100%; position: relative; overflow: hidden; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .card-visual img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94); opacity: 0.8; filter: grayscale(40%) contrast(1.1); }
+        .fuel-cell-card:hover .card-visual img { transform: scale(1.05); opacity: 1; filter: grayscale(0%) contrast(1); }
+        .card-visual-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent); pointer-events: none; z-index: 1; }
         .price-stamp {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: #ef4444;
-            color: #000;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 800;
-            font-size: 16px;
-            padding: 4px 12px;
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 15px 100%);
-            z-index: 10;
+            position: absolute; top: 0; right: 0; background: #ef4444; color: #000;
+            font-family: 'Rajdhani', sans-serif; font-weight: 800; font-size: 16px;
+            padding: 4px 12px; clip-path: polygon(0 0, 100% 0, 100% 100%, 15px 100%); z-index: 10;
         }
 
-        /* Tab Styles */
-        .tab-btn {
-            position: relative;
-            padding-bottom: 8px;
-            color: #6b7280;
-            transition: color 0.3s;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
+        /* Modal & UI */
+        .tab-btn { position: relative; padding-bottom: 8px; color: #6b7280; transition: color 0.3s; font-size: 0.9rem; cursor: pointer; }
+        .tab-btn::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 2px; background: #ef4444; transition: width 0.3s ease; }
+        .tab-btn.active { color: white; }
+        .tab-btn.active::after { width: 100%; }
+        
+        #product-modal { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        #product-modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        #product-modal.active .modal-content { transform: scale(1); }
 
-        .tab-btn::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0%;
-            height: 2px;
-            background: #ef4444;
-            transition: width 0.3s ease;
-        }
+        #page-overlay { transform: translateY(-100%); transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1); }
+        #page-overlay.active { transform: translateY(0); }
 
-        .tab-btn.active {
-            color: white;
-        }
-
-        .tab-btn.active::after {
-            width: 100%;
-        }
-
-        /* Modal Styles */
-        #product-modal {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        #product-modal.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            transform: scale(0.95);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        #product-modal.active .modal-content {
-            transform: scale(1);
-        }
-
-        /* NEW: Full Page Overlay Styles for Navbar Links */
-        #page-overlay {
-            transform: translateY(-100%);
-            transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1);
-        }
-
-        #page-overlay.active {
-            transform: translateY(0);
-        }
-
-        /* Adjust instructions for mobile */
-        @media (max-width: 768px) {
-            .instructions-overlay {
-                display: none;
-                /* Hide on mobile to reduce clutter */
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #000;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ef4444;
-        }
+        @media (max-width: 768px) { .instructions-overlay { display: none; } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ef4444; }
     </style>
 </head>
 
 <body>
 
-    <!-- SLEEK NAVBAR -->
-    <nav
-        class="fixed top-0 left-0 w-full z-[200] px-4 md:px-8 py-4 md:py-6 flex justify-between items-center pointer-events-none">
-        <!-- Logo -->
+    <!-- NAVBAR -->
+    <nav class="fixed top-0 left-0 w-full z-[200] px-4 md:px-8 py-4 md:py-6 flex justify-between items-center pointer-events-none">
         <div class="pointer-events-auto cursor-pointer group" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-            <h1
-                class="font-['Michroma'] text-lg md:text-xl tracking-widest transition-all duration-500 bg-[length:200%_auto] hover:bg-right bg-gradient-to-r from-white via-red-500 to-white bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+            <h1 class="font-['Michroma'] text-lg md:text-xl tracking-widest transition-all duration-500 bg-[length:200%_auto] hover:bg-right bg-gradient-to-r from-white via-red-500 to-white bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
                 VELOCITY<span class="text-white group-hover:text-transparent transition-colors duration-500">.OS</span>
             </h1>
         </div>
-        <!-- Center Menu -->
-        <div id="nav-center"
-            class="hidden md:flex pointer-events-auto bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-10 py-3 space-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-            <a href="javascript:void(0)" onclick="openPage('concept')"
-                class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Concept</a>
-            <a href="javascript:void(0)" onclick="openPage('engineering')"
-                class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Engineering</a>
-            <a href="javascript:void(0)" onclick="openPage('configure')"
-                class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Configure</a>
+        <div id="nav-center" class="hidden md:flex pointer-events-auto bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-10 py-3 space-x-12 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+            <a href="javascript:void(0)" onclick="openPage('concept')" class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Concept</a>
+            <a href="javascript:void(0)" onclick="openPage('engineering')" class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Engineering</a>
+            <a href="javascript:void(0)" onclick="openPage('configure')" class="hover-underline-animation text-[11px] text-gray-400 uppercase tracking-[0.2em] font-semibold hover:text-white transition-colors duration-300">Configure</a>
         </div>
-        <!-- Right Action -->
         <div id="nav-right" class="pointer-events-auto flex items-center gap-6">
-            <a href="javascript:void(0)" onclick="openPage('login')"
-                class="hidden md:block text-xs font-['Michroma'] text-white tracking-wider transition-all duration-300 ease-in-out hover:text-red-400 hover:scale-110 hover:drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]">
-                LOGIN
-            </a>
+            <a href="javascript:void(0)" onclick="openPage('login')" class="hidden md:block text-xs font-['Michroma'] text-white tracking-wider transition-all duration-300 ease-in-out hover:text-red-400 hover:scale-110 hover:drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]">LOGIN</a>
             <button class="group flex flex-col justify-center items-end gap-1.5 w-8 h-8 cursor-pointer">
-                <span
-                    class="block w-8 h-[2px] bg-white group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-colors duration-300"></span>
-                <span
-                    class="block w-5 h-[2px] bg-white group-hover:w-8 group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all duration-300"></span>
-                <span
-                    class="block w-8 h-[2px] bg-white group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-colors duration-300"></span>
+                <span class="block w-8 h-[2px] bg-white group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-colors duration-300"></span>
+                <span class="block w-5 h-[2px] bg-white group-hover:w-8 group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all duration-300"></span>
+                <span class="block w-8 h-[2px] bg-white group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-colors duration-300"></span>
             </button>
         </div>
     </nav>
 
     <!-- HERO SECTION TEXT -->
-    <div id="hero-section"
-        class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-[150] w-full px-4 pointer-events-none">
-        <h1 id="hero-title"
-            class="font-['Michroma'] text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-8 drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]">
+    <div id="hero-section" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-[150] w-full px-4 pointer-events-none">
+        <h1 id="hero-title" class="font-['Michroma'] text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-8 drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]">
             DESIGNING THE<br /><span id="hero-span">INVISIBLE</span>
         </h1>
         <div class="space-y-2">
-            <p
-                class="font-['Inter'] text-[10px] md:text-xs text-gray-400 tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed">
-                A CURATED MARKETPLACE FOR THE NEXT GENERATION
-            </p>
-            <p
-                class="font-['Inter'] text-[10px] md:text-xs text-gray-400 tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed">
-                OF DIGITAL EXPERIENCES. CRAFTED WITH PRECISION.
-            </p>
-            <p
-                class="font-['Inter'] text-[10px] md:text-xs text-red-500 tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed font-semibold drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">
-                POWERED BY VIBE.
-            </p>
+            <p class="font-['Inter'] text-[10px] md:text-xs text-gray-400 tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed">A CURATED MARKETPLACE FOR THE NEXT GENERATION</p>
+            <p class="font-['Inter'] text-[10px] md:text-xs text-gray-400 tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed">OF DIGITAL EXPERIENCES. CRAFTED WITH PRECISION.</p>
+            <p class="font-['Inter'] text-[10px] md:text-xs text-red-500 tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed font-semibold drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">POWERED BY VIBE.</p>
         </div>
     </div>
 
@@ -673,30 +282,25 @@
         </div>
     </div>
 
-    <!-- NEW: DUAL GRID SECTION (Diagonal Layout) -->
+    <!-- PHASE 3: DUAL GRID SECTION -->
     <div id="dual-grid-section">
         <div class="grid-container">
-            <!-- Philosophy (Top Right) -->
             <div class="grid-col right" id="phil-col">
                 <h2 class="section-label" style="text-align: right;">The Philosophy</h2>
                 <div>
                     <p id="phil-title" class="unified-big-title"></p>
                     <p id="phil-desc" class="unified-desc text-gray-400 text-sm leading-relaxed"></p>
-                    <div id="phil-quote-container"
-                        class="mt-4 text-sm font-semibold tracking-widest uppercase opacity-0 transition-opacity duration-500 text-right">
+                    <div id="phil-quote-container" class="mt-4 text-sm font-semibold tracking-widest uppercase opacity-0 transition-opacity duration-500 text-right">
                         <span id="phil-quote" class="highlight-word">Function creates form.</span>
                     </div>
                 </div>
             </div>
-
-            <!-- Methodology (Bottom Left) -->
             <div class="grid-col" id="meth-col">
                 <h2 class="section-label">The Methodology</h2>
                 <div>
                     <p id="meth-title" class="unified-big-title"></p>
                     <p id="meth-desc" class="unified-desc text-gray-400 text-sm leading-relaxed"></p>
-                    <div id="meth-keywords"
-                        class="mt-4 text-sm font-semibold tracking-widest uppercase opacity-0 transition-opacity duration-500">
+                    <div id="meth-keywords" class="mt-4 text-sm font-semibold tracking-widest uppercase opacity-0 transition-opacity duration-500">
                         <span id="kw-1" class="highlight-word">Lightweight,</span>
                         <span id="kw-2" class="highlight-word">rigid,</span>
                         <span id="kw-3" class="highlight-word">and ready to race.</span>
@@ -709,48 +313,29 @@
     <!-- 3D SCENE CONTAINER -->
     <div id="webgl-container"></div>
 
-    <!-- Optional: Scroll Hint -->
     <div class="instructions-overlay font-['Michroma'] text-xs tracking-widest border border-white/20 backdrop-blur-sm">
         SCROLL TO TRANSFORM
     </div>
 
-    <!-- MARKETPLACE OVERLAY (Initially Hidden/Below) -->
+    <!-- MARKETPLACE OVERLAY -->
     <div id="marketplace-wrapper" class="fixed inset-0 z-[190] translate-y-full overflow-y-auto">
-        <!-- MARKETPLACE CONTENT -->
-        <!-- Added class 'marketplace-content-enter' for staggered intro animations -->
         <main class="marketplace-content-enter w-full max-w-[1600px] mx-auto px-4 md:px-8 pt-32 pb-20 relative z-10">
-            <!-- Header & Tabs -->
             <div class="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-white/10 pb-6">
                 <div>
-                    <h2 class="font-['Michroma'] text-3xl md:text-5xl text-white mb-3">COMPONENT <span
-                            class="text-red-500">STORE</span></h2>
-                    <p
-                        class="font-['Inter'] text-xs md:text-sm text-gray-400 tracking-widest uppercase max-w-lg leading-relaxed">
-                        High-performance UI/UX assets for mission-critical interfaces. <br
-                            class="hidden md:block">Strictly typed. Motion-rich. Production ready.
+                    <h2 class="font-['Michroma'] text-3xl md:text-5xl text-white mb-3">COMPONENT <span class="text-red-500">STORE</span></h2>
+                    <p class="font-['Inter'] text-xs md:text-sm text-gray-400 tracking-widest uppercase max-w-lg leading-relaxed">
+                        High-performance UI/UX assets for mission-critical interfaces. <br class="hidden md:block">Strictly typed. Motion-rich. Production ready.
                     </p>
                 </div>
-                <div
-                    class="flex gap-6 md:gap-10 mt-8 md:mt-0 font-['Rajdhani'] font-bold text-sm md:text-base tracking-widest overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
-                    <button class="tab-btn active hover:text-white whitespace-nowrap"
-                        onclick="switchTab('trending')">TRENDING</button>
-                    <button class="tab-btn hover:text-white whitespace-nowrap" onclick="switchTab('new')">NEW
-                        ARRIVALS</button>
-                    <button class="tab-btn hover:text-white whitespace-nowrap"
-                        onclick="switchTab('community')">COMMUNITY</button>
+                <div class="flex gap-6 md:gap-10 mt-8 md:mt-0 font-['Rajdhani'] font-bold text-sm md:text-base tracking-widest overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+                    <button class="tab-btn active hover:text-white whitespace-nowrap" onclick="switchTab('trending')">TRENDING</button>
+                    <button class="tab-btn hover:text-white whitespace-nowrap" onclick="switchTab('new')">NEW ARRIVALS</button>
+                    <button class="tab-btn hover:text-white whitespace-nowrap" onclick="switchTab('community')">COMMUNITY</button>
                 </div>
             </div>
-
-            <!-- Dynamic Grid Container -->
-            <div id="cards-container"
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 min-h-[600px]">
-                <!-- Cards injected via JS -->
-            </div>
-
-            <!-- View More Button -->
+            <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 min-h-[600px]"></div>
             <div class="mt-16 flex justify-center">
-                <button id="view-all-btn"
-                    class="px-12 py-4 border border-white/20 text-white font-['Michroma'] text-xs tracking-widest hover:bg-white hover:text-black hover:border-white transition-all duration-300">
+                <button id="view-all-btn" class="px-12 py-4 border border-white/20 text-white font-['Michroma'] text-xs tracking-widest hover:bg-white hover:text-black hover:border-white transition-all duration-300">
                     VIEW ALL TRENDING
                 </button>
             </div>
@@ -764,31 +349,17 @@
                         <h3 class="font-['Michroma'] text-3xl mb-4 text-white">SYSTEM STATUS</h3>
                         <div class="h-1 w-20 bg-red-600 mb-6 mx-auto md:mx-0"></div>
                         <p class="font-['Inter'] text-sm text-gray-500 leading-relaxed mb-4 max-w-md">
-                            ALL SYSTEMS NOMINAL. VELOCITY.OS v2.0 IS LIVE AND READY FOR INTEGRATION.
-                            CONNECTING THE PHYSICAL AND DIGITAL REALMS WITH UNPRECEDENTED PRECISION.
+                            ALL SYSTEMS NOMINAL. VELOCITY.OS v2.0 IS LIVE.
                         </p>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
-                        <div>
-                            <h4 class="section-label">LATENCY</h4>
-                            <p class="font-['Michroma'] text-xl text-white">1.2ms</p>
-                        </div>
-                        <div>
-                            <h4 class="section-label">THROUGHPUT</h4>
-                            <p class="font-['Michroma'] text-xl text-white">50GB/s</p>
-                        </div>
-                        <div>
-                            <h4 class="section-label">UPTIME</h4>
-                            <p class="font-['Michroma'] text-xl text-white">99.99%</p>
-                        </div>
-                        <div>
-                            <h4 class="section-label">ENCRYPTION</h4>
-                            <p class="font-['Michroma'] text-xl text-white">AES-256</p>
-                        </div>
+                        <div><h4 class="section-label">LATENCY</h4><p class="font-['Michroma'] text-xl text-white">1.2ms</p></div>
+                        <div><h4 class="section-label">THROUGHPUT</h4><p class="font-['Michroma'] text-xl text-white">50GB/s</p></div>
+                        <div><h4 class="section-label">UPTIME</h4><p class="font-['Michroma'] text-xl text-white">99.99%</p></div>
+                        <div><h4 class="section-label">ENCRYPTION</h4><p class="font-['Michroma'] text-xl text-white">AES-256</p></div>
                     </div>
                 </div>
-                <div
-                    class="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-600 font-['Michroma'] tracking-widest">
+                <div class="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-600 font-['Michroma'] tracking-widest">
                     <p>© 2024 VELOCITY SYSTEMS. ALL RIGHTS RESERVED.</p>
                     <div class="flex gap-8 mt-4 md:mt-0">
                         <a href="#" class="hover:text-red-500 transition-colors">PRIVACY POLICY</a>
@@ -801,15 +372,10 @@
     </div>
 
     <!-- PRODUCT MODAL -->
-    <div id="product-modal"
-        class="fixed inset-0 z-[210] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div
-            class="modal-content bg-[#0a0a0a] border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row relative">
+    <div id="product-modal" class="fixed inset-0 z-[210] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div class="modal-content bg-[#0a0a0a] border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row relative">
             <button onclick="closeProductModal()" class="absolute top-4 right-4 text-white hover:text-red-500 z-10">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             <div class="w-full md:w-1/2 h-64 md:h-auto relative">
                 <img id="modal-img" src="" class="w-full h-full object-cover">
@@ -817,931 +383,46 @@
             </div>
             <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
                 <div id="modal-cat" class="text-red-500 font-['Michroma'] text-xs tracking-widest mb-2">CATEGORY</div>
-                <h2 id="modal-title"
-                    class="text-4xl md:text-5xl font-['Rajdhani'] font-bold text-white mb-6 leading-none">TITLE</h2>
+                <h2 id="modal-title" class="text-4xl md:text-5xl font-['Rajdhani'] font-bold text-white mb-6 leading-none">TITLE</h2>
                 <p id="modal-desc" class="text-gray-400 font-['Inter'] text-sm leading-relaxed mb-8">Description...</p>
                 <div class="flex items-center justify-between mb-8 border-y border-white/10 py-4">
-                    <div class="text-center">
-                        <div class="text-xs text-gray-500 font-['Michroma'] mb-1">VERSION</div>
-                        <div class="text-white font-['Rajdhani'] font-bold">2.4.0</div>
-                    </div>
-                    <div class="text-center border-l border-white/10 pl-6">
-                        <div class="text-xs text-gray-500 font-['Michroma'] mb-1">SIZE</div>
-                        <div class="text-white font-['Rajdhani'] font-bold">45KB</div>
-                    </div>
-                    <div class="text-center border-l border-white/10 pl-6">
-                        <div class="text-xs text-gray-500 font-['Michroma'] mb-1">LICENSE</div>
-                        <div class="text-white font-['Rajdhani'] font-bold">MIT</div>
-                    </div>
+                    <div class="text-center"><div class="text-xs text-gray-500 font-['Michroma'] mb-1">VERSION</div><div class="text-white font-['Rajdhani'] font-bold">2.4.0</div></div>
+                    <div class="text-center border-l border-white/10 pl-6"><div class="text-xs text-gray-500 font-['Michroma'] mb-1">SIZE</div><div class="text-white font-['Rajdhani'] font-bold">45KB</div></div>
+                    <div class="text-center border-l border-white/10 pl-6"><div class="text-xs text-gray-500 font-['Michroma'] mb-1">LICENSE</div><div class="text-white font-['Rajdhani'] font-bold">MIT</div></div>
                 </div>
                 <div class="flex gap-4">
-                    <div id="modal-price" class="text-3xl font-['Rajdhani'] font-bold text-white flex items-center">$99
-                    </div>
-                    <button
-                        class="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white font-['Michroma'] text-xs tracking-widest transition-colors">ADD
-                        TO CART</button>
+                    <div id="modal-price" class="text-3xl font-['Rajdhani'] font-bold text-white flex items-center">$99</div>
+                    <button class="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white font-['Michroma'] text-xs tracking-widest transition-colors">ADD TO CART</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- FULL PAGE OVERLAY (FOR NAVBAR LINKS) -->
+    <!-- FULL PAGE OVERLAY -->
     <div id="page-overlay" class="fixed inset-0 z-[250] bg-[#050505] flex flex-col pointer-events-none">
-        <!-- Close Button -->
-        <button onclick="closePage()"
-            class="absolute top-6 right-8 text-gray-400 hover:text-white z-50 pointer-events-auto transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+        <button onclick="closePage()" class="absolute top-6 right-8 text-gray-400 hover:text-white z-50 pointer-events-auto transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
-
-        <!-- Content Container -->
-        <div id="page-content"
-            class="flex-grow overflow-y-auto p-8 md:p-20 pt-32 flex flex-col items-center justify-center opacity-0 transition-opacity duration-500 pointer-events-auto">
+        <div id="page-content" class="flex-grow overflow-y-auto p-8 md:p-20 pt-32 flex flex-col items-center justify-center opacity-0 transition-opacity duration-500 pointer-events-auto">
             <div class="max-w-4xl w-full">
-                <h1 id="page-overlay-title"
-                    class="text-4xl md:text-7xl font-['Michroma'] text-white mb-8 border-l-4 border-red-600 pl-6 leading-tight">
-                    PAGE TITLE</h1>
-                <div id="page-overlay-body"
-                    class="text-lg md:text-xl text-gray-400 font-['Inter'] leading-relaxed space-y-6">
-                    <!-- Content injected here -->
-                </div>
+                <h1 id="page-overlay-title" class="text-4xl md:text-7xl font-['Michroma'] text-white mb-8 border-l-4 border-red-600 pl-6 leading-tight">PAGE TITLE</h1>
+                <div id="page-overlay-body" class="text-lg md:text-xl text-gray-400 font-['Inter'] leading-relaxed space-y-6"></div>
             </div>
         </div>
-
-        <!-- CONCEPT IFRAME CONTAINER (For the specific Concept Page request) -->
-        <div id="concept-frame-container"
-            class="absolute inset-0 z-40 hidden w-full h-full bg-black pointer-events-auto"></div>
+        <div id="concept-frame-container" class="absolute inset-0 z-40 hidden w-full h-full bg-black pointer-events-auto"></div>
     </div>
 
     <script>
-        // --- 1. CONSTANTS & CONFIGURATION ---
         const TXT_TITLE = "WHY VELOCITY.OS?";
         const TXT_SUB1 = "Built for the future of web.";
         const TXT_SUB2 = "We don't just sell code. We sell an implementation strategy that scales.";
-
         const METH_TITLE = "Race-Spec Architecture.";
         const METH_DESC = "Built with the same precision engineering found in the paddock.";
-
         const PHIL_TITLE = "Craftsmanship. At Scale.";
-        const PHIL_DESC = "Don't just build a UI. Orchestrate an experience. Velocity.os delivers the motion-rich, accessible, and strictly typed foundations that top engineering teams rely on to ship awards, not just code.";
+        const PHIL_DESC = "Don't just build a UI. Orchestrate an experience. Velocity.os delivers the motion-rich, accessible, and strictly typed foundations that top engineering teams rely on to ship awards.";
 
-        // --- CONCEPT PAGE HTML CODE ---
-        const CONCEPT_HTML = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MotoGP Wheel Simulation</title>
-    <style>
-        body { 
-            margin: 0; 
-            background-color: #050505; 
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden; 
-        }
-        
-        #canvas-container {
-            width: 100%;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        canvas { 
-            display: block; 
-            outline: none;
-        }
-
-        /* --- HEADER STYLES --- */
-        #main-header {
-            position: fixed;
-            top: 80px;
-            width: 100%;
-            text-align: center;
-            z-index: 4;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-        }
-
-        #main-header h1 {
-            font-family: 'Arial Black', sans-serif;
-            font-size: 42px;
-            text-transform: uppercase;
-            margin: 0 0 10px 0;
-            letter-spacing: -1px;
-            color: #ffffff;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        #main-header p {
-            font-family: monospace;
-            font-size: 13px;
-            color: #888;
-            margin: 0;
-            letter-spacing: 1px;
-            line-height: 1.5;
-            text-transform: uppercase;
-        }
-
-        /* --- MARKETPLACE SECTION --- */
-        #marketplace {
-            position: relative;
-            z-index: 10;
-            background: linear-gradient(to bottom, transparent 0%, #050505 20%);
-            min-height: 100vh;
-            padding: 100px 5% 50px 5%;
-            margin-top: -50vh; 
-            pointer-events: auto; 
-            perspective: 2000px; /* Deep perspective for the curved effect */
-        }
-
-        .market-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* --- SLEEK SEARCH BAR (Reference Style) --- */
-        .search-area {
-            display: flex;
-            align-items: center;
-            background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: 8px; /* Slightly rounded like the reference */
-            padding: 5px;
-            margin-bottom: 60px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            max-width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 50px; /* Slim height */
-        }
-
-        .search-icon {
-            padding: 0 15px;
-            color: #555;
-            font-size: 14px;
-        }
-
-        .search-input {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            color: #ccc;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 14px;
-            outline: none;
-            height: 100%;
-        }
-        
-        .search-input::placeholder {
-            color: #444;
-        }
-
-        .filter-group {
-            display: flex;
-            gap: 5px;
-            padding-right: 5px;
-        }
-
-        .filter-btn {
-            background: transparent;
-            border: 1px solid transparent;
-            color: #666;
-            padding: 6px 16px;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .filter-btn:hover {
-            color: #fff;
-            background: #151515;
-        }
-
-        .filter-btn.active {
-            background: #222;
-            color: #fff;
-            border-color: #333;
-        }
-
-        /* --- TAGS (Below Search) --- */
-        .tags-row {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 60px;
-            flex-wrap: wrap;
-        }
-
-        .tag-pill {
-            background: #0a0a0a;
-            border: 1px solid #222;
-            color: #555;
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .tag-pill:hover {
-            border-color: #444;
-            color: #fff;
-            transform: translateY(-1px);
-        }
-
-        /* --- CURVED MONITOR GRID LAYOUT --- */
-        .components-grid {
-            display: grid;
-            /* Force 3 columns for the panoramic effect */
-            grid-template-columns: 1fr 1fr 1fr; 
-            gap: 20px;
-            /* Add some padding to avoid clipping transforms */
-            padding: 20px 0; 
-        }
-
-        .component-card {
-            background: #0a0a0a;
-            border: 1px solid #1a1a1a;
-            border-radius: 12px; /* Monitor corner radius */
-            padding: 0;
-            position: relative;
-            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease, border-color 0.4s ease;
-            cursor: pointer;
-            overflow: hidden;
-            height: 280px;
-            display: flex;
-            flex-direction: column;
-            
-            /* MONITOR REFLECTION OVERLAY */
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
-        }
-
-        /* SCREEN REFLECTION GLARE */
-        .component-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 40%);
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        /* --- THE CURVED EFFECT LOGIC --- */
-        
-        /* LEFT CARDS (Column 1) */
-        .components-grid .component-card:nth-child(3n+1) {
-            transform: rotateY(15deg) scale(0.95);
-            transform-origin: right center;
-            border-right: 1px solid #333; /* Enhance edge definition */
-            box-shadow: -10px 10px 30px rgba(0,0,0,0.5);
-        }
-
-        /* CENTER CARDS (Column 2) */
-        .components-grid .component-card:nth-child(3n+2) {
-            transform: translateZ(40px); /* Push forward */
-            z-index: 2;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            border: 1px solid #333;
-        }
-
-        /* RIGHT CARDS (Column 3) */
-        .components-grid .component-card:nth-child(3n+3) {
-            transform: rotateY(-15deg) scale(0.95);
-            transform-origin: left center;
-            border-left: 1px solid #333;
-            box-shadow: 10px 10px 30px rgba(0,0,0,0.5);
-        }
-
-        /* HOVER STATES - Break out of formation slightly */
-        .components-grid .component-card:nth-child(3n+1):hover {
-            transform: rotateY(5deg) scale(1.0) translateZ(20px);
-            border-color: #ff3333;
-            z-index: 5;
-        }
-        .components-grid .component-card:nth-child(3n+2):hover {
-            transform: translateZ(60px) scale(1.02);
-            border-color: #ff3333;
-            z-index: 5;
-        }
-        .components-grid .component-card:nth-child(3n+3):hover {
-            transform: rotateY(-5deg) scale(1.0) translateZ(20px);
-            border-color: #ff3333;
-            z-index: 5;
-        }
-
-        /* Card Content Styles */
-        .card-preview {
-            flex-grow: 1;
-            background: #111;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #333;
-            font-family: monospace;
-            font-size: 24px;
-            position: relative;
-            /* Grid Pattern background */
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        .card-info {
-            padding: 15px;
-            background: #0a0a0a;
-            border-top: 1px solid #1a1a1a;
-            position: relative;
-            z-index: 3;
-        }
-
-        .card-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #eee;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
-        }
-
-        .card-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            color: #666;
-            font-family: monospace;
-            text-transform: uppercase;
-        }
-
-        .pro-badge {
-            background: #ff3333;
-            color: #000;
-            font-size: 8px;
-            font-weight: 800;
-            padding: 1px 4px;
-            border-radius: 2px;
-            margin-left: 6px;
-            vertical-align: middle;
-        }
-
-        /* Responsive Fix for Mobile */
-        @media (max-width: 900px) {
-            .components-grid {
-                grid-template-columns: 1fr; /* Stack on mobile */
-            }
-            /* Remove 3D effects on mobile for usability */
-            .components-grid .component-card:nth-child(n) {
-                transform: none;
-                margin-bottom: 20px;
-            }
-            .components-grid .component-card:nth-child(n):hover {
-                transform: translateY(-5px);
-            }
-        }
-
-        /* Text Overlay System (Existing) */
-        #overlay-container {
-            position: fixed;
-            bottom: 5%; 
-            left: 50%;
-            transform: translateX(-50%); 
-            z-index: 3;
-            pointer-events: none;
-            mix-blend-mode: difference;
-            max-width: 600px;
-            width: 100%;
-            perspective: 1000px;
-            text-align: center;
-        }
-
-        .theme-section {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%; 
-            opacity: 0;
-            transform: rotateX(20deg) translateY(40px);
-            transform-origin: center bottom;
-            transition: opacity 0.2s ease, transform 0.3s ease;
-            pointer-events: none;
-            will-change: opacity, transform;
-            display: flex;
-            flex-direction: column;
-            align-items: center; 
-        }
-
-        .theme-section.active {
-            opacity: 1;
-            transform: rotateX(0deg) translateY(0);
-            pointer-events: auto;
-            transition: opacity 1.0s ease, transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .theme-header {
-            font-size: 11px;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: #ff3333;
-            margin-bottom: 12px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.1s ease, transform 0.1s ease;
-        }
-
-        .theme-section.active .theme-header {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.6s ease 0.1s, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.1s;
-        }
-
-        .theme-header::before, .theme-header::after {
-            content: '';
-            display: inline-block;
-            width: 30px;
-            height: 2px;
-            background: #ff3333;
-            transform: scaleX(0);
-            transition: transform 0.1s ease;
-        }
-        
-        .theme-header::before { margin-right: 15px; transform-origin: right; }
-        .theme-header::after { margin-left: 15px; transform-origin: left; }
-
-        .theme-section.active .theme-header::before,
-        .theme-section.active .theme-header::after {
-            transform: scaleX(1);
-            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .theme-title {
-            font-size: 56px; 
-            font-weight: 900;
-            line-height: 0.9;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            font-family: 'Arial Black', sans-serif;
-            color: #fff;
-            letter-spacing: -2px;
-            clip-path: inset(0 0 100% 0); 
-            transform: translateY(10px);
-            transition: clip-path 0.2s ease, transform 0.2s ease;
-        }
-
-        .theme-section.active .theme-title {
-            clip-path: inset(0 0 0 0); 
-            transform: translateY(0);
-            transition: clip-path 1.0s cubic-bezier(0.19, 1, 0.22, 1) 0.2s, transform 1.0s cubic-bezier(0.19, 1, 0.22, 1) 0.2s;
-        }
-
-        .theme-desc {
-            font-size: 13px;
-            line-height: 1.6;
-            color: #ccc;
-            font-family: monospace;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-top: 1px solid #444;
-            padding-top: 15px;
-            opacity: 0;
-            clip-path: inset(0 100% 0 0); 
-            transition: opacity 0.2s ease, clip-path 0.2s ease;
-        }
-
-        .theme-section.active .theme-desc {
-            opacity: 1;
-            clip-path: inset(0 0 0 0); 
-            transition: opacity 0.8s ease 0.4s, clip-path 1.2s cubic-bezier(0.19, 1, 0.22, 1) 0.4s; 
-        }
-
-        #scroll-spacer {
-            height: 4000px; 
-            position: relative;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .scroll-instruction {
-            position: absolute;
-            top: 50%; 
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #444;
-            animation: pulse 2s infinite;
-            z-index: 2;
-            pointer-events: none;
-            font-family: monospace;
-            font-size: 10px;
-            letter-spacing: 2px;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 0.1; }
-        }
-    </style>
-    <!-- Import Three.js and OrbitControls -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-            }
-        }
-    <\/script>
-</head>
-<body>
-    <!-- HEADER -->
-    <div id="main-header">
-        <h1>Podium-Proven Parts.</h1>
-        <p>Precision components machined for the fastest teams on the grid.<br>Lightweight, rigid, and race-ready.</p>
-    </div>
-
-    <!-- OVERLAYS -->
-    <div id="overlay-container">
-        <!-- PHASE 1 -->
-        <div id="theme-concept" class="theme-section">
-            <div class="theme-header">PHASE 01 // CONCEPT</div>
-            <div class="theme-title">ROTATIONAL<br>DYNAMICS</div>
-            <div class="theme-desc">
-                [>] MINIMIZED UNSPRUNG MASS &nbsp;&nbsp; [>] AERO-SCULPTED PROFILE
-            </div>
-        </div>
-        <!-- PHASE 2 -->
-        <div id="theme-engineering" class="theme-section">
-            <div class="theme-header">PHASE 02 // ENGINEERING</div>
-            <div class="theme-title">FORGED<br>MAGNESIUM</div>
-            <div class="theme-desc">
-                [>] AZ80 MONOBLOCK &nbsp;&nbsp; [>] FEM-DERIVED SPOKES
-            </div>
-        </div>
-        <!-- PHASE 3 -->
-        <div id="theme-configure" class="theme-section">
-            <div class="theme-header">PHASE 03 // CONFIGURE</div>
-            <div class="theme-title">SYSTEM<br>INTERFACE</div>
-            <div class="theme-desc">
-                [>] FLOATING CARBON ROTORS &nbsp;&nbsp; [>] TITANIUM HARDWARE
-            </div>
-        </div>
-    </div>
-
-    <div class="scroll-instruction">SCROLL TO ACTIVATE</div>
-    
-    <div id="canvas-container"></div>
-    
-    <!-- Animation Scroll Spacer -->
-    <div id="scroll-spacer"></div>
-
-    <!-- MARKETPLACE SECTION -->
-    <section id="marketplace">
-        <div class="market-container">
-            
-            <div class="search-area">
-                <span class="search-icon">⌕</span>
-                <input type="text" class="search-input" placeholder="Search 1847 components...">
-                <div class="filter-group">
-                    <button class="filter-btn active">Popular</button>
-                    <button class="filter-btn">Explore</button>
-                    <button class="filter-btn">Recent</button>
-                </div>
-            </div>
-
-            <div class="tags-row">
-                <div class="tag-pill">HERO SECTION</div>
-                <div class="tag-pill">BUTTONS</div>
-                <div class="tag-pill">CARDS</div>
-                <div class="tag-pill">FORMS</div>
-                <div class="tag-pill">HEADERS</div>
-                <div class="tag-pill">FOOTERS</div>
-                <div class="tag-pill">PRICING</div>
-                <div class="tag-pill">TESTIMONIALS</div>
-                <div class="tag-pill">GALLERY</div>
-            </div>
-
-            <div class="components-grid">
-                <!-- Row 1 -->
-                <div class="component-card">
-                    <div class="card-preview">H1</div>
-                    <div class="card-info">
-                        <div class="card-title">Cinematic Hero <span class="pro-badge">PRO</span></div>
-                        <div class="card-meta"><span>v2.4</span><span>React</span></div>
-                    </div>
-                </div>
-                <div class="component-card">
-                    <div class="card-preview">btn</div>
-                    <div class="card-info">
-                        <div class="card-title">Magnetic Button</div>
-                        <div class="card-meta"><span>v1.2</span><span>CSS</span></div>
-                    </div>
-                </div>
-                <div class="component-card">
-                    <div class="card-preview">grid</div>
-                    <div class="card-info">
-                        <div class="card-title">Bento Grid</div>
-                        <div class="card-meta"><span>v3.0</span><span>Vue</span></div>
-                    </div>
-                </div>
-
-                <!-- Row 2 -->
-                <div class="component-card">
-                    <div class="card-preview">nav</div>
-                    <div class="card-info">
-                        <div class="card-title">Floating Dock <span class="pro-badge">PRO</span></div>
-                        <div class="card-meta"><span>v1.8</span><span>Motion</span></div>
-                    </div>
-                </div>
-                <div class="component-card">
-                    <div class="card-preview">img</div>
-                    <div class="card-info">
-                        <div class="card-title">Parallax Scroll</div>
-                        <div class="card-meta"><span>v2.1</span><span>GSAP</span></div>
-                    </div>
-                </div>
-                <div class="component-card">
-                    <div class="card-preview">txt</div>
-                    <div class="card-info">
-                        <div class="card-title">Typewriter Effect</div>
-                        <div class="card-meta"><span>v1.0</span><span>JS</span></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-        // --- DOM Elements ---
-        const mainHeader = document.getElementById('main-header');
-        const themeConcept = document.getElementById('theme-concept');
-        const themeEngineering = document.getElementById('theme-engineering');
-        const themeConfigure = document.getElementById('theme-configure');
-        const overlayContainer = document.getElementById('overlay-container');
-
-        // --- Configuration ---
-        const CONFIG = {
-            tireRadius: 10,
-            tireTube: 3.5,
-            rimRadius: 5.8,
-            rimWidth: 5,
-            spokeCount: 7,
-            brakeDiscRadius: 4.5
-        };
-
-        // --- Scene Setup ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050505);
-        scene.fog = new THREE.FogExp2(0x050505, 0.02);
-
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 5, 45); 
-        camera.lookAt(0, 0, 0);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.minDistance = 10;
-        controls.maxDistance = 60;
-        controls.enableZoom = false; 
-
-        // --- Texture Generators (Same as previous) ---
-        function createBrakeDiscTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, 512, 512);
-            ctx.fillStyle = '#000000';
-            const centerX = 256; const centerY = 256;
-            for (let r = 100; r < 230; r += 25) {
-                const circumference = 2 * Math.PI * r;
-                const holeCount = Math.floor(circumference / 20); 
-                for (let i = 0; i < holeCount; i++) {
-                    const angle = (i / holeCount) * Math.PI * 2;
-                    const offsetR = r + (Math.random() * 5 - 2.5);
-                    const x = centerX + Math.cos(angle) * offsetR;
-                    const y = centerY + Math.sin(angle) * offsetR;
-                    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
-                }
-            }
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.anisotropy = 16;
-            return texture;
-        }
-
-        function createTireTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 1024;
-            canvas.height = 1024;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, 1024, 1024);
-            for(let i=0; i<50000; i++){
-                ctx.fillStyle = \`rgba(255,255,255, \${Math.random() * 0.05})\`;
-                ctx.fillRect(Math.random()*1024, Math.random()*1024, 2, 2);
-            }
-            ctx.save(); ctx.translate(512, 512);
-            function drawCurvedText(text, radius, startAngle, color, fontSize, angleSpacing = 0.15) {
-                ctx.font = \`900 \${fontSize}px Arial\`; ctx.fillStyle = color;
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                const totalAngle = text.length * angleSpacing;
-                let currentAngle = startAngle - (totalAngle / 2);
-                text.split('').forEach((char) => {
-                    ctx.save(); ctx.rotate(currentAngle); ctx.translate(0, -radius);
-                    ctx.fillText(char, 0, 0); ctx.restore(); currentAngle += angleSpacing;
-                });
-            }
-            drawCurvedText("DESIGNING THE INVISIBLE", 350, 0, "#ffffff", 60, 0.10); 
-            ctx.rotate(Math.PI / 4);
-            ctx.fillStyle = '#FFCC00'; ctx.fillRect(-60, -320, 120, 40);
-            ctx.fillStyle = '#000000'; ctx.font = 'bold 20px Arial'; ctx.fillText("WARNING", 0, -300); 
-            ctx.restore();
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.anisotropy = 16;
-            return texture;
-        }
-
-        // --- Materials ---
-        const rubberMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6, metalness: 0.1, map: createTireTexture(), bumpMap: createTireTexture(), bumpScale: 0.02 });
-        const slickMaterial = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.7, metalness: 0.0 });
-        const rimMaterial = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.4, metalness: 0.8 });
-        const rimStripeMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0x990000, emissiveIntensity: 0.5, roughness: 0.2, metalness: 0.5 });
-        const brakeDiscMap = createBrakeDiscTexture();
-        const brakeDiscMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, map: brakeDiscMap, alphaMap: brakeDiscMap, transparent: true, side: THREE.DoubleSide, roughness: 0.3, metalness: 0.9 });
-        const hubMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.5, metalness: 0.7 });
-        const axleMaterial = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.6, metalness: 0.6 });
-
-        // --- Geometry ---
-        const wheelAssembly = new THREE.Group();
-        wheelAssembly.rotation.x = -Math.PI / 2;
-        scene.add(wheelAssembly);
-        
-        const axleGeo = new THREE.CylinderGeometry(0.5, 0.5, 7, 16); axleGeo.rotateX(Math.PI/2);
-        const axle = new THREE.Mesh(axleGeo, axleMaterial); wheelAssembly.add(axle);
-
-        const rotatingGroup = new THREE.Group(); wheelAssembly.add(rotatingGroup);
-        const tireGroup = new THREE.Group(); const rimGroup = new THREE.Group(); const brakeGroup = new THREE.Group(); 
-        rotatingGroup.add(tireGroup); rotatingGroup.add(rimGroup); rotatingGroup.add(brakeGroup);
-
-        // Tire
-        const tireGeo = new THREE.TorusGeometry(CONFIG.tireRadius, CONFIG.tireTube, 32, 64);
-        const tire = new THREE.Mesh(tireGeo, rubberMaterial); tire.scale.set(1, 1, 1.8);
-        const sidewallGeo = new THREE.RingGeometry(CONFIG.rimRadius, CONFIG.tireRadius + CONFIG.tireTube/2, 64);
-        const sidewallLeft = new THREE.Mesh(sidewallGeo, rubberMaterial); sidewallLeft.position.z = 2.5; sidewallLeft.rotation.y = Math.PI; 
-        const sidewallRight = new THREE.Mesh(sidewallGeo, rubberMaterial); sidewallRight.position.z = -2.5;
-        const slickGeo = new THREE.CylinderGeometry(CONFIG.tireRadius + CONFIG.tireTube - 0.2, CONFIG.tireRadius + CONFIG.tireTube - 0.2, 5, 64, 1, true); slickGeo.rotateX(Math.PI/2);
-        const slick = new THREE.Mesh(slickGeo, slickMaterial);
-        const edgeGeo = new THREE.TorusGeometry(CONFIG.tireRadius + 1.5, 1.8, 16, 64);
-        const edgeMesh = new THREE.Mesh(edgeGeo, slickMaterial); edgeMesh.scale.set(1, 1, 1.4);
-        tireGroup.add(sidewallLeft); tireGroup.add(sidewallRight); tireGroup.add(slick); tireGroup.add(edgeMesh);
-
-        // Rim
-        const rimCylGeo = new THREE.CylinderGeometry(CONFIG.rimRadius, CONFIG.rimRadius, CONFIG.rimWidth, 64, 1, true); rimCylGeo.rotateX(Math.PI/2);
-        const rim = new THREE.Mesh(rimCylGeo, rimMaterial); rimGroup.add(rim);
-        const rimLipGeo = new THREE.TorusGeometry(CONFIG.rimRadius - 0.1, 0.2, 16, 64);
-        const rimLip1 = new THREE.Mesh(rimLipGeo, rimMaterial); rimLip1.position.z = CONFIG.rimWidth / 2;
-        const rimLip2 = rimLip1.clone(); rimLip2.position.z = -CONFIG.rimWidth / 2;
-        rimGroup.add(rimLip1); rimGroup.add(rimLip2);
-        const rimStripeGeo = new THREE.TorusGeometry(CONFIG.rimRadius - 0.05, 0.05, 16, 100);
-        const rimStripe1 = new THREE.Mesh(rimStripeGeo, rimStripeMaterial); rimStripe1.position.z = CONFIG.rimWidth / 2 + 0.1;
-        const rimStripe2 = rimStripe1.clone(); rimStripe2.position.z = -CONFIG.rimWidth / 2 - 0.1;
-        rimGroup.add(rimStripe1); rimGroup.add(rimStripe2);
-        for (let i = 0; i < CONFIG.spokeCount; i++) {
-            const angle = (i / CONFIG.spokeCount) * Math.PI * 2;
-            const spokeGeo = new THREE.CylinderGeometry(0.4, 0.2, CONFIG.rimRadius - 1, 8);
-            const spoke = new THREE.Mesh(spokeGeo, rimMaterial);
-            spoke.position.x = Math.cos(angle) * (CONFIG.rimRadius / 2); spoke.position.y = Math.sin(angle) * (CONFIG.rimRadius / 2);
-            spoke.rotation.z = angle - Math.PI / 2; spoke.rotation.x = Math.PI / 2; spoke.rotation.set(0, 0, angle - Math.PI/2);
-            rimGroup.add(spoke);
-        }
-        const hubGeo = new THREE.CylinderGeometry(1.5, 1.5, 6, 32); hubGeo.rotateX(Math.PI/2);
-        const hub = new THREE.Mesh(hubGeo, hubMaterial); rimGroup.add(hub);
-
-        // Brakes
-        const discGeo = new THREE.RingGeometry(2.5, CONFIG.brakeDiscRadius, 64);
-        const disc = new THREE.Mesh(discGeo, brakeDiscMaterial); disc.position.z = 1.8; 
-        const discBack = disc.clone(); discBack.rotation.y = Math.PI; discBack.position.z = 1.9; 
-        const carrierGeo = new THREE.RingGeometry(1.5, 2.5, 32);
-        const carrierMat = new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 0.8, roughness: 0.5 });
-        const carrier = new THREE.Mesh(carrierGeo, carrierMat); carrier.position.z = 1.85;
-        brakeGroup.add(disc); brakeGroup.add(discBack); brakeGroup.add(carrier);
-        const boltGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.2, 8);
-        const boltMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
-        for(let i=0; i<5; i++){
-            const angle = (i/5) * Math.PI * 2;
-            const bolt = new THREE.Mesh(boltGeo, boltMat); bolt.rotateX(Math.PI/2);
-            bolt.position.set(Math.cos(angle)*2.5, Math.sin(angle)*2.5, 1.9); brakeGroup.add(bolt);
-        }
-
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); scene.add(ambientLight);
-        const spotLight = new THREE.SpotLight(0xffffff, 500); spotLight.position.set(-10, 20, 10); spotLight.angle = Math.PI / 6; spotLight.penumbra = 0.5; spotLight.castShadow = true; scene.add(spotLight);
-        const rimLight1 = new THREE.PointLight(0xffffff, 200); rimLight1.position.set(15, 5, 5); scene.add(rimLight1);
-        const rimLight2 = new THREE.PointLight(0xff0000, 300); rimLight2.position.set(-5, -10, 5); scene.add(rimLight2);
-
-        // --- Animation Loop ---
-        const clock = new THREE.Clock();
-        let smoothedScroll = 0;
-        const animationRange = 4000; // Fixed pixel height for animation sequence
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const time = clock.getElapsedTime();
-            rotatingGroup.rotation.z = time * -0.5;
-
-            // NEW SCROLL LOGIC: Use fixed range
-            const currentScrollY = window.scrollY;
-            const animationProgress = Math.min(Math.max(currentScrollY / animationRange, 0), 1);
-            
-            smoothedScroll += (animationProgress - smoothedScroll) * 0.04;
-
-            // ANIMATION: Stand Up (0-15%)
-            const standProgress = Math.min(smoothedScroll / 0.15, 1);
-            wheelAssembly.rotation.x = THREE.MathUtils.lerp(-Math.PI / 2, 0, standProgress);
-
-            // HEADER FADE
-            if(mainHeader) mainHeader.style.opacity = 1 - Math.min(smoothedScroll * 10, 1);
-
-            // TEXT FADE OUT (If scrolling into marketplace)
-            if (currentScrollY > animationRange) {
-                overlayContainer.style.opacity = 0;
-                overlayContainer.style.transition = 'opacity 0.5s ease';
-            } else {
-                overlayContainer.style.opacity = 1;
-            }
-
-            // TEXT & TRANSITION LOGIC
-            if (themeConcept && themeEngineering && themeConfigure) {
-                themeConcept.classList.remove('active');
-                themeEngineering.classList.remove('active');
-                themeConfigure.classList.remove('active');
-
-                if (smoothedScroll < 0.18) {
-                    themeConcept.classList.add('active');
-                } else if (smoothedScroll >= 0.22 && smoothedScroll < 0.59) {
-                    themeEngineering.classList.add('active');
-                } else if (smoothedScroll >= 0.59 && currentScrollY <= animationRange) { // Only show if not past animation
-                    themeConfigure.classList.add('active');
-                }
-            }
-
-            // DISINTEGRATION
-            const tireScroll = Math.max(0, smoothedScroll - 0.08); 
-            tireGroup.position.z = tireScroll * 320.0; 
-            
-            const rimScroll = Math.max(0, smoothedScroll - 0.22);
-            rimGroup.position.z = rimScroll * 122.0;
-
-            const brakeScroll = Math.max(0, smoothedScroll - 0.59);
-            brakeGroup.position.z = brakeScroll * 30.0; 
-
-            // WOBBLE
-            if(standProgress >= 1.0) {
-                wheelAssembly.rotation.y = Math.sin(time * 0.5) * 0.1 + (smoothedScroll * 0.5);
-            } else {
-                wheelAssembly.rotation.y = 0; 
-            }
-
-            controls.update();
-            renderer.render(scene, camera);
-        }
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        animate();
-
-    <\/script>
-</body>
-</html>`;
+        // --- CONCEPT HTML (Same as provided previously, kept intact for design consistency) ---
+        const CONCEPT_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MotoGP Wheel</title><style>body{margin:0;background-color:#050505;color:#fff;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;overflow-x:hidden}#canvas-container{width:100%;height:100vh;position:fixed;top:0;left:0;z-index:1}canvas{display:block;outline:0}#main-header{position:fixed;top:80px;width:100%;text-align:center;z-index:4;pointer-events:none;transition:opacity .5s ease}#main-header h1{font-family:'Arial Black',sans-serif;font-size:42px;text-transform:uppercase;margin:0 0 10px 0;letter-spacing:-1px;color:#fff;text-shadow:0 10px 30px rgba(0,0,0,.5)}#main-header p{font-family:monospace;font-size:13px;color:#888;margin:0;letter-spacing:1px;line-height:1.5;text-transform:uppercase}#marketplace{position:relative;z-index:10;background:linear-gradient(to bottom,transparent 0,#050505 20%);min-height:100vh;padding:100px 5% 50px 5%;margin-top:-50vh;pointer-events:auto;perspective:2000px}.market-container{max-width:1400px;margin:0 auto}.search-area{display:flex;align-items:center;background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:5px;margin-bottom:60px;box-shadow:0 10px 40px rgba(0,0,0,.5);max-width:1000px;margin-left:auto;margin-right:auto;height:50px}.search-icon{padding:0 15px;color:#555;font-size:14px}.search-input{flex-grow:1;background:0 0;border:none;color:#ccc;font-family:'Segoe UI',sans-serif;font-size:14px;outline:0;height:100%}.search-input::placeholder{color:#444}.filter-group{display:flex;gap:5px;padding-right:5px}.filter-btn{background:0 0;border:1px solid transparent;color:#666;padding:6px 16px;font-family:'Segoe UI',sans-serif;font-size:12px;font-weight:600;border-radius:4px;cursor:pointer;transition:all .2s}.filter-btn:hover{color:#fff;background:#151515}.filter-btn.active{background:#222;color:#fff;border-color:#333}.tags-row{display:flex;justify-content:center;gap:10px;margin-bottom:60px;flex-wrap:wrap}.tag-pill{background:#0a0a0a;border:1px solid #222;color:#555;padding:6px 14px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s;text-transform:uppercase;letter-spacing:.5px}.tag-pill:hover{border-color:#444;color:#fff;transform:translateY(-1px)}.components-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:20px 0}.component-card{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;padding:0;position:relative;transition:transform .4s cubic-bezier(.25,.46,.45,.94),box-shadow .4s ease,border-color .4s ease;cursor:pointer;overflow:hidden;height:280px;display:flex;flex-direction:column;box-shadow:inset 0 0 40px rgba(0,0,0,.8)}.component-card::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(255,255,255,.03) 0,rgba(255,255,255,0) 40%);pointer-events:none;z-index:2}.components-grid .component-card:nth-child(3n+1){transform:rotateY(15deg) scale(.95);transform-origin:right center;border-right:1px solid #333;box-shadow:-10px 10px 30px rgba(0,0,0,.5)}.components-grid .component-card:nth-child(3n+2){transform:translateZ(40px);z-index:2;box-shadow:0 20px 50px rgba(0,0,0,.8);border:1px solid #333}.components-grid .component-card:nth-child(3n+3){transform:rotateY(-15deg) scale(.95);transform-origin:left center;border-left:1px solid #333;box-shadow:10px 10px 30px rgba(0,0,0,.5)}.components-grid .component-card:nth-child(3n+1):hover{transform:rotateY(5deg) scale(1) translateZ(20px);border-color:#ff3333;z-index:5}.components-grid .component-card:nth-child(3n+2):hover{transform:translateZ(60px) scale(1.02);border-color:#ff3333;z-index:5}.components-grid .component-card:nth-child(3n+3):hover{transform:rotateY(-5deg) scale(1) translateZ(20px);border-color:#ff3333;z-index:5}.card-preview{flex-grow:1;background:#111;display:flex;align-items:center;justify-content:center;color:#333;font-family:monospace;font-size:24px;position:relative;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:20px 20px}.card-info{padding:15px;background:#0a0a0a;border-top:1px solid #1a1a1a;position:relative;z-index:3}.card-title{font-size:14px;font-weight:600;color:#eee;margin-bottom:4px;letter-spacing:.5px}.card-meta{display:flex;justify-content:space-between;font-size:10px;color:#666;font-family:monospace;text-transform:uppercase}.pro-badge{background:#ff3333;color:#000;font-size:8px;font-weight:800;padding:1px 4px;border-radius:2px;margin-left:6px;vertical-align:middle}@media (max-width:900px){.components-grid{grid-template-columns:1fr}.components-grid .component-card:nth-child(n){transform:none;margin-bottom:20px}.components-grid .component-card:nth-child(n):hover{transform:translateY(-5px)}}#overlay-container{position:fixed;bottom:5%;left:50%;transform:translateX(-50%);z-index:3;pointer-events:none;mix-blend-mode:difference;max-width:600px;width:100%;perspective:1000px;text-align:center}.theme-section{position:absolute;bottom:0;left:0;width:100%;opacity:0;transform:rotateX(20deg) translateY(40px);transform-origin:center bottom;transition:opacity .2s ease,transform .3s ease;pointer-events:none;will-change:opacity,transform;display:flex;flex-direction:column;align-items:center}.theme-section.active{opacity:1;transform:rotateX(0) translateY(0);pointer-events:auto;transition:opacity 1s ease,transform 1.2s cubic-bezier(.23,1,.32,1)}.theme-header{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#ff3333;margin-bottom:12px;font-weight:700;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(10px);transition:opacity .1s ease,transform .1s ease}.theme-section.active .theme-header{opacity:1;transform:translateY(0);transition:opacity .6s ease .1s,transform .6s cubic-bezier(.23,1,.32,1) .1s}.theme-header::after,.theme-header::before{content:'';display:inline-block;width:30px;height:2px;background:#ff3333;transform:scaleX(0);transition:transform .1s ease}.theme-header::before{margin-right:15px;transform-origin:right}.theme-header::after{margin-left:15px;transform-origin:left}.theme-section.active .theme-header::after,.theme-section.active .theme-header::before{transform:scaleX(1);transition:transform .6s cubic-bezier(.23,1,.32,1)}.theme-title{font-size:56px;font-weight:900;line-height:.9;margin-bottom:15px;text-transform:uppercase;font-family:'Arial Black',sans-serif;color:#fff;letter-spacing:-2px;clip-path:inset(0 0 100% 0);transform:translateY(10px);transition:clip-path .2s ease,transform .2s ease}.theme-section.active .theme-title{clip-path:inset(0 0 0 0);transform:translateY(0);transition:clip-path 1s cubic-bezier(.19,1,.22,1) .2s,transform 1s cubic-bezier(.19,1,.22,1) .2s}.theme-desc{font-size:13px;line-height:1.6;color:#ccc;font-family:monospace;text-transform:uppercase;letter-spacing:1px;border-top:1px solid #444;padding-top:15px;opacity:0;clip-path:inset(0 100% 0 0);transition:opacity .2s ease,clip-path .2s ease}.theme-section.active .theme-desc{opacity:1;clip-path:inset(0 0 0 0);transition:opacity .8s ease .4s,clip-path 1.2s cubic-bezier(.19,1,.22,1) .4s}#scroll-spacer{height:4000px;position:relative;z-index:0;pointer-events:none}.scroll-instruction{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#444;animation:pulse 2s infinite;z-index:2;pointer-events:none;font-family:monospace;font-size:10px;letter-spacing:2px}@keyframes pulse{0%{opacity:.1}50%{opacity:.6}100%{opacity:.1}}</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}<\/script></head><body><div id="main-header"><h1>Podium-Proven Parts.</h1><p>Precision components machined for the fastest teams on the grid.<br>Lightweight, rigid, and race-ready.</p></div><div id="overlay-container"><div id="theme-concept" class="theme-section"><div class="theme-header">PHASE 01 // CONCEPT</div><div class="theme-title">ROTATIONAL<br>DYNAMICS</div><div class="theme-desc">[>] MINIMIZED UNSPRUNG MASS &nbsp;&nbsp; [>] AERO-SCULPTED PROFILE</div></div><div id="theme-engineering" class="theme-section"><div class="theme-header">PHASE 02 // ENGINEERING</div><div class="theme-title">FORGED<br>MAGNESIUM</div><div class="theme-desc">[>] AZ80 MONOBLOCK &nbsp;&nbsp; [>] FEM-DERIVED SPOKES</div></div><div id="theme-configure" class="theme-section"><div class="theme-header">PHASE 03 // CONFIGURE</div><div class="theme-title">SYSTEM<br>INTERFACE</div><div class="theme-desc">[>] FLOATING CARBON ROTORS &nbsp;&nbsp; [>] TITANIUM HARDWARE</div></div></div><div class="scroll-instruction">SCROLL TO ACTIVATE</div><div id="canvas-container"></div><div id="scroll-spacer"></div><section id="marketplace"><div class="market-container"><div class="search-area"><span class="search-icon">⌕</span><input type="text" class="search-input" placeholder="Search 1847 components..."><div class="filter-group"><button class="filter-btn active">Popular</button><button class="filter-btn">Explore</button><button class="filter-btn">Recent</button></div></div><div class="tags-row"><div class="tag-pill">HERO SECTION</div><div class="tag-pill">BUTTONS</div><div class="tag-pill">CARDS</div><div class="tag-pill">FORMS</div><div class="tag-pill">HEADERS</div><div class="tag-pill">FOOTERS</div><div class="tag-pill">PRICING</div><div class="tag-pill">TESTIMONIALS</div><div class="tag-pill">GALLERY</div></div><div class="components-grid"><div class="component-card"><div class="card-preview">H1</div><div class="card-info"><div class="card-title">Cinematic Hero <span class="pro-badge">PRO</span></div><div class="card-meta"><span>v2.4</span><span>React</span></div></div></div><div class="component-card"><div class="card-preview">btn</div><div class="card-info"><div class="card-title">Magnetic Button</div><div class="card-meta"><span>v1.2</span><span>CSS</span></div></div></div><div class="component-card"><div class="card-preview">grid</div><div class="card-info"><div class="card-title">Bento Grid</div><div class="card-meta"><span>v3.0</span><span>Vue</span></div></div></div><div class="component-card"><div class="card-preview">nav</div><div class="card-info"><div class="card-title">Floating Dock <span class="pro-badge">PRO</span></div><div class="card-meta"><span>v1.8</span><span>Motion</span></div></div></div><div class="component-card"><div class="card-preview">img</div><div class="card-info"><div class="card-title">Parallax Scroll</div><div class="card-meta"><span>v2.1</span><span>GSAP</span></div></div></div><div class="component-card"><div class="card-preview">txt</div><div class="card-info"><div class="card-title">Typewriter Effect</div><div class="card-meta"><span>v1.0</span><span>JS</span></div></div></div></div></div></section><script type="module">import*as THREE from'three';import{OrbitControls}from'three/addons/controls/OrbitControls.js';const mainHeader=document.getElementById('main-header');const themeConcept=document.getElementById('theme-concept');const themeEngineering=document.getElementById('theme-engineering');const themeConfigure=document.getElementById('theme-configure');const overlayContainer=document.getElementById('overlay-container');const CONFIG={tireRadius:10,tireTube:3.5,rimRadius:5.8,rimWidth:5,spokeCount:7,brakeDiscRadius:4.5};const scene=new THREE.Scene();scene.background=new THREE.Color(0x050505);scene.fog=new THREE.FogExp2(0x050505,.02);const camera=new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,.1,1000);camera.position.set(0,5,45);camera.lookAt(0,0,0);const renderer=new THREE.WebGLRenderer({antialias:!0,alpha:!0});renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(window.devicePixelRatio);renderer.shadowMap.enabled=!0;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.getElementById('canvas-container').appendChild(renderer.domElement);const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=!0;controls.dampingFactor=.05;controls.minDistance=10;controls.maxDistance=60;controls.enableZoom=!1;function createBrakeDiscTexture(){const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;const ctx=canvas.getContext('2d');ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,512,512);ctx.fillStyle='#000000';const centerX=256;const centerY=256;for(let r=100;r<230;r+=25){const circumference=2*Math.PI*r;const holeCount=Math.floor(circumference/20);for(let i=0;i<holeCount;i++){const angle=i/holeCount*Math.PI*2;const offsetR=r+(Math.random()*5-2.5);const x=centerX+Math.cos(angle)*offsetR;const y=centerY+Math.sin(angle)*offsetR;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()}}const texture=new THREE.CanvasTexture(canvas);texture.anisotropy=16;return texture}function createTireTexture(){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1024;const ctx=canvas.getContext('2d');ctx.fillStyle='#111111';ctx.fillRect(0,0,1024,1024);for(let i=0;i<1000;i++){ctx.fillStyle=\`rgba(255,255,255,\${Math.random()*.05})\`;ctx.fillRect(Math.random()*1024,Math.random()*1024,2,2)}ctx.save();ctx.translate(512,512);function drawCurvedText(text,radius,startAngle,color,fontSize,angleSpacing=.15){ctx.font=\`900 \${fontSize}px Arial\`;ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';const totalAngle=text.length*angleSpacing;let currentAngle=startAngle-totalAngle/2;text.split('').forEach(char=>{ctx.save();ctx.rotate(currentAngle);ctx.translate(0,-radius);ctx.fillText(char,0,0);ctx.restore();currentAngle+=angleSpacing})}drawCurvedText("DESIGNING THE INVISIBLE",350,0,"#ffffff",60,.10);ctx.rotate(Math.PI/4);ctx.fillStyle='#FFCC00';ctx.fillRect(-60,-320,120,40);ctx.fillStyle='#000000';ctx.font='bold 20px Arial';ctx.fillText("WARNING",0,-300);ctx.restore();const texture=new THREE.CanvasTexture(canvas);texture.anisotropy=16;return texture}const rubberMaterial=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:.6,metalness:.1,map:createTireTexture(),bumpMap:createTireTexture(),bumpScale:.02});const slickMaterial=new THREE.MeshStandardMaterial({color:0x151515,roughness:.7,metalness:0});const rimMaterial=new THREE.MeshStandardMaterial({color:0x080808,roughness:.4,metalness:.8});const rimStripeMaterial=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0x990000,emissiveIntensity:.5,roughness:.2,metalness:.5});const brakeDiscMap=createBrakeDiscTexture();const brakeDiscMaterial=new THREE.MeshStandardMaterial({color:0xaaaaaa,map:brakeDiscMap,alphaMap:brakeDiscMap,transparent:!0,side:THREE.DoubleSide,roughness:.3,metalness:.9});const hubMaterial=new THREE.MeshStandardMaterial({color:0x333333,roughness:.5,metalness:.7});const axleMaterial=new THREE.MeshStandardMaterial({color:0x555555,roughness:.6,metalness:.6});const wheelAssembly=new THREE.Group();wheelAssembly.rotation.x=-Math.PI/2;scene.add(wheelAssembly);const axleGeo=new THREE.CylinderGeometry(.5,.5,7,16);axleGeo.rotateX(Math.PI/2);const axle=new THREE.Mesh(axleGeo,axleMaterial);wheelAssembly.add(axle);const rotatingGroup=new THREE.Group();wheelAssembly.add(rotatingGroup);const tireGroup=new THREE.Group();const rimGroup=new THREE.Group();const brakeGroup=new THREE.Group();rotatingGroup.add(tireGroup);rotatingGroup.add(rimGroup);rotatingGroup.add(brakeGroup);const tireGeo=new THREE.TorusGeometry(CONFIG.tireRadius,CONFIG.tireTube,32,64);const tire=new THREE.Mesh(tireGeo,rubberMaterial);tire.scale.set(1,1,1.8);const sidewallGeo=new THREE.RingGeometry(CONFIG.rimRadius,CONFIG.tireRadius+CONFIG.tireTube/2,64);const sidewallLeft=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallLeft.position.z=2.5;sidewallLeft.rotation.y=Math.PI;const sidewallRight=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallRight.position.z=-2.5;const slickGeo=new THREE.CylinderGeometry(CONFIG.tireRadius+CONFIG.tireTube-.2,CONFIG.tireRadius+CONFIG.tireTube-.2,5,64,1,!0);slickGeo.rotateX(Math.PI/2);const slick=new THREE.Mesh(slickGeo,slickMaterial);const edgeGeo=new THREE.TorusGeometry(CONFIG.tireRadius+1.5,1.8,16,64);const edgeMesh=new THREE.Mesh(edgeGeo,slickMaterial);edgeMesh.scale.set(1,1,1.4);tireGroup.add(sidewallLeft);tireGroup.add(sidewallRight);tireGroup.add(slick);tireGroup.add(edgeMesh);const rimCylGeo=new THREE.CylinderGeometry(CONFIG.rimRadius,CONFIG.rimRadius,CONFIG.rimWidth,64,1,!0);rimCylGeo.rotateX(Math.PI/2);const rim=new THREE.Mesh(rimCylGeo,rimMaterial);rimGroup.add(rim);const rimLipGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.1,.2,16,64);const rimLip1=new THREE.Mesh(rimLipGeo,rimMaterial);rimLip1.position.z=CONFIG.rimWidth/2;const rimLip2=rimLip1.clone();rimLip2.position.z=-CONFIG.rimWidth/2;rimGroup.add(rimLip1);rimGroup.add(rimLip2);const rimStripeGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.05,.05,16,100);const rimStripe1=new THREE.Mesh(rimStripeGeo,rimStripeMaterial);rimStripe1.position.z=CONFIG.rimWidth/2+.1;const rimStripe2=rimStripe1.clone();rimStripe2.position.z=-CONFIG.rimWidth/2-.1;rimGroup.add(rimStripe1);rimGroup.add(rimStripe2);for(let i=0;i<CONFIG.spokeCount;i++){const angle=i/CONFIG.spokeCount*Math.PI*2;const spokeGeo=new THREE.CylinderGeometry(.4,.2,CONFIG.rimRadius-1,8);const spoke=new THREE.Mesh(spokeGeo,rimMaterial);spoke.position.x=Math.cos(angle)*(CONFIG.rimRadius/2);spoke.position.y=Math.sin(angle)*(CONFIG.rimRadius/2);spoke.rotation.z=angle-Math.PI/2;spoke.rotation.x=Math.PI/2;spoke.rotation.set(0,0,angle-Math.PI/2);rimGroup.add(spoke)}const hubGeo=new THREE.CylinderGeometry(1.5,1.5,6,32);hubGeo.rotateX(Math.PI/2);const hub=new THREE.Mesh(hubGeo,hubMaterial);rimGroup.add(hub);const discGeo=new THREE.RingGeometry(2.5,CONFIG.brakeDiscRadius,64);const disc=new THREE.Mesh(discGeo,brakeDiscMaterial);disc.position.z=1.8;const discBack=disc.clone();discBack.rotation.y=Math.PI;discBack.position.z=1.9;const carrierGeo=new THREE.RingGeometry(1.5,2.5,32);const carrierMat=new THREE.MeshStandardMaterial({color:0x000000,metalness:.8,roughness:.5});const carrier=new THREE.Mesh(carrierGeo,carrierMat);carrier.position.z=1.85;brakeGroup.add(disc);brakeGroup.add(discBack);brakeGroup.add(carrier);const boltGeo=new THREE.CylinderGeometry(.1,.1,.2,8);const boltMat=new THREE.MeshStandardMaterial({color:0xaaaaaa});for(let i=0;i<5;i++){const angle=i/5*Math.PI*2;const bolt=new THREE.Mesh(boltGeo,boltMat);bolt.rotateX(Math.PI/2);bolt.position.set(Math.cos(angle)*2.5,Math.sin(angle)*2.5,1.9);brakeGroup.add(bolt)}const ambientLight=new THREE.AmbientLight(0xffffff,.2);scene.add(ambientLight);const spotLight=new THREE.SpotLight(0xffffff,500);spotLight.position.set(-10,20,10);spotLight.angle=Math.PI/6;spotLight.penumbra=.5;spotLight.castShadow=!0;scene.add(spotLight);const rimLight1=new THREE.PointLight(0xffffff,200);rimLight1.position.set(15,5,5);scene.add(rimLight1);const rimLight2=new THREE.PointLight(0xff0000,300);rimLight2.position.set(-5,-10,5);scene.add(rimLight2);const clock=new THREE.Clock();let smoothedScroll=0;const animationRange=4000;function animate(){requestAnimationFrame(animate);const time=clock.getElapsedTime();rotatingGroup.rotation.z=time*-.5;const currentScrollY=window.scrollY;const animationProgress=Math.min(Math.max(currentScrollY/animationRange,0),1);smoothedScroll+=(animationProgress-smoothedScroll)*.04;const standProgress=Math.min(smoothedScroll/.15,1);wheelAssembly.rotation.x=THREE.MathUtils.lerp(-Math.PI/2,0,standProgress);if(mainHeader)mainHeader.style.opacity=1-Math.min(smoothedScroll*10,1);if(currentScrollY>animationRange){overlayContainer.style.opacity=0;overlayContainer.style.transition='opacity 0.5s ease'}else{overlayContainer.style.opacity=1}if(themeConcept&&themeEngineering&&themeConfigure){themeConcept.classList.remove('active');themeEngineering.classList.remove('active');themeConfigure.classList.remove('active');if(smoothedScroll<.18){themeConcept.classList.add('active')}else if(smoothedScroll>=.22&&smoothedScroll<.59){themeEngineering.classList.add('active')}else if(smoothedScroll>=.59&&currentScrollY<=animationRange){themeConfigure.classList.add('active')}}const tireScroll=Math.max(0,smoothedScroll-.08);tireGroup.position.z=tireScroll*320;const rimScroll=Math.max(0,smoothedScroll-.22);rimGroup.position.z=rimScroll*122;const brakeScroll=Math.max(0,smoothedScroll-.59);brakeGroup.position.z=brakeScroll*30;if(standProgress>=1){wheelAssembly.rotation.y=Math.sin(time*.5)*.1+smoothedScroll*.5}else{wheelAssembly.rotation.y=0}controls.update();renderer.render(scene,camera)}window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});animate();<\/script></body></html>`;
 
         const WHEEL_CONFIG = {
             tireRadius: 2.5,
@@ -1754,27 +435,13 @@
         };
 
         const pagesContent = {
-            concept: {
-                title: "CONCEPT // ZERO",
-                // Content handled by special case
-                content: ""
-            },
-            engineering: {
-                title: "ENGINEERING // CORE",
-                content: "Built on a custom WebGL render pipeline, Velocity.OS achieves 60fps interaction on standard hardware. <br><br><b>Stack:</b><br>- Three.js (Custom Shaders)<br>- React Fiber (Orchestration)<br>- Rust (WASM Modules for Physics)<br><br>Every animation is calculated in real-time. No pre-rendered videos. Pure math."
-            },
-            configure: {
-                title: "SYSTEM // CONFIG",
-                content: "Configuration options allow deep customization of the viewport.<br><br>- <b>Render Scale:</b> 0.5x - 2.0x<br>- <b>Motion Blur:</b> Adaptive<br>- <b>Bloom:</b> Gaussian<br><br>Access the developer console [~] to inject custom shader overrides."
-            },
-            login: {
-                title: "AUTHENTICATION",
-                content: "Enter your credentials to access the Velocity Mainframe.<br><br><input type='text' placeholder='USERNAME' class='bg-transparent border-b border-white/20 w-full py-2 text-white outline-none focus:border-red-600 transition-colors mb-4 font-mono'><input type='password' placeholder='PASSWORD' class='bg-transparent border-b border-white/20 w-full py-2 text-white outline-none focus:border-red-600 transition-colors mb-8 font-mono'><button class='px-8 py-3 bg-red-600 text-white font-[Michroma] text-xs tracking-widest hover:bg-red-700 transition-colors'>ACCESS</button>"
-            }
+            concept: { title: "CONCEPT // ZERO", content: "" },
+            engineering: { title: "ENGINEERING // CORE", content: "Built on a custom WebGL render pipeline, Velocity.OS achieves 60fps interaction on standard hardware. <br><br><b>Stack:</b><br>- Three.js (Custom Shaders)<br>- React Fiber (Orchestration)<br>- Rust (WASM Modules for Physics)<br><br>Every animation is calculated in real-time. No pre-rendered videos. Pure math." },
+            configure: { title: "SYSTEM // CONFIG", content: "Configuration options allow deep customization of the viewport.<br><br>- <b>Render Scale:</b> 0.5x - 2.0x<br>- <b>Motion Blur:</b> Adaptive<br>- <b>Bloom:</b> Gaussian<br><br>Access the developer console [~] to inject custom shader overrides." },
+            login: { title: "AUTHENTICATION", content: "Enter your credentials to access the Velocity Mainframe.<br><br><input type='text' placeholder='USERNAME' class='bg-transparent border-b border-white/20 w-full py-2 text-white outline-none focus:border-red-600 transition-colors mb-4 font-mono'><input type='password' placeholder='PASSWORD' class='bg-transparent border-b border-white/20 w-full py-2 text-white outline-none focus:border-red-600 transition-colors mb-8 font-mono'><button class='px-8 py-3 bg-red-600 text-white font-[Michroma] text-xs tracking-widest hover:bg-red-700 transition-colors'>ACCESS</button>" }
         };
 
         const IDLE_ROTATION_SPEED = 0.001;
-        const HOVER_LIFT_AMOUNT = 0.1;
         const scrollRotationSpeed = 0.005;
         const SMOOTHING_FACTOR = 0.1;
         const MAX_SCROLL_AMOUNT = 10000;
@@ -1796,9 +463,9 @@
         // --- MARKETPLACE DATA ---
         const products = {
             trending: [
-                { title: "VELOCITY_MOTION", cat: "LIBRARY", price: "$99", img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80", desc: "Production-grade animation primitives for React." },
+                { title: "VELOCITY_MOTION", cat: "LIBRARY", price: "$99", img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80", desc: "Production-grade animation primitives." },
                 { title: "GLASS_UI_KIT", cat: "DESIGN", price: "$49", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80", desc: "Frosted glass morphism component library." },
-                { title: "GRID_SYSTEM_PRO", cat: "LAYOUT", price: "$29", img: "https://images.unsplash.com/photo-1558655146-d09347e0b7a9?auto=format&fit=crop&w=600&q=80", desc: "Responsive, sub-grid compatible layout engine." },
+                { title: "GRID_SYSTEM_PRO", cat: "LAYOUT", price: "$29", img: "https://images.unsplash.com/photo-1558655146-d09347e0b7a9?auto=format&fit=crop&w=600&q=80", desc: "Responsive layout engine." },
                 { title: "CHART_WRAPPER", cat: "DATA", price: "$35", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80", desc: "Canvas-accelerated financial charting suite." },
                 { title: "NEON_BUTTONS", cat: "UI", price: "$15", img: "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80", desc: "Glow-effect interactive button set." },
                 { title: "DARK_MODE_THEME", cat: "THEME", price: "$25", img: "https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&w=600&q=80", desc: "Optimized OLED-black color palettes." },
@@ -1807,23 +474,10 @@
             ],
             new: [
                 { title: "3D_MODEL_VIEWER", cat: "3D", price: "$59", img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80", desc: "Drag-and-drop GLTF/OBJ viewer component." },
-                { title: "AUDIO_VISUALIZER", cat: "AUDIO", price: "$45", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80", desc: "Real-time frequency analysis canvas." },
-                { title: "HAPTIC_FEEDBACK", cat: "INTERACTION", price: "$30", img: "https://images.unsplash.com/photo-1621360841013-c768371e93cf?auto=format&fit=crop&w=600&q=80", desc: "Vibration API patterns for mobile web." },
-                { title: "PAYMENT_MODAL", cat: "ECOMMERCE", price: "$40", img: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&w=600&q=80", desc: "Stripe-integrated checkout overlay." },
-                { title: "CONFETTI_CANNON", cat: "EFFECTS", price: "$10", img: "https://images.unsplash.com/photo-1514525253440-b393452e8d26?auto=format&fit=crop&w=600&q=80", desc: "High-performance particle celebration." },
-                { title: "SCROLL_SNAP_PRO", cat: "LAYOUT", price: "$25", img: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?auto=format&fit=crop&w=600&q=80", desc: "Smoothed scroll-snapping logic." },
-                { title: "DATE_PICKER_X", cat: "FORM", price: "$20", img: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=600&q=80", desc: "Accessible, keyboard-navigable calendar." },
-                { title: "TOAST_NOTIFY", cat: "UI", price: "$15", img: "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&w=600&q=80", desc: "Stackable notification system." }
+                { title: "AUDIO_VISUALIZER", cat: "AUDIO", price: "$45", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80", desc: "Real-time frequency analysis canvas." }
             ],
             community: [
-                { title: "REACT_SPRING_FORK", cat: "ANIMATION", price: "FREE", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80", desc: "Community maintained physics spring lib." },
-                { title: "VUE_ADAPTER", cat: "INTEGRATION", price: "FREE", img: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=600&q=80", desc: "Use Velocity components in Vue apps." },
-                { title: "SVELTE_TRANSITIONS", cat: "ANIMATION", price: "FREE", img: "https://images.unsplash.com/photo-1550439062-609e1531270e?auto=format&fit=crop&w=600&q=80", desc: "Port of core transitions to Svelte." },
-                { title: "FIGMA_DESIGN_SYSTEM", cat: "DESIGN", price: "$20", img: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=600&q=80", desc: "Complete UI kit for Figma." },
-                { title: "VSCODE_THEME", cat: "DEV_TOOL", price: "FREE", img: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=600&q=80", desc: "Velocity OS syntax highlighting." },
-                { title: "CLI_TOOL", cat: "DEV_TOOL", price: "FREE", img: "https://images.unsplash.com/photo-1629654297299-c8506221ca97?auto=format&fit=crop&w=600&q=80", desc: "Scaffold projects from the terminal." },
-                { title: "ICON_PACK_V2", cat: "ASSETS", price: "$10", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=600&q=80", desc: "200+ SVG vector icons." },
-                { title: "DOCS_TEMPLATE", cat: "CONTENT", price: "$25", img: "https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=600&q=80", desc: "Markdown-driven documentation site." }
+                { title: "REACT_SPRING_FORK", cat: "ANIMATION", price: "FREE", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80", desc: "Community maintained physics spring lib." }
             ]
         };
 
@@ -1838,28 +492,12 @@
         let heroSectionElement, heroTitleElement, heroSpanElement;
         let whySectionElement, whyTitleElement, whySub1Element, whySub2Element;
         let marqueeSectionElement, marqueeTrackElement;
-        
-        // Navbar Elements
         let navCenter, navRight;
-
-        // New Dual Grid DOM
-        let dualGridSectionElement;
-        let methTitleElement, methDescElement, methKeywordsContainer;
-        let methKw1, methKw2, methKw3;
+        let dualGridSectionElement, methTitleElement, methDescElement, methKeywordsContainer, methKw1, methKw2, methKw3;
         let philTitleElement, philDescElement, philQuoteContainer, philQuote;
-
-        let marketplaceWrapper;
-        let marketplaceOpen = false;
-        let cardsContainer;
-
-        // Page Overlay
-        let pageOverlay, pageOverlayTitle, pageOverlayBody;
+        let marketplaceWrapper, marketplaceOpen = false, cardsContainer;
         let isPageOpen = false;
 
-        // State trackers
-        let prevTitleLen = 0;
-        let prevSub1Len = 0;
-        let prevSub2Len = 0;
         let scrollAmount = 0;
         let smoothedScrollAmount = 0;
         let currentScroll = 0;
@@ -1891,23 +529,19 @@
             isPageOpen = true;
 
             if (pageId === 'concept') {
-                // SPECIAL HANDLING FOR CONCEPT PAGE
-                contentEl.style.display = 'none'; // Hide text content
-                conceptFrame.style.display = 'block'; // Show Iframe container
-                conceptFrame.innerHTML = `<iframe srcdoc='${CONCEPT_HTML.replace(/'/g, "&apos;")}' style="width:100%; height:100%; border:none;"></iframe>`;
+                contentEl.style.display = 'none';
+                conceptFrame.style.display = 'block';
+                // Optimized: Defer heavy HTML injection until needed
+                if(!conceptFrame.hasChildNodes()) {
+                    conceptFrame.innerHTML = `<iframe srcdoc='${CONCEPT_HTML.replace(/'/g, "&apos;")}' style="width:100%; height:100%; border:none;"></iframe>`;
+                }
             } else {
-                // STANDARD PAGE HANDLING
                 const data = pagesContent[pageId];
                 if (!data) return;
-
-                conceptFrame.style.display = 'none'; // Hide iframe
-                conceptFrame.innerHTML = ''; // Clear iframe to stop resources
-                contentEl.style.display = 'flex'; // Show text content
-
+                conceptFrame.style.display = 'none';
+                contentEl.style.display = 'flex';
                 titleEl.innerText = data.title;
                 bodyEl.innerHTML = data.content;
-
-                // Fade in content
                 setTimeout(() => {
                     contentEl.style.opacity = '1';
                     contentEl.style.transform = 'translateY(0)';
@@ -1919,15 +553,10 @@
             const overlay = document.getElementById('page-overlay');
             const contentEl = document.getElementById('page-content');
             const conceptFrame = document.getElementById('concept-frame-container');
-
             contentEl.style.opacity = '0';
             contentEl.style.transform = 'translateY(20px)';
-
-            // Clear iframe content after delay to allow transition, or immediately if prefer performance
-            conceptFrame.innerHTML = '';
             conceptFrame.style.display = 'none';
-            contentEl.style.display = 'flex'; // Reset for next time
-
+            contentEl.style.display = 'flex'; 
             overlay.classList.remove('active');
             isPageOpen = false;
         };
@@ -1942,13 +571,9 @@
 
             data.forEach((item, index) => {
                 const card = document.createElement('div');
-                // Added cursor: pointer to the card class
                 card.className = `fuel-cell-card group opacity-0`;
                 card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${index * 0.1}s, border-color 0.3s ease, background 0.3s ease`;
-
-                // Added onclick to the card wrapper
                 card.onclick = () => openProductModal(category, index);
-
                 card.innerHTML = `
                     <div class="card-visual">
                         <div class="card-visual-overlay"></div>
@@ -1970,10 +595,7 @@
                 cardsContainer.appendChild(card);
             });
             requestAnimationFrame(() => {
-                Array.from(cardsContainer.children).forEach(c => {
-                    c.style.opacity = '1';
-                    c.style.transform = 'translateY(0)';
-                });
+                Array.from(cardsContainer.children).forEach(c => { c.style.opacity = '1'; c.style.transform = 'translateY(0)'; });
             });
         }
 
@@ -1984,23 +606,11 @@
             document.getElementById('modal-title').innerText = item.title;
             document.getElementById('modal-desc').innerText = item.desc;
             document.getElementById('modal-price').innerText = item.price;
-
-            const modal = document.getElementById('product-modal');
-            modal.classList.add('active');
+            document.getElementById('product-modal').classList.add('active');
         }
 
-        window.closeProductModal = function () {
-            const modal = document.getElementById('product-modal');
-            modal.classList.remove('active');
-        }
-
-        // Close modal on outside click
-        window.addEventListener('click', function (e) {
-            const modal = document.getElementById('product-modal');
-            if (e.target === modal) {
-                closeProductModal();
-            }
-        });
+        window.closeProductModal = function () { document.getElementById('product-modal').classList.remove('active'); }
+        window.addEventListener('click', function (e) { if (e.target === document.getElementById('product-modal')) closeProductModal(); });
 
         window.switchTab = function (cat) {
             const btns = document.querySelectorAll('.tab-btn');
@@ -2008,25 +618,8 @@
             event.target.classList.add('active');
             if (cardsContainer) {
                 const cards = Array.from(cardsContainer.children);
-                cards.forEach((c, i) => {
-                    c.style.transition = `opacity 0.3s ease, transform 0.3s ease`;
-                    c.style.opacity = '0';
-                    c.style.transform = 'translateY(10px)';
-                });
+                cards.forEach((c) => { c.style.opacity = '0'; c.style.transform = 'translateY(10px)'; });
                 setTimeout(() => { renderCards(cat); }, 300);
-            }
-        }
-
-        function pressKey(char) {
-            if (!char) return;
-            const keyChar = char.toUpperCase();
-            const mesh = keysRegistry[keyChar];
-            if (mesh) {
-                mesh.userData.pressOffset = -0.08;
-                if (mesh.material) {
-                    mesh.material.emissive.setHex(0xff0000);
-                    mesh.material.emissiveIntensity = 4.0;
-                }
             }
         }
 
@@ -2056,28 +649,15 @@
 
         function createIsolatedKeyboard() {
             const group = new THREE.Group(); const u = 0.65; const gap = 0.12;
-            // Create shared base geometry for standard keys
-            const sharedKeyGeo = new THREE.BoxGeometry(1, 0.05, 1);
-
             function createRow(keysData, zPos) {
                 let totalRowWidth = 0; keysData.forEach(k => { totalRowWidth += (k.w * u) + gap; }); totalRowWidth -= gap;
                 let currentX = -totalRowWidth / 2 + (keysData[0].w * u) / 2;
                 keysData.forEach((key) => {
                     const width = key.w * u;
-                    let mesh;
-
-                    // For standard keys, use shared geometry to optimize
-                    if (key.w === 1 && u === 0.65) {
-                        const keyGeo = new THREE.BoxGeometry(width, 0.05, u);
-                        let fs = 40; if (key.l.length > 1) fs = 25; const mat = getKeyMaterial(key.l, fs);
-                        mesh = new THREE.Mesh(keyGeo, mat);
-                    } else {
-                        // Fallback for non-standard or just keep it simple
-                        const keyGeo = new THREE.BoxGeometry(width, 0.05, u);
-                        let fs = 40; if (key.l.length > 1) fs = 25; const mat = getKeyMaterial(key.l, fs);
-                        mesh = new THREE.Mesh(keyGeo, mat);
-                    }
-
+                    const keyGeo = new THREE.BoxGeometry(width, 0.05, u);
+                    let fs = 40; if (key.l.length > 1) fs = 25; const mat = getKeyMaterial(key.l, fs);
+                    const mesh = new THREE.Mesh(keyGeo, mat);
+                    mesh.castShadow = true; 
                     if (key.l.length === 1) keysRegistry[key.l.toUpperCase()] = mesh;
                     mesh.userData.pressOffset = 0; mesh.userData.finalPos = new THREE.Vector3(currentX, 0, zPos);
                     mesh.userData.startPos = new THREE.Vector3((Math.random() - 0.5) * 8, (Math.random() * 3) + 4, (Math.random() - 0.5) * 5);
@@ -2088,21 +668,20 @@
                 });
             }
             const keyLayout = [
-                [{ l: "esc", w: 1.6 }, { l: "F1", w: 1 }, { l: "F2", w: 1 }, { l: "F3", w: 1 }, { l: "F4", w: 1 }, { l: "F5", w: 1 }, { l: "F6", w: 1 }, { l: "F7", w: 1 }, { l: "F8", w: 1 }, { l: "F9", w: 1 }, { l: "F10", w: 1 }, { l: "F11", w: 1 }, { l: "F12", w: 1 }, { l: "", w: 1.1 }],
-                [{ l: "ù", w: 1 }, { l: "1", w: 1 }, { l: "2", w: 1 }, { l: "3", w: 1 }, { l: "4", w: 1 }, { l: "5", w: 1 }, { l: "6", w: 1 }, { l: "7", w: 1 }, { l: "8", w: 1 }, { l: "9", w: 1 }, { l: "0", w: 1 }, { l: "-", w: 1 }, { l: "=", w: 1 }, { l: "delete", w: 1.6 }],
-                [{ l: "tab", w: 1.6 }, { l: "Q", w: 1 }, { l: "W", w: 1 }, { l: "E", w: 1 }, { l: "R", w: 1 }, { l: "T", w: 1 }, { l: "Y", w: 1 }, { l: "U", w: 1 }, { l: "I", w: 1 }, { l: "O", w: 1 }, { l: "P", w: 1 }, { l: "[", w: 1 }, { l: "]", w: 1 }, { l: "\\", w: 1 }],
-                [{ l: "caps lock", w: 1.85 }, { l: "A", w: 1 }, { l: "S", w: 1 }, { l: "D", w: 1 }, { l: "F", w: 1 }, { l: "G", w: 1 }, { l: "H", w: 1 }, { l: "J", w: 1 }, { l: "K", w: 1 }, { l: "L", w: 1 }, { l: ";", w: 1 }, { l: "'", w: 1 }, { l: "return", w: 1.75 }],
-                [{ l: "shift", w: 2.3 }, { l: "Z", w: 1 }, { l: "X", w: 1 }, { l: "C", w: 1 }, { l: "V", w: 1 }, { l: "B", w: 1 }, { l: "N", w: 1 }, { l: "M", w: 1 }, { l: ",", w: 1 }, { l: ".", w: 1 }, { l: "/", w: 1 }, { l: "shift", w: 2.3 }],
-                [{ l: "fn", w: 1 }, { l: "control", w: 1 }, { l: "option", w: 1 }, { l: "command", w: 1.25 }, { l: "", w: 5.5 }, { l: "command", w: 1.25 }, { l: "option", w: 1 }]
+                [{ l: "esc", w: 1.6 }, { l: "F1", w: 1 }, { l: "F2", w: 1 }, { l: "F3", w: 1 }, { l: "F4", w: 1 }, { l: "F5", w: 1 }, { l: "F6", w: 1 }, { l: "", w: 1.1 }],
+                [{ l: "tab", w: 1.6 }, { l: "Q", w: 1 }, { l: "W", w: 1 }, { l: "E", w: 1 }, { l: "R", w: 1 }, { l: "T", w: 1 }, { l: "Y", w: 1 }, { l: "U", w: 1 }],
+                [{ l: "shift", w: 2.3 }, { l: "Z", w: 1 }, { l: "X", w: 1 }, { l: "C", w: 1 }, { l: "V", w: 1 }, { l: "B", w: 1 }, { l: "N", w: 1 }, { l: "M", w: 1 }]
             ];
-            const startZ = -2.6; let z = startZ;
+            let z = -2.6;
             keyLayout.forEach(row => { createRow(row, z); z += u + gap; });
             return group;
         }
 
+        // OPTIMIZED WHEEL CREATION using InstancedMesh
         function createWheel() {
-            const brakeDiscMap = (function () { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const x = c.getContext('2d'); x.fillStyle = '#FFF'; x.fillRect(0, 0, 512, 512); x.fillStyle = '#000'; for (let r = 100; r < 230; r += 25) { for (let i = 0; i < Math.PI * 2 * r / 20; i++) { const a = i / (Math.PI * 2 * r / 20) * Math.PI * 2; x.beginPath(); x.arc(256 + Math.cos(a) * r, 256 + Math.sin(a) * r, 4, 0, Math.PI * 2); x.fill(); } } return new THREE.CanvasTexture(c); })();
-            const tireMap = (function () { const c = document.createElement('canvas'); c.width = 1024; c.height = 1024; const x = c.getContext('2d'); x.fillStyle = '#111'; x.fillRect(0, 0, 1024, 1024); for (let i = 0; i < 2000; i++) { x.fillStyle = `rgba(255,255,255,${Math.random() * 0.05})`; x.fillRect(Math.random() * 1024, Math.random() * 1024, 2, 2); } return new THREE.CanvasTexture(c); })();
+            // Optimized Textures (Reduced Ops)
+            const brakeDiscMap = (function () { const c = document.createElement('canvas'); c.width = 256; c.height = 256; const x = c.getContext('2d'); x.fillStyle = '#FFF'; x.fillRect(0, 0, 256, 256); x.fillStyle = '#000'; for (let r = 50; r < 115; r += 12) { for (let i = 0; i < Math.PI * 2 * r / 10; i++) { const a = i / (Math.PI * 2 * r / 10) * Math.PI * 2; x.beginPath(); x.arc(128 + Math.cos(a) * r, 128 + Math.sin(a) * r, 2, 0, Math.PI * 2); x.fill(); } } return new THREE.CanvasTexture(c); })();
+            const tireMap = (function () { const c = document.createElement('canvas'); c.width = 512; c.height = 512; const x = c.getContext('2d'); x.fillStyle = '#111'; x.fillRect(0, 0, 512, 512); for (let i = 0; i < 5000; i++) { x.fillStyle = `rgba(255,255,255,${Math.random() * 0.05})`; x.fillRect(Math.random() * 512, Math.random() * 512, 2, 2); } return new THREE.CanvasTexture(c); })();
 
             const group = new THREE.Group();
             const rubberMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6, metalness: 0.1, map: tireMap, bumpMap: tireMap, bumpScale: 0.02, transparent: true, opacity: 1.0 });
@@ -2110,19 +689,28 @@
             const brakeDiscMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, map: brakeDiscMap, alphaMap: brakeDiscMap, transparent: true, side: THREE.DoubleSide, roughness: 0.3, metalness: 0.9, opacity: 1.0 });
             const hubMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.5, metalness: 0.7, transparent: true, opacity: 1.0 });
 
-            const tire = new THREE.Mesh(new THREE.TorusGeometry(WHEEL_CONFIG.tireRadius, WHEEL_CONFIG.tireTube / 1.8, 32, 64), rubberMaterial); tire.scale.set(1, 1, 1.8); group.add(tire);
-            const sl = new THREE.Mesh(new THREE.RingGeometry(WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.tireRadius + WHEEL_CONFIG.tireTube / 3.6, 64), rubberMaterial); sl.position.z = WHEEL_CONFIG.rimWidth / 2; sl.rotation.y = Math.PI; group.add(sl);
-            const sr = new THREE.Mesh(new THREE.RingGeometry(WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.tireRadius + WHEEL_CONFIG.tireTube / 3.6, 64), rubberMaterial); sr.position.z = -WHEEL_CONFIG.rimWidth / 2; group.add(sr);
-            const rim = new THREE.Mesh(new THREE.CylinderGeometry(WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.rimWidth, 64, 1, true).rotateX(Math.PI / 2), rimMaterial); group.add(rim);
-            const spokeGroup = new THREE.Group();
+            // Main Meshes
+            const tire = new THREE.Mesh(new THREE.TorusGeometry(WHEEL_CONFIG.tireRadius, WHEEL_CONFIG.tireTube / 1.8, 32, 48), rubberMaterial); tire.scale.set(1, 1, 1.8); group.add(tire);
+            const sl = new THREE.Mesh(new THREE.RingGeometry(WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.tireRadius + WHEEL_CONFIG.tireTube / 3.6, 48), rubberMaterial); sl.position.z = WHEEL_CONFIG.rimWidth / 2; sl.rotation.y = Math.PI; group.add(sl);
+            const sr = new THREE.Mesh(new THREE.RingGeometry(WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.tireRadius + WHEEL_CONFIG.tireTube / 3.6, 48), rubberMaterial); sr.position.z = -WHEEL_CONFIG.rimWidth / 2; group.add(sr);
+            const rim = new THREE.Mesh(new THREE.CylinderGeometry(WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.rimRadius, WHEEL_CONFIG.rimWidth, 48, 1, true).rotateX(Math.PI / 2), rimMaterial); group.add(rim);
+            
+            // Instanced Spokes
+            const spokeGeo = new THREE.CylinderGeometry(0.4, 0.2, WHEEL_CONFIG.rimRadius - 1, 8);
+            spokeGeo.rotateX(Math.PI/2); // Align for rotation
+            const spokeMesh = new THREE.InstancedMesh(spokeGeo, rimMaterial, WHEEL_CONFIG.spokeCount);
+            const dummy = new THREE.Object3D();
             for (let i = 0; i < WHEEL_CONFIG.spokeCount; i++) {
                 const angle = (i / WHEEL_CONFIG.spokeCount) * Math.PI * 2;
-                const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.2, WHEEL_CONFIG.rimRadius - 1, 8), rimMaterial);
-                spoke.rotation.set(0, 0, angle - Math.PI / 2); spoke.position.set(Math.cos(angle) * (WHEEL_CONFIG.rimRadius / 2), Math.sin(angle) * (WHEEL_CONFIG.rimRadius / 2), 0); spokeGroup.add(spoke);
+                dummy.position.set(Math.cos(angle) * (WHEEL_CONFIG.rimRadius / 2), Math.sin(angle) * (WHEEL_CONFIG.rimRadius / 2), 0);
+                dummy.rotation.set(0, 0, angle - Math.PI / 2);
+                dummy.updateMatrix();
+                spokeMesh.setMatrixAt(i, dummy.matrix);
             }
-            group.add(spokeGroup);
-            group.add(new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 6, 32).rotateX(Math.PI / 2), hubMaterial));
-            const disc = new THREE.Mesh(new THREE.RingGeometry(0.8, WHEEL_CONFIG.brakeDiscRadius, 64), brakeDiscMaterial); disc.position.z = 1.8; group.add(disc);
+            group.add(spokeMesh);
+
+            group.add(new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 6, 24).rotateX(Math.PI / 2), hubMaterial));
+            const disc = new THREE.Mesh(new THREE.RingGeometry(0.8, WHEEL_CONFIG.brakeDiscRadius, 48), brakeDiscMaterial); disc.position.z = 1.8; group.add(disc);
             const discBack = disc.clone(); discBack.rotation.y = Math.PI; discBack.position.z = 1.9; group.add(discBack);
             group.scale.set(WHEEL_CONFIG.scaleFactor, WHEEL_CONFIG.scaleFactor, WHEEL_CONFIG.scaleFactor);
             return group;
@@ -2132,44 +720,32 @@
         function onMouseMove(event) { mouse.x = (event.clientX / window.innerWidth) * 2 - 1; mouse.y = - (event.clientY / window.innerHeight) * 2 + 1; }
 
         function onScroll(event) {
-            if (isPageOpen) return; // Allow natural scroll if overlay is active
+            if (isPageOpen) return;
 
             // Check if we are in the Marketplace view
             if (marketplaceOpen) {
-                // Determine if we are at the top boundary
                 const isAtTop = marketplaceWrapper.scrollTop <= 0;
-                // Check if user is trying to scroll UP (negative deltaY)
                 const isScrollingUp = event.deltaY < 0;
 
                 if (isAtTop && isScrollingUp) {
-                    // We are at the top and pulling down -> Trigger transition back to 3D
                     event.preventDefault(); 
                     const now = Date.now();
-                    
                     if (now - lastTransitionTime > 1000) {
                         marketplaceOpen = false;
                         lastTransitionTime = now;
-                        currentScroll = MAX_SCROLL_AMOUNT - 500; // Nudge back slightly into 3D space
+                        currentScroll = MAX_SCROLL_AMOUNT - 500;
                         scrollAmount = currentScroll / MAX_SCROLL_AMOUNT;
                     }
                 }
-                // ELSE: Do nothing. Let the browser handle the scroll natively (preserves inertia).
             } else {
-                // 3D Timeline Mode - Hijack everything
+                // 3D Timeline Mode - Hijack logic
                 event.preventDefault();
-                
-                // Normal 3D scroll logic
                 currentScroll = Math.max(0, Math.min(MAX_SCROLL_AMOUNT, currentScroll + event.deltaY));
                 scrollAmount = currentScroll / MAX_SCROLL_AMOUNT;
 
                 if (sphereObject) sphereObject.rotation.y += event.deltaY * scrollRotationSpeed;
-                
-                // Rotate Wheel on Scroll during Grid Phase
-                if (wheelObject && wheelObject.visible) {
-                    wheelObject.rotation.y += event.deltaY * scrollRotationSpeed;
-                }
+                if (wheelObject && wheelObject.visible) wheelObject.rotation.z -= (event.deltaY * 0.002);
 
-                // Check transition trigger: Opens at very end
                 const now = Date.now();
                 if (scrollAmount >= 0.995) {
                     if (now - lastTransitionTime > 1000) {
@@ -2185,27 +761,20 @@
         
         document.addEventListener('touchmove', e => {
             if (isPageOpen) return;
-            
             if (marketplaceOpen) {
-                // MARKETPLACE MODE (Native Scroll with Boundary Check)
                 const touchY = e.touches[0].clientY;
-                const deltaY = (touchStartY - touchY) * 2; // Positive = Scrolling Down
-                
+                const deltaY = (touchStartY - touchY) * 2;
                 const isAtTop = marketplaceWrapper.scrollTop <= 0;
                 const isScrollingUp = deltaY < 0;
 
                 if (isAtTop && isScrollingUp) {
-                    // Boundary hit: Transition back to 3D
                     e.preventDefault(); 
                     onScroll({ preventDefault: () => { }, deltaY: deltaY });
                     touchStartY = touchY;
                 } else {
-                    // Allow native scroll. 
-                    // We update touchStartY so if the user reverses direction without lifting finger, logic holds.
-                    touchStartY = touchY;
+                    touchStartY = touchY; // Allow native
                 }
             } else {
-                // 3D MODE (Hijack)
                 e.preventDefault();
                 const touchY = e.touches[0].clientY;
                 const deltaY = (touchStartY - touchY) * 2;
@@ -2225,36 +794,26 @@
             whyTitleElement = document.getElementById('why-title');
             whySub1Element = document.getElementById('why-sub1');
             whySub2Element = document.getElementById('why-sub2');
-
             marqueeSectionElement = document.getElementById('marquee-section');
             marqueeTrackElement = document.getElementById('marquee-track');
-
-            // Get new Dual Grid Elements
+            navCenter = document.getElementById('nav-center');
+            navRight = document.getElementById('nav-right');
             dualGridSectionElement = document.getElementById('dual-grid-section');
-
             methTitleElement = document.getElementById('meth-title');
             methDescElement = document.getElementById('meth-desc');
             methKeywordsContainer = document.getElementById('meth-keywords');
             methKw1 = document.getElementById('kw-1');
             methKw2 = document.getElementById('kw-2');
             methKw3 = document.getElementById('kw-3');
-
             philTitleElement = document.getElementById('phil-title');
             philDescElement = document.getElementById('phil-desc');
             philQuoteContainer = document.getElementById('phil-quote-container');
             philQuote = document.getElementById('phil-quote');
-
-            // Marketplace Init
             marketplaceWrapper = document.getElementById('marketplace-wrapper');
             cardsContainer = document.getElementById('cards-container');
             renderCards('trending');
 
-            // Navbar Init
-            navCenter = document.getElementById('nav-center');
-            navRight = document.getElementById('nav-right');
-
             scene = new THREE.Scene(); scene.background = new THREE.Color(0x000000);
-            // Optimized camera settings for mobile
             const isMobile = window.innerWidth < 768;
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, TOP_SPHERE_Y + 3.5, isMobile ? CAMERA_Z_START + 2 : CAMERA_Z_START);
@@ -2268,8 +827,8 @@
             const ambientLight = new THREE.AmbientLight(AMBIENT_COLOR); scene.add(ambientLight);
             const spotLight = new THREE.SpotLight(SPOTLIGHT_COLOR, 30); spotLight.position.set(0, 10, 0);
             spotLight.angle = Math.PI / 8; spotLight.penumbra = 0.5; spotLight.decay = 2; spotLight.distance = 50; spotLight.castShadow = true;
-            spotLight.shadow.mapSize.width = 1024; spotLight.shadow.mapSize.height = 1024; spotLight.shadow.camera.near = 1; spotLight.shadow.camera.far = 20;
-            spotLight.target.position.set(0, 0, 0); scene.add(spotLight); scene.add(spotLight.target);
+            spotLight.shadow.mapSize.width = 1024; spotLight.shadow.mapSize.height = 1024; 
+            scene.add(spotLight); scene.add(spotLight.target);
 
             sphereObject = new THREE.Group(); sphereObject.add(createSphere()); sphereObject.position.y = TOP_SPHERE_Y; scene.add(sphereObject);
             keyboardGroup = createIsolatedKeyboard(); keyboardGroup.position.set(KEYBOARD_X_POSITION, KEYBOARD_Y, 0); keyboardGroup.rotation.x = -Math.PI / 4; keyboardGroup.scale.set(0.6, 0.6, 0.6); scene.add(keyboardGroup);
@@ -2289,7 +848,6 @@
             smoothedScrollAmount = lerp(smoothedScrollAmount, scrollAmount, SMOOTHING_FACTOR);
             const s = smoothedScrollAmount;
 
-            // Handle Marketplace Transition
             if (marketplaceWrapper) {
                 if (marketplaceOpen) {
                     marketplaceWrapper.style.transform = 'translateY(0%)';
@@ -2300,11 +858,8 @@
                 }
             }
 
-            // --- 1. HERO SECTION (0.0 - 0.3) ---
             const colorProgress = mapRange(s, 0.0, 0.3, 0.0, 1.0);
-            if (sphereObject && sphereObject.children[0].material) {
-                sphereObject.children[0].material.color.lerpColors(SPHERE_COLOR_START, SPHERE_COLOR_END, colorProgress);
-            }
+            if (sphereObject && sphereObject.children[0].material) { sphereObject.children[0].material.color.lerpColors(SPHERE_COLOR_START, SPHERE_COLOR_END, colorProgress); }
             if (heroTitleElement && heroSpanElement) {
                 const textStart = [220, 220, 220]; const textEnd = [255, 255, 255];
                 const currentColor = interpolateColorStyles(textStart, textEnd, colorProgress);
@@ -2317,54 +872,36 @@
                     const scale = 1 + (s * 0.3);
                     heroSectionElement.style.transform = `translate(-50%, -50%) scale(${scale})`;
                     heroSectionElement.style.display = 'block';
-                } else {
-                    heroSectionElement.style.display = 'none';
-                }
+                } else { heroSectionElement.style.display = 'none'; }
             }
             
-            // --- NAVBAR LOGIC ---
             if (navCenter && navRight) {
                  let navAlpha = 1;
-                 if (s > 0.05) {
-                     navAlpha = mapRange(s, 0.05, 0.15, 1, 0);
-                 }
-                 navCenter.style.opacity = navAlpha;
-                 navRight.style.opacity = navAlpha;
-                 // Prevent interaction when hidden
+                 if (s > 0.05) { navAlpha = mapRange(s, 0.05, 0.15, 1, 0); }
+                 navCenter.style.opacity = navAlpha; navRight.style.opacity = navAlpha;
                  const ptr = navAlpha < 0.1 ? 'none' : 'auto';
-                 navCenter.style.pointerEvents = ptr;
-                 navRight.style.pointerEvents = ptr;
+                 navCenter.style.pointerEvents = ptr; navRight.style.pointerEvents = ptr;
             }
 
-            // --- CAMERA ---
-            const transitionPoint1 = 0.5;
-            const transitionPoint2 = 0.8;
-
+            const transitionPoint1 = 0.5; const transitionPoint2 = 0.8;
             let targetY, targetX;
             if (s <= transitionPoint1) {
                 const t = mapRange(s, 0.0, transitionPoint1, 0.0, 1.0);
                 targetY = lerp(TOP_SPHERE_Y, KEYBOARD_Y, t);
                 targetX = lerp(0.0, KEYBOARD_X_POSITION, t);
-            }
-            else if (s <= transitionPoint2) {
-                targetY = KEYBOARD_Y;
-                targetX = KEYBOARD_X_POSITION;
-            }
-            else {
+            } else if (s <= transitionPoint2) {
+                targetY = KEYBOARD_Y; targetX = KEYBOARD_X_POSITION;
+            } else {
                 const t = mapRange(s, transitionPoint2, 0.98, 0.0, 1.0);
                 targetY = lerp(KEYBOARD_Y, LOWEST_TARGET_Y, t);
                 targetX = lerp(KEYBOARD_X_POSITION, -KEYBOARD_X_POSITION, t);
             }
-
             controls.target.y = targetY; controls.target.x = targetX;
             camera.position.z = lerp(CAMERA_Z_START, CAMERA_Z_END, s);
             camera.position.x = targetX;
             camera.position.y = lerp(TOP_SPHERE_Y + 3.5, LOWEST_TARGET_Y + 0.5, s);
             controls.enableZoom = (s >= 0.99);
 
-            // --- OBJECT VISIBILITY & LOGIC ---
-
-            // Sphere
             const opacitySphere = mapRange(s, 0.0, 0.4, 1.0, 0.0);
             if (sphereObject && sphereObject.children[0].material) {
                 sphereObject.children[0].material.opacity = opacitySphere;
@@ -2372,41 +909,32 @@
                 if (sphereObject.visible) sphereObject.rotation.y += IDLE_ROTATION_SPEED;
             }
 
-            // Keyboard & Typing Section
             if (keyboardGroup) {
                 let currentKeyboardOpacity = 1.0;
                 const formOpacity = mapRange(s, 0.1, 0.5, 0.0, 1.0);
                 const bgPhaseOpacity = mapRange(s, 0.45, 0.55, 1.0, 0.3);
                 const exitOpacity = mapRange(s, 0.80, 0.88, 0.3, 0.0);
-
                 if (s < 0.45) currentKeyboardOpacity = formOpacity;
                 else if (s < 0.80) currentKeyboardOpacity = bgPhaseOpacity;
                 else currentKeyboardOpacity = exitOpacity;
-
                 keyboardGroup.visible = currentKeyboardOpacity > 0.01;
-
                 if (keyboardGroup.visible) {
                     const formationRaw = mapRange(s, 0.1, 0.5, 0, 1);
                     const easedProgress = easeOutCubic(formationRaw);
                     const slantProgress = mapRange(s, 0.5, 0.65, 0.0, 1.0);
                     const easedSlant = easeOutCubic(slantProgress);
-
                     const baseRotX = lerp(-Math.PI / 2, -Math.PI / 4, easedProgress);
                     const slantZ = lerp(0, Math.PI / 8, easedSlant);
                     const moveX = lerp(0, 1.5, easedSlant);
-
-                    let exitRotX = 0;
-                    let exitRotZ = 0;
+                    let exitRotX = 0, exitRotZ = 0;
                     if (s > 0.80) {
                         const exitProg = mapRange(s, 0.80, 0.88, 0, 1);
                         exitRotX = lerp(0, -Math.PI / 4, exitProg);
                         exitRotZ = lerp(0, -Math.PI / 4, exitProg);
                     }
-
                     keyboardGroup.rotation.x = baseRotX + exitRotX;
                     keyboardGroup.rotation.z = slantZ + exitRotZ;
                     keyboardGroup.position.x = KEYBOARD_X_POSITION + moveX;
-
                     keyboardGroup.children.forEach(mesh => {
                         mesh.userData.pressOffset = lerp(mesh.userData.pressOffset, 0, 0.1);
                         if (mesh.material) {
@@ -2428,46 +956,29 @@
                     });
                     keyboardGroup.rotation.y += IDLE_ROTATION_SPEED;
                 }
-
-                // "WHY" Section Logic
                 if (whySectionElement) {
                     if (s > 0.45 && s < 0.88) {
                         whySectionElement.style.display = 'block';
-                        // ... (previous why logic)
                         let whyOpacity = 1;
                         if (s < 0.5) whyOpacity = mapRange(s, 0.45, 0.5, 0, 1);
                         else if (s > 0.80) {
                             const exitProgress = mapRange(s, 0.80, 0.88, 0, 1);
-                            const blurVal = lerp(0, 30, exitProgress);
-                            whySectionElement.style.filter = `blur(${blurVal}px)`;
-                            const scaleVal = lerp(1, 0.05, exitProgress);
-                            const xMove = lerp(0, 40, exitProgress);
-                            whySectionElement.style.transform = `translate(${xMove}vw, -50%) scale(${scaleVal})`;
+                            whySectionElement.style.transform = `translate(${lerp(0, 40, exitProgress)}vw, -50%) scale(${lerp(1, 0.05, exitProgress)})`;
                             whySectionElement.style.opacity = lerp(1, 0, exitProgress);
                         } else {
                             whySectionElement.style.transform = 'translate(0, -50%) scale(1)';
-                            whySectionElement.style.filter = 'blur(0px)';
                             whySectionElement.style.opacity = 1;
                         }
-
                         const titleProgress = mapRange(s, 0.5, 0.60, 0, 1);
-                        const titleCharCount = Math.floor(titleProgress * TXT_TITLE.length);
-                        whyTitleElement.textContent = TXT_TITLE.substring(0, titleCharCount);
-
+                        whyTitleElement.textContent = TXT_TITLE.substring(0, Math.floor(titleProgress * TXT_TITLE.length));
                         const sub1Progress = mapRange(s, 0.60, 0.70, 0, 1);
-                        const sub1CharCount = Math.floor(sub1Progress * TXT_SUB1.length);
-                        whySub1Element.textContent = TXT_SUB1.substring(0, sub1CharCount);
+                        whySub1Element.textContent = TXT_SUB1.substring(0, Math.floor(sub1Progress * TXT_SUB1.length));
                         const sub2Progress = mapRange(s, 0.70, 0.80, 0, 1);
-                        const sub2CharCount = Math.floor(sub2Progress * TXT_SUB2.length);
-                        whySub2Element.textContent = TXT_SUB2.substring(0, sub2CharCount);
-
-                    } else {
-                        whySectionElement.style.display = 'none';
-                    }
+                        whySub2Element.textContent = TXT_SUB2.substring(0, Math.floor(sub2Progress * TXT_SUB2.length));
+                    } else { whySectionElement.style.display = 'none'; }
                 }
             }
 
-            // Marquee Section (0.80 - 0.90)
             if (marqueeSectionElement) {
                 if (s > 0.80 && s < 0.90) {
                     marqueeSectionElement.style.display = 'block';
@@ -2475,118 +986,67 @@
                     if (s < 0.82) mOpacity = mapRange(s, 0.80, 0.82, 0, 1);
                     else if (s > 0.88) mOpacity = mapRange(s, 0.88, 0.90, 1, 0);
                     marqueeSectionElement.style.opacity = mOpacity;
-                    const translateX = mapRange(s, 0.80, 0.90, 100, -100);
-                    marqueeTrackElement.style.transform = `translateX(${translateX}%)`;
-                } else {
-                    marqueeSectionElement.style.display = 'none';
-                }
+                    marqueeTrackElement.style.transform = `translateX(${mapRange(s, 0.80, 0.90, 100, -100)}%)`;
+                } else { marqueeSectionElement.style.display = 'none'; }
             }
 
-            // Wheel Animation Logic
             const wheelEntryProgress = mapRange(s, 0.82, 0.90, 0.0, 1.0);
-
-            // Wheel Positioning Logic: 
-            // 1. Enters normally.
-            // 2. STAYS centered for the Grid phase (0.90 - 0.95).
-            // 3. Stays centered for the Marketplace phase (0.95+).
-
             let wheelYPos = LOWEST_TARGET_Y;
-            // Lift wheel from LOWEST_TARGET_Y to the current camera center to keep it "fixed"
             if (s > 0.88) {
-                // We use controls.target.y to keep it fixed in the center of the camera's view
                 const fixedProgress = mapRange(s, 0.88, 0.92, 0, 1);
                 wheelYPos = lerp(LOWEST_TARGET_Y, controls.target.y, easeOutCubic(fixedProgress));
             }
-
-            // Fade Logic for Marketplace:
-            // Visible during grid, fades to semi-transparent when marketplace opens.
             let wheelOpacityMultiplier = 1;
             if (s > 0.96) {
                 const fadeProg = mapRange(s, 0.96, 0.99, 0, 1);
                 wheelOpacityMultiplier = lerp(1, 0.15, fadeProg);
             }
-
             if (wheelObject) {
                 wheelObject.position.y = wheelYPos;
                 wheelObject.children.forEach(mesh => {
-                    if (Array.isArray(mesh.material)) {
-                        mesh.material.forEach(mat => { if (mat.transparent) mat.opacity = wheelEntryProgress * wheelOpacityMultiplier; });
-                    } else if (mesh.material) {
-                        if (mesh.material.transparent) mesh.material.opacity = wheelEntryProgress * wheelOpacityMultiplier;
+                    if (mesh.material) {
+                        if (Array.isArray(mesh.material)) {
+                            mesh.material.forEach(mat => { if (mat.transparent) mat.opacity = wheelEntryProgress * wheelOpacityMultiplier; });
+                        } else if (mesh.material.transparent) {
+                            mesh.material.opacity = wheelEntryProgress * wheelOpacityMultiplier;
+                        }
+                    } else if (mesh.isInstancedMesh && mesh.material.transparent) {
+                        mesh.material.opacity = wheelEntryProgress * wheelOpacityMultiplier;
                     }
                 });
                 wheelObject.visible = (wheelEntryProgress > 0.01);
                 if (wheelObject.visible) {
                     wheelObject.rotation.z -= 0.025;
-                    // No hard reset of Y rotation here to allow scroll influence
                     const targetScale = WHEEL_CONFIG.scaleFactor;
                     const currentScale = lerp(0.1, targetScale, easeOutCubic(wheelEntryProgress));
                     wheelObject.scale.set(currentScale, currentScale, currentScale);
                 }
             }
 
-            // --- PHASE 3: DUAL GRID SECTION (0.90 -> 0.95) ---
             if (dualGridSectionElement) {
-                // Extended range: 0.90 -> 0.98 (leaves room before store at 0.99)
                 if (s > 0.90 && s < 0.98) {
                     dualGridSectionElement.style.display = 'flex';
-
-                    // Fade In (0.90 - 0.92)
                     let gridOpacity = 1;
-                    if (s < 0.92) {
-                        gridOpacity = mapRange(s, 0.90, 0.92, 0, 1);
-                    }
-                    // Fade Out (0.96 - 0.98) as marketplace enters
+                    if (s < 0.92) { gridOpacity = mapRange(s, 0.90, 0.92, 0, 1); }
                     else if (s > 0.96) {
                         gridOpacity = mapRange(s, 0.96, 0.98, 1, 0);
-                        // Slide up on exit
-                        const exitSlide = mapRange(s, 0.96, 0.98, 0, -50);
-                        dualGridSectionElement.style.transform = `translateY(${exitSlide}px)`;
-                    } else {
-                        dualGridSectionElement.style.transform = `translateY(0px)`;
-                    }
+                        dualGridSectionElement.style.transform = `translateY(${mapRange(s, 0.96, 0.98, 0, -50)}px)`;
+                    } else { dualGridSectionElement.style.transform = `translateY(0px)`; }
                     dualGridSectionElement.style.opacity = gridOpacity;
-
-                    // Content Filling Logic (Methodology)
-                    const mTitleProg = mapRange(s, 0.90, 0.92, 0, 1);
-                    const mTitleChars = Math.floor(mTitleProg * METH_TITLE.length);
-                    methTitleElement.textContent = METH_TITLE.substring(0, mTitleChars);
-
-                    const mDescProg = mapRange(s, 0.92, 0.93, 0, 1);
-                    const mDescChars = Math.floor(mDescProg * METH_DESC.length);
-                    methDescElement.textContent = METH_DESC.substring(0, mDescChars);
-
+                    methTitleElement.textContent = METH_TITLE.substring(0, Math.floor(mapRange(s, 0.90, 0.92, 0, 1) * METH_TITLE.length));
+                    methDescElement.textContent = METH_DESC.substring(0, Math.floor(mapRange(s, 0.92, 0.93, 0, 1) * METH_DESC.length));
                     if (s > 0.925) {
                         methKeywordsContainer.style.opacity = 1;
                         if (s > 0.928) methKw1.classList.add('active');
                         if (s > 0.931) methKw2.classList.add('active');
                         if (s > 0.934) methKw3.classList.add('active');
-                    } else {
-                        methKeywordsContainer.style.opacity = 0;
-                    }
-
-                    // Content Filling Logic (Philosophy)
-                    const pTitleProg = mapRange(s, 0.90, 0.92, 0, 1);
-                    const pTitleChars = Math.floor(pTitleProg * PHIL_TITLE.length);
-                    philTitleElement.textContent = PHIL_TITLE.substring(0, pTitleChars);
-
-                    const pDescProg = mapRange(s, 0.93, 0.945, 0, 1);
-                    const pDescChars = Math.floor(pDescProg * PHIL_DESC.length);
-                    philDescElement.textContent = PHIL_DESC.substring(0, pDescChars);
-
-                    if (s > 0.94) {
-                        philQuoteContainer.style.opacity = 1;
-                        philQuote.classList.add('active');
-                    } else {
-                        philQuoteContainer.style.opacity = 0;
-                    }
-
-                } else {
-                    dualGridSectionElement.style.display = 'none';
-                }
+                    } else { methKeywordsContainer.style.opacity = 0; }
+                    philTitleElement.textContent = PHIL_TITLE.substring(0, Math.floor(mapRange(s, 0.90, 0.92, 0, 1) * PHIL_TITLE.length));
+                    philDescElement.textContent = PHIL_DESC.substring(0, Math.floor(mapRange(s, 0.93, 0.945, 0, 1) * PHIL_DESC.length));
+                    if (s > 0.94) { philQuoteContainer.style.opacity = 1; philQuote.classList.add('active'); } else { philQuoteContainer.style.opacity = 0; }
+                } else { dualGridSectionElement.style.display = 'none'; }
             }
 
-            // Raycasting
             if (controls.enabled && keyboardGroup.visible) {
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(keyboardGroup.children, true);
@@ -2597,11 +1057,8 @@
                         INTERSECTED = newIntersected;
                         INTERSECTED.userData.pressOffset = -0.05;
                     }
-                } else {
-                    INTERSECTED = null;
-                }
+                } else { INTERSECTED = null; }
             }
-
             controls.update();
             renderer.render(scene, camera);
         }
@@ -2609,5 +1066,4 @@
         window.onload = init;
     </script>
 </body>
-
 </html>
