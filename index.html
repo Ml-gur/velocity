@@ -240,13 +240,21 @@
         </div>
         <div id="nav-right" class="pointer-events-auto flex items-center gap-6">
             <a href="javascript:void(0)" onclick="openPage('login')" class="hidden md:block text-xs font-['Michroma'] text-white tracking-wider transition-all duration-300 ease-in-out hover:text-red-400 hover:scale-110 hover:drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]">LOGIN</a>
-            <button class="group flex flex-col justify-center items-end gap-1.5 w-8 h-8 cursor-pointer">
+            <button onclick="toggleMobileMenu()" class="group flex flex-col justify-center items-end gap-1.5 w-8 h-8 cursor-pointer relative z-[200]">
                 <span class="block w-8 h-[2px] bg-white group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-colors duration-300"></span>
                 <span class="block w-5 h-[2px] bg-white group-hover:w-8 group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all duration-300"></span>
                 <span class="block w-8 h-[2px] bg-white group-hover:bg-red-600 shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-colors duration-300"></span>
             </button>
         </div>
     </nav>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div id="mobile-menu" class="fixed inset-0 z-[195] bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center space-y-8 transition-transform duration-500 translate-x-full pointer-events-auto">
+        <a href="javascript:void(0)" onclick="openPage('concept'); toggleMobileMenu()" class="text-2xl font-['Michroma'] text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 hover:to-red-500 transition-all">CONCEPT</a>
+        <a href="javascript:void(0)" onclick="openPage('engineering'); toggleMobileMenu()" class="text-2xl font-['Michroma'] text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 hover:to-red-500 transition-all">ENGINEERING</a>
+        <a href="javascript:void(0)" onclick="openPage('configure'); toggleMobileMenu()" class="text-2xl font-['Michroma'] text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 hover:to-red-500 transition-all">CONFIGURE</a>
+        <a href="javascript:void(0)" onclick="openPage('login'); toggleMobileMenu()" class="text-xl font-['Michroma'] text-red-500 mt-8">LOGIN</a>
+    </div>
 
     <!-- HERO SECTION TEXT -->
     <div id="hero-section" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-[150] w-full px-4 pointer-events-none">
@@ -560,6 +568,16 @@
             overlay.classList.remove('active');
             isPageOpen = false;
         };
+
+        window.toggleMobileMenu = function() {
+            const menu = document.getElementById('mobile-menu');
+            const isOpen = !menu.classList.contains('translate-x-full');
+            if (isOpen) {
+                menu.classList.add('translate-x-full');
+            } else {
+                menu.classList.remove('translate-x-full');
+            }
+        }
 
         // --- 4. RENDER FUNCTIONS ---
         function renderCards(category) {
