@@ -430,12 +430,18 @@
         }
 
         .card-visual {
-            height: 200px;
+            height: 140px; /* Mobile height */
             width: 100%;
             position: relative;
             overflow: hidden;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             flex-shrink: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .card-visual {
+                height: 200px; /* Desktop height */
+            }
         }
 
         .card-visual img {
@@ -810,10 +816,9 @@
             <!-- Redesigned Filter Command Bar (Sticky) -->
             <div class="w-full mb-6 md:mb-8 sticky top-[60px] md:top-[88px] z-30 transition-all duration-300 -mx-4 px-4 md:-mx-12 md:px-12 py-4 bg-[#050505]/95 backdrop-blur-xl border-b border-white/10 shadow-2xl"
                 id="sticky-filter">
-                <div
-                    class="bg-white/5 border border-white/10 backdrop-blur-md rounded-md flex flex-col md:flex-row p-1">
-                    <!-- Left: Search -->
-                    <div class="relative w-full md:w-1/2 flex-grow-0">
+                <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-md grid grid-cols-2 md:flex md:flex-row p-1 gap-1">
+                    <!-- Left: Search (Full width on mobile grid, auto on desktop flex) -->
+                    <div class="relative col-span-2 md:w-1/3 md:flex-grow-0">
                         <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4"
                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -822,19 +827,41 @@
                         </svg>
                         <input type="text" id="search-input"
                             class="bg-transparent border-none text-white pl-10 pr-4 py-3 w-full font-['Inter'] text-sm focus:outline-none placeholder-gray-600"
-                            placeholder="Search 1861 components...">
+                            placeholder="Search...">
                     </div>
 
-                    <!-- Right: Tabs -->
-                    <div class="flex gap-0.5 bg-black/30 p-0.5 rounded-sm mt-2 md:mt-0 md:ml-auto overflow-x-auto">
+                    <!-- Middle: Filters (Side by side on mobile) -->
+                    <select onchange="updateAdminFilter('category', this.value)" class="col-span-1 md:w-auto bg-black/20 border-r border-white/5 text-white px-4 py-2 text-xs outline-none focus:bg-white/10 transition-colors uppercase cursor-pointer rounded-sm">
+                        <option value="ALL" class="bg-black text-white">All Cats</option>
+                        <option value="HERO" class="bg-black text-white">Hero</option>
+                        <option value="SECTION" class="bg-black text-white">Section</option>
+                        <option value="BUTTON" class="bg-black text-white">Button</option>
+                        <option value="CARD" class="bg-black text-white">Card</option>
+                        <option value="FEATURE" class="bg-black text-white">Feature</option>
+                        <option value="FORM" class="bg-black text-white">Form</option>
+                        <option value="HEADER" class="bg-black text-white">Header</option>
+                        <option value="FOOTER" class="bg-black text-white">Footer</option>
+                        <option value="PRICING" class="bg-black text-white">Pricing</option>
+                        <option value="TESTIMONIAL" class="bg-black text-white">Testimonial</option>
+                        <option value="GALLERY" class="bg-black text-white">Gallery</option>
+                    </select>
+
+                    <select onchange="updateAdminFilter('sort', this.value)" class="col-span-1 md:w-auto bg-black/20 text-white px-4 py-2 text-xs outline-none focus:bg-white/10 transition-colors uppercase cursor-pointer rounded-sm">
+                        <option value="NEWEST" class="bg-black text-white">Newest</option>
+                        <option value="POPULAR" class="bg-black text-white">Popular</option>
+                        <option value="RATING" class="bg-black text-white">Rated</option>
+                    </select>
+
+                    <!-- Right: Tabs (Full width row on mobile if needed, or flexed) -->
+                    <div class="col-span-2 md:w-auto flex gap-0.5 bg-black/30 p-0.5 rounded-sm md:ml-auto overflow-x-auto">
                         <button
-                            class="cmd-tab-btn active px-4 py-2 text-xs font-['Rajdhani'] font-bold tracking-wider text-gray-400 hover:bg-white/5 rounded-sm transition-colors whitespace-nowrap"
+                            class="cmd-tab-btn active px-4 py-2 text-xs font-['Rajdhani'] font-bold tracking-wider text-gray-400 hover:bg-white/5 rounded-sm transition-colors whitespace-nowrap flex-1 md:flex-none"
                             onclick="switchTab('trending')">TRENDING</button>
                         <button
-                            class="cmd-tab-btn px-4 py-2 text-xs font-['Rajdhani'] font-bold tracking-wider text-gray-400 hover:bg-white/5 rounded-sm transition-colors whitespace-nowrap"
-                            onclick="switchTab('new')">NEW ARRIVALS</button>
+                            class="cmd-tab-btn px-4 py-2 text-xs font-['Rajdhani'] font-bold tracking-wider text-gray-400 hover:bg-white/5 rounded-sm transition-colors whitespace-nowrap flex-1 md:flex-none"
+                            onclick="switchTab('new')">NEW</button>
                         <button
-                            class="cmd-tab-btn px-4 py-2 text-xs font-['Rajdhani'] font-bold tracking-wider text-gray-400 hover:bg-white/5 rounded-sm transition-colors whitespace-nowrap"
+                            class="cmd-tab-btn px-4 py-2 text-xs font-['Rajdhani'] font-bold tracking-wider text-gray-400 hover:bg-white/5 rounded-sm transition-colors whitespace-nowrap flex-1 md:flex-none"
                             onclick="switchTab('community')">COMMUNITY</button>
                     </div>
                 </div>
@@ -846,9 +873,9 @@
             </div>
 
             <!-- Dynamic Grid Container -->
-            <!-- grid-cols-1 on mobile for better visibility -->
+            <!-- Updated Grid: grid-cols-2 on mobile, gap-3 on mobile -->
             <div id="cards-container"
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 min-h-[600px]">
+                class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 min-h-[600px]">
                 <!-- Cards injected via JS -->
             </div>
 
@@ -1858,40 +1885,31 @@
         function renderCards() {
             if (!cardsContainer) return;
             cardsContainer.innerHTML = '';
-
+            
+            // Use velocityStore.products if initialized, else fallback (though init does it)
+            const source = window.velocityStore ? window.velocityStore.products : products;
             let data = [];
 
             // LOGIC UPDATE: Dynamic Trending Filtering
             if (currentTab === 'trending') {
-                // 1. Aggregation: Get all unique components from the system
-                const allComponents = window.velocityStore ? window.velocityStore.getAllComponents() : [];
-
-                // 2. Algorithm: Calculate Trending Score
-                // Logic: A download is worth 4x a view to determine "true" popularity
-                data = allComponents.sort((a, b) => {
+                 const allComponents = window.velocityStore ? window.velocityStore.getAllComponents() : [];
+                 data = allComponents.sort((a, b) => {
                     const scoreA = (a.views || 0) + ((a.downloads || 0) * 4);
                     const scoreB = (b.views || 0) + ((b.downloads || 0) * 4);
-                    return scoreB - scoreA; // Descending order
+                    return scoreB - scoreA;
                 });
-
-                // Optional: Limit trending to top performers to keep it exclusive
-                // data = data.slice(0, 12); 
             } else {
-                // Standard tabs (New, Community) use their specific lists
-                const source = window.velocityStore ? window.velocityStore.products : products;
                 data = source[currentTab] || [];
             }
-
-            // Apply Filters (Category)
+            
             if (currentCategoryFilter !== 'All') {
                 data = data.filter(item => item.cat === currentCategoryFilter.toUpperCase());
             }
-
-            // Apply Search
+            
             if (searchQuery) {
                 const q = searchQuery.toLowerCase();
-                data = data.filter(item =>
-                    item.title.toLowerCase().includes(q) ||
+                data = data.filter(item => 
+                    item.title.toLowerCase().includes(q) || 
                     item.desc.toLowerCase().includes(q)
                 );
             }
@@ -1911,9 +1929,9 @@
                 const card = document.createElement('div');
                 card.className = `fuel-cell-card group opacity-0`;
                 card.style.transition = `opacity 0.6s ease ${index * 0.05}s, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${index * 0.05}s, border-color 0.3s ease, background 0.3s ease`;
-
+                
                 // Click handler
-                card.onclick = () => openModalWithItem(item);
+                card.onclick = () => openModalWithItem(item); 
 
                 card.innerHTML = `
                     <div class="card-visual">
@@ -1922,12 +1940,13 @@
                         <div class="price-stamp">${item.price}</div>
                     </div>
                     <!-- FLEX-GROW content, removed fixed height -->
-                    <div class="p-6 flex flex-col flex-grow bg-gradient-to-b from-transparent to-black/80 relative">
+                    <!-- Updated Padding for Mobile (p-3) vs Desktop (p-6) -->
+                    <div class="p-3 md:p-6 flex flex-col flex-grow bg-gradient-to-b from-transparent to-black/80 relative">
                         <div class="flex-grow">
                             <div class="flex justify-between items-start mb-1">
-                                <div class="text-[10px] font-['Michroma'] text-red-500 tracking-widest opacity-80">${item.cat}</div>
+                                <div class="text-[8px] md:text-[10px] font-['Michroma'] text-red-500 tracking-widest opacity-80">${item.cat}</div>
                                 <!-- Live Analytics Display -->
-                                <div class="flex items-center gap-2 text-[9px] font-mono text-gray-500">
+                                <div class="flex items-center gap-2 text-[8px] md:text-[9px] font-mono text-gray-500">
                                     <span class="flex items-center gap-0.5" title="Views">
                                         <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                         <span id="stat-views-${item.id}" class="transition-colors duration-300">${kFormatter(item.views || 0)}</span>
@@ -1938,21 +1957,22 @@
                                     </span>
                                 </div>
                             </div>
-                            <h3 class="font-['Rajdhani'] font-bold text-2xl text-white mb-2 leading-none tracking-wide group-hover:text-red-500 transition-colors">${item.title}</h3>
+                            <!-- Updated Text Sizes for Mobile -->
+                            <h3 class="font-['Rajdhani'] font-bold text-base md:text-2xl text-white mb-1 md:mb-2 leading-none tracking-wide group-hover:text-red-500 transition-colors truncate">${item.title}</h3>
                             
                             <!-- Clamped Text + Read More -->
                             <div class="relative">
-                                <p class="font-['Inter'] text-xs text-gray-400 leading-relaxed opacity-80 line-clamp-3 mb-1">${item.desc}</p>
-                                <div class="text-[9px] font-['Michroma'] text-red-500 mt-2 flex items-center gap-1 group-hover:text-white transition-colors">
+                                <p class="font-['Inter'] text-[10px] md:text-xs text-gray-400 leading-relaxed opacity-80 line-clamp-2 md:line-clamp-3 mb-1">${item.desc}</p>
+                                <div class="text-[8px] md:text-[9px] font-['Michroma'] text-red-500 mt-1 md:mt-2 flex items-center gap-1 group-hover:text-white transition-colors">
                                     READ MORE <span class="text-xs">&rsaquo;</span>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Buttons pinned to bottom, prevented from shrinking -->
-                        <div class="flex gap-3 mt-4 pt-4 border-t border-white/5 shrink-0">
-                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] border border-white/20 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-300 rounded-sm">PREVIEW</button>
-                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] bg-red-600/10 text-red-500 border border-red-600/30 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300 rounded-sm shadow-[0_0_10px_rgba(220,38,38,0.1)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]" onclick="event.stopPropagation()">ACQUIRE</button>
+                        <div class="flex gap-2 md:gap-3 mt-3 md:mt-4 pt-3 md:pt-4 border-t border-white/5 shrink-0">
+                            <button class="w-full flex-1 py-1.5 md:py-2.5 text-[8px] md:text-[10px] font-['Michroma'] border border-white/20 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-300 rounded-sm">PREVIEW</button>
+                            <button class="w-full flex-1 py-1.5 md:py-2.5 text-[8px] md:text-[10px] font-['Michroma'] bg-red-600/10 text-red-500 border border-red-600/30 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300 rounded-sm shadow-[0_0_10px_rgba(220,38,38,0.1)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]" onclick="event.stopPropagation()">ACQUIRE</button>
                         </div>
                     </div>
                 `;
