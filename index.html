@@ -21,7 +21,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@300;400;500;600&family=Rajdhani:wght@500;600;700;800&display=swap"
         rel="stylesheet">
-    
+
     <!-- Load PrismJS for Syntax Highlighting -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
@@ -352,9 +352,14 @@
             transition: transform 1.62s cubic-bezier(0.75, 0, 0.25, 1);
             will-change: transform;
             backdrop-filter: blur(8px);
-            touch-action: pan-y;
-            /* Restore native scroll interaction */
-            overscroll-behavior-y: none;
+            
+            /* SCROLLING OPTIMIZATIONS */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Critical for iOS momentum */
+            scroll-behavior: smooth;
+            scroll-padding-top: 120px; /* Space for sticky header */
+            touch-action: pan-y; /* Allow vertical scrolling */
+            overscroll-behavior-y: none; /* Prevent bounce affecting parent */
         }
 
         .marketplace-content-enter>* {
@@ -616,7 +621,7 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        
+
         /* PrismJS Custom Overrides */
         pre[class*="language-"] {
             margin: 0 !important;
@@ -671,8 +676,7 @@
         <a href="javascript:void(0)" onclick="openPage('engineering'); toggleMobileMenu()"
             class="text-2xl font-['Michroma'] text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 hover:to-red-500 transition-all">ENGINEERING</a>
         <!-- Added ID and 'hidden' class to Mobile Configure button -->
-        <a id="mobile-nav-configure-btn" href="javascript:void(0)"
-            onclick="openPage('configure'); toggleMobileMenu()"
+        <a id="mobile-nav-configure-btn" href="javascript:void(0)" onclick="openPage('configure'); toggleMobileMenu()"
             class="hidden text-2xl font-['Michroma'] text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 hover:to-red-500 transition-all">CONFIGURE</a>
         <a href="javascript:void(0)" onclick="openPage('login'); toggleMobileMenu()"
             class="text-xl font-['Michroma'] text-red-500 mt-8">LOGIN</a>
@@ -851,48 +855,43 @@
         </main>
 
         <!-- SYSTEM FOOTER -->
-        <footer class="w-full border-t border-white/10 bg-black pt-16 pb-12 relative z-20">
-            <div class="max-w-[1600px] mx-auto px-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-center md:text-left items-start">
+        <footer class="w-full border-t border-white/10 bg-black py-10 md:pt-16 md:pb-12 relative z-20">
+            <div class="max-w-[1600px] mx-auto px-6 md:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 text-center md:text-left items-start">
                     <div>
-                        <h3 class="font-['Michroma'] text-3xl mb-4 text-white">SYSTEM STATUS</h3>
-                        <div class="h-1 w-20 bg-red-600 mb-6 mx-auto md:mx-0"></div>
-                        <p class="font-['Inter'] text-sm text-gray-500 leading-relaxed mb-6 max-w-md">
-                            ALL SYSTEMS NOMINAL. VELOCITY.OS v2.0 IS LIVE.
+                        <h3 class="font-['Michroma'] text-xl md:text-3xl mb-4 text-white">VELOCITY SYSTEMS</h3>
+                        <div class="h-1 w-12 md:w-20 bg-red-600 mb-6 mx-auto md:mx-0"></div>
+                        <p class="font-['Inter'] text-xs md:text-sm text-gray-400 leading-relaxed mb-4 max-w-md mx-auto md:mx-0">
+                            The premier marketplace for high-performance, motion-rich digital components.
                         </p>
-                        <button
-                            class="px-6 py-3 border border-white/20 text-white font-['Michroma'] text-[10px] tracking-widest hover:bg-white hover:text-black hover:border-white transition-all duration-300 group flex items-center gap-3 mx-auto md:mx-0">
-                            UPLOAD COMPONENT
-                            <svg class="w-3 h-3 text-red-500 group-hover:text-black transition-colors" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                            </svg>
-                        </button>
+                        <div class="flex items-center gap-2 justify-center md:justify-start">
+                            <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <span class="text-[9px] md:text-[10px] font-mono text-gray-600 tracking-widest">SYSTEM STATUS: NOMINAL // v2.4.0 LIVE</span>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 mt-4 md:mt-0">
                         <div>
-                            <h4 class="section-label">LATENCY</h4>
-                            <p class="font-['Michroma'] text-xl text-white">1.2ms</p>
+                            <h4 class="section-label text-[10px] md:text-xs">ACTIVE DEVS</h4>
+                            <p class="font-['Michroma'] text-base md:text-xl text-white">842</p>
                         </div>
                         <div>
-                            <h4 class="section-label">THROUGHPUT</h4>
-                            <p class="font-['Michroma'] text-xl text-white">50GB/s</p>
+                            <h4 class="section-label text-[10px] md:text-xs">ASSETS</h4>
+                            <p class="font-['Michroma'] text-base md:text-xl text-white">156</p>
                         </div>
                         <div>
-                            <h4 class="section-label">UPTIME</h4>
-                            <p class="font-['Michroma'] text-xl text-white">99.99%</p>
+                            <h4 class="section-label text-[10px] md:text-xs">DOWNLOADS</h4>
+                            <p class="font-['Michroma'] text-base md:text-xl text-white">1.2k</p>
                         </div>
                         <div>
-                            <h4 class="section-label">ENCRYPTION</h4>
-                            <p class="font-['Michroma'] text-xl text-white">AES-256</p>
+                            <h4 class="section-label text-[10px] md:text-xs">VERSION</h4>
+                            <p class="font-['Michroma'] text-base md:text-xl text-white">v2.4.0</p>
                         </div>
                     </div>
                 </div>
                 <div
-                    class="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-600 font-['Michroma'] tracking-widest">
+                    class="mt-10 md:mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-[9px] md:text-[10px] text-gray-600 font-['Michroma'] tracking-widest gap-4 md:gap-0">
                     <p>© 2024 VELOCITY SYSTEMS. ALL RIGHTS RESERVED.</p>
-                    <div class="flex gap-8 mt-4 md:mt-0">
+                    <div class="flex flex-wrap justify-center gap-4 md:gap-8">
                         <a href="#" class="hover:text-red-500 transition-colors">PRIVACY POLICY</a>
                         <a href="#" class="hover:text-red-500 transition-colors">TERMS OF SERVICE</a>
                         <a href="#" class="hover:text-red-500 transition-colors">CONTACT SUPPORT</a>
@@ -945,7 +944,8 @@
                         <img id="modal-image" src="" alt="Component Preview"
                             class="w-full h-full object-cover opacity-90 transition-opacity duration-500">
                         <!-- Secure Iframe for HTML Components -->
-                        <iframe id="modal-iframe" class="hidden absolute inset-0 w-full h-full border-none bg-white"></iframe>
+                        <iframe id="modal-iframe"
+                            class="hidden absolute inset-0 w-full h-full border-none bg-white"></iframe>
                         <div
                             class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none">
                         </div>
@@ -990,7 +990,8 @@
                     <div class="space-y-0">
                         <div class="spec-item">
                             <span class="text-xs text-gray-500 font-mono">FRAMEWORK</span>
-                            <span id="modal-spec-lang" class="text-xs text-white font-['Michroma'] tracking-wide">HTML/CSS</span>
+                            <span id="modal-spec-lang"
+                                class="text-xs text-white font-['Michroma'] tracking-wide">HTML/CSS</span>
                         </div>
                         <div class="spec-item">
                             <span class="text-xs text-gray-500 font-mono">LICENSE</span>
@@ -1055,9 +1056,25 @@
         const PHIL_DESC = "Don't just build a UI. Orchestrate an experience. Velocity.os delivers the motion-rich, accessible, and strictly typed foundations that top engineering teams rely on to ship awards.";
 
         // --- CONCEPT HTML ---
-        const CONCEPT_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MotoGP Wheel</title><style>body{margin:0;background-color:#050505;color:#fff;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;overflow-x:hidden}#canvas-container{width:100%;height:100vh;position:fixed;top:0;left:0;z-index:1}canvas{display:block;outline:0}#main-header{position:fixed;top:80px;width:100%;text-align:center;z-index:4;pointer-events:none;transition:opacity .5s ease}#main-header h1{font-family:'Arial Black',sans-serif;font-size:42px;text-transform:uppercase;margin:0 0 10px 0;letter-spacing:-1px;color:#fff;text-shadow:0 10px 30px rgba(0,0,0,.5)}#main-header p{font-family:monospace;font-size:13px;color:#888;margin:0;letter-spacing:1px;line-height:1.5;text-transform:uppercase}#marketplace{position:relative;z-index:10;background:linear-gradient(to bottom,transparent 0,#050505 20%);min-height:100vh;padding:100px 5% 50px 5%;margin-top:-50vh;pointer-events:auto;perspective:2000px}.market-container{max-width:1400px;margin:0 auto}.search-area{display:flex;align-items:center;background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:5px;margin-bottom:60px;box-shadow:0 10px 40px rgba(0,0,0,.5);max-width:1000px;margin-left:auto;margin-right:auto;height:50px}.search-icon{padding:0 15px;color:#555;font-size:14px}.search-input{flex-grow:1;background:0 0;border:none;color:#ccc;font-family:'Segoe UI',sans-serif;font-size:14px;outline:0;height:100%}.search-input::placeholder{color:#444}.filter-group{display:flex;gap:5px;padding-right:5px}.filter-btn{background:0 0;border:1px solid transparent;color:#666;padding:6px 16px;font-family:'Segoe UI',sans-serif;font-size:12px;font-weight:600;border-radius:4px;cursor:pointer;transition:all .2s}.filter-btn:hover{color:#fff;background:#151515}.filter-btn.active{background:#222;color:#fff;border-color:#333}.tags-row{display:flex;justify-content:center;gap:10px;margin-bottom:60px;flex-wrap:wrap}.tag-pill{background:#0a0a0a;border:1px solid #222;color:#555;padding:6px 14px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s;text-transform:uppercase;letter-spacing:.5px}.tag-pill:hover{border-color:#444;color:#fff;transform:translateY(-1px)}.components-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:20px 0}.component-card{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:12px;padding:0;position:relative;transition:transform .4s cubic-bezier(.25,.46,.45,.94),box-shadow .4s ease,border-color .4s ease;cursor:pointer;overflow:hidden;height:280px;display:flex;flex-direction:column;box-shadow:inset 0 0 40px rgba(0,0,0,.8)}.component-card::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(255,255,255,.03) 0,rgba(255,255,255,0) 40%);pointer-events:none;z-index:2}.components-grid .component-card:nth-child(3n+1){transform:rotateY(15deg) scale(.95);transform-origin:right center;border-right:1px solid #333;box-shadow:-10px 10px 30px rgba(0,0,0,.5)}.components-grid .component-card:nth-child(3n+2){transform:translateZ(40px);z-index:2;box-shadow:0 20px 50px rgba(0,0,0,.8);border:1px solid #333}.components-grid .component-card:nth-child(3n+3){transform:rotateY(-15deg) scale(.95);transform-origin:left center;border-left:1px solid #333;box-shadow:10px 10px 30px rgba(0,0,0,.5)}.components-grid .component-card:nth-child(3n+1):hover{transform:rotateY(5deg) scale(1) translateZ(20px);border-color:#ff3333;z-index:5}.components-grid .component-card:nth-child(3n+2):hover{transform:translateZ(60px) scale(1.02);border-color:#ff3333;z-index:5}.components-grid .component-card:nth-child(3n+3):hover{transform:rotateY(-5deg) scale(1) translateZ(20px);border-color:#ff3333;z-index:5}.card-preview{flex-grow:1;background:#111;display:flex;align-items:center;justify-content:center;color:#333;font-family:monospace;font-size:24px;position:relative;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:20px 20px}.card-info{padding:15px;background:#0a0a0a;border-top:1px solid #1a1a1a;position:relative;z-index:3}.card-title{font-size:14px;font-weight:600;color:#eee;margin-bottom:4px;letter-spacing:.5px}.card-meta{display:flex;justify-content:space-between;font-size:10px;color:#666;font-family:monospace;text-transform:uppercase}.pro-badge{background:#ff3333;color:#000;font-size:8px;font-weight:800;padding:1px 4px;border-radius:2px;margin-left:6px;vertical-align:middle}@media (max-width:900px){.components-grid{grid-template-columns:1fr}.components-grid .component-card:nth-child(n){transform:none;margin-bottom:20px}.components-grid .component-card:nth-child(n):hover{transform:translateY(-5px)}}#overlay-container{position:fixed;bottom:5%;left:50%;transform:translateX(-50%);z-index:3;pointer-events:none;mix-blend-mode:difference;max-width:600px;width:100%;perspective:1000px;text-align:center}.theme-section{position:absolute;bottom:0;left:0;width:100%;opacity:0;transform:rotateX(20deg) translateY(40px);transform-origin:center bottom;transition:opacity .2s ease,transform .3s ease;pointer-events:none;will-change:opacity,transform;display:flex;flex-direction:column;align-items:center}.theme-section.active{opacity:1;transform:rotateX(0) translateY(0);pointer-events:auto;transition:opacity 1s ease,transform 1.2s cubic-bezier(.23,1,.32,1)}.theme-header{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#ff3333;margin-bottom:12px;font-weight:700;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(10px);transition:opacity .1s ease,transform .1s ease}.theme-section.active .theme-header{opacity:1;transform:translateY(0);transition:opacity .6s ease .1s,transform .6s cubic-bezier(.23,1,.32,1) .1s}.theme-header::after,.theme-header::before{content:'';display:inline-block;width:30px;height:2px;background:#ff3333;transform:scaleX(0);transition:transform .1s ease}.theme-header::before{margin-right:15px;transform-origin:right}.theme-header::after{margin-left:15px;transform-origin:left}.theme-section.active .theme-header::after,.theme-section.active .theme-header::before{transform:scaleX(1);transition:transform .6s cubic-bezier(.23,1,.32,1)}.theme-title{font-size:56px;font-weight:900;line-height:.9;margin-bottom:15px;text-transform:uppercase;font-family:'Arial Black',sans-serif;color:#fff;letter-spacing:-2px;clip-path:inset(0 0 100% 0);transform:translateY(10px);transition:clip-path .2s ease,transform .2s ease}.theme-section.active .theme-title{clip-path:inset(0 0 0 0);transform:translateY(0);transition:clip-path 1s cubic-bezier(.19,1,.22,1) .2s,transform 1s cubic-bezier(.19,1,.22,1) .2s}.theme-desc{font-size:13px;line-height:1.6;color:#ccc;font-family:monospace;text-transform:uppercase;letter-spacing:1px;border-top:1px solid #444;padding-top:15px;opacity:0;clip-path:inset(0 100% 0 0);transition:opacity .2s ease,clip-path .2s ease}.theme-section.active .theme-desc{opacity:1;clip-path:inset(0 0 0 0);transition:opacity .8s ease .4s,clip-path 1.2s cubic-bezier(.19,1,.22,1) .4s}#scroll-spacer{height:4000px;position:relative;z-index:0;pointer-events:none}.scroll-instruction{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#444;animation:pulse 2s infinite;z-index:2;pointer-events:none;font-family:monospace;font-size:10px;letter-spacing:2px}@keyframes pulse{0%{opacity:.1}50%{opacity:.6}100%{opacity:.1}}</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}<\/script></head><body><div id="main-header"><h1>Podium-Proven Parts.</h1><p>Precision components machined for the fastest teams on the grid.<br>Lightweight, rigid, and race-ready.</p></div><div id="overlay-container"><div id="theme-concept" class="theme-section"><div class="theme-header">PHASE 01 // CONCEPT</div><div class="theme-title">ROTATIONAL<br>DYNAMICS</div><div class="theme-desc">[>] MINIMIZED UNSPRUNG MASS &nbsp;&nbsp; [>] AERO-SCULPTED PROFILE</div></div><div id="theme-engineering" class="theme-section"><div class="theme-header">PHASE 02 // ENGINEERING</div><div class="theme-title">FORGED<br>MAGNESIUM</div><div class="theme-desc">[>] AZ80 MONOBLOCK &nbsp;&nbsp; [>] FEM-DERIVED SPOKES</div></div><div id="theme-configure" class="theme-section"><div class="theme-header">PHASE 03 // CONFIGURE</div><div class="theme-title">SYSTEM<br>INTERFACE</div><div class="theme-desc">[>] FLOATING CARBON ROTORS &nbsp;&nbsp; [>] TITANIUM HARDWARE</div></div></div><div class="scroll-instruction">SCROLL TO ACTIVATE</div><div id="canvas-container"></div><div id="scroll-spacer"></div><section id="marketplace"><div class="market-container"><div class="search-area"><span class="search-icon">⌕</span><input type="text" class="search-input" placeholder="Search 1847 components..."><div class="filter-group"><button class="filter-btn active">Popular</button><button class="filter-btn">Explore</button><button class="filter-btn">Recent</button></div></div><div class="tags-row"><div class="tag-pill">HERO SECTION</div><div class="tag-pill">BUTTONS</div><div class="tag-pill">CARDS</div><div class="tag-pill">FORMS</div><div class="tag-pill">HEADERS</div><div class="tag-pill">FOOTERS</div><div class="tag-pill">PRICING</div><div class="tag-pill">TESTIMONIALS</div><div class="tag-pill">GALLERY</div></div><div class="components-grid"><div class="component-card"><div class="card-preview">H1</div><div class="card-info"><div class="card-title">Cinematic Hero <span class="pro-badge">PRO</span></div><div class="card-meta"><span>v2.4</span><span>React</span></div></div></div><div class="component-card"><div class="card-preview">btn</div><div class="card-info"><div class="card-title">Magnetic Button</div><div class="card-meta"><span>v1.2</span><span>CSS</span></div></div></div><div class="component-card"><div class="card-preview">grid</div><div class="card-info"><div class="card-title">Bento Grid</div><div class="card-meta"><span>v3.0</span><span>Vue</span></div></div></div><div class="component-card"><div class="card-preview">nav</div><div class="card-info"><div class="card-title">Floating Dock <span class="pro-badge">PRO</span></div><div class="card-meta"><span>v1.8</span><span>Motion</span></div></div></div><div class="component-card"><div class="card-preview">img</div><div class="card-info"><div class="card-title">Parallax Scroll</div><div class="card-meta"><span>v2.1</span><span>GSAP</span></div></div></div><div class="component-card"><div class="card-preview">txt</div><div class="card-info"><div class="card-title">Typewriter Effect</div><div class="card-meta"><span>v1.0</span><span>JS</span></div></div></div></div></div></section><script type="module">import*as THREE from'three';import{OrbitControls}from'three/addons/controls/OrbitControls.js';const mainHeader=document.getElementById('main-header');const themeConcept=document.getElementById('theme-concept');const themeEngineering=document.getElementById('theme-engineering');const themeConfigure=document.getElementById('theme-configure');const overlayContainer=document.getElementById('overlay-container');const CONFIG={tireRadius:10,tireTube:3.5,rimRadius:5.8,rimWidth:5,spokeCount:7,brakeDiscRadius:4.5};const scene=new THREE.Scene();scene.background=new THREE.Color(0x050505);scene.fog=new THREE.FogExp2(0x050505,.02);const camera=new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,.1,1000);camera.position.set(0,5,45);camera.lookAt(0,0,0);const renderer=new THREE.WebGLRenderer({antialias:!0,alpha:!0});renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(window.devicePixelRatio);renderer.shadowMap.enabled=!0;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.getElementById('canvas-container').appendChild(renderer.domElement);const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=!0;controls.dampingFactor=.05;controls.minDistance=10;controls.maxDistance=60;controls.enableZoom=!1;function createBrakeDiscTexture(){const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;const ctx=canvas.getContext('2d');ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,512,512);ctx.fillStyle='#000000';const centerX=256;const centerY=256;for(let r=100;r<230;r+=25){const circumference=2*Math.PI*r;const holeCount=Math.floor(circumference/20);for(let i=0;i<holeCount;i++){const angle=i/holeCount*Math.PI*2;const offsetR=r+(Math.random()*5-2.5);const x=centerX+Math.cos(angle)*offsetR;const y=centerY+Math.sin(angle)*offsetR;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()}}const texture=new THREE.CanvasTexture(canvas);texture.anisotropy=16;return texture}function createTireTexture(){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1024;const ctx=canvas.getContext('2d');ctx.fillStyle='#111111';ctx.fillRect(0,0,1024,1024);for(let i=0;i<1000;i++){ctx.fillStyle=\`rgba(255,255,255,\${Math.random()*.05})\`;ctx.fillRect(Math.random()*1024,Math.random()*1024,2,2)}ctx.save();ctx.translate(512,512);function drawCurvedText(text,radius,startAngle,color,fontSize,angleSpacing=.15){ctx.font=\`900 \${fontSize}px Arial\`;ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';const totalAngle=text.length*angleSpacing;let currentAngle=startAngle-totalAngle/2;text.split('').forEach(char=>{ctx.save();ctx.rotate(currentAngle);ctx.translate(0,-radius);ctx.fillText(char,0,0);ctx.restore();currentAngle+=angleSpacing})}drawCurvedText("DESIGNING THE INVISIBLE",350,0,"#ffffff",60,.10);ctx.rotate(Math.PI/4);ctx.fillStyle='#FFCC00';ctx.fillRect(-60,-320,120,40);ctx.fillStyle='#000000';ctx.font='bold 20px Arial';ctx.fillText("WARNING",0,-300);ctx.restore();const texture=new THREE.CanvasTexture(canvas);texture.anisotropy=16;return texture}const rubberMaterial=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:.6,metalness:.1,map:createTireTexture(),bumpMap:createTireTexture(),bumpScale:.02});const slickMaterial=new THREE.MeshStandardMaterial({color:0x151515,roughness:.7,metalness:0});const rimMaterial=new THREE.MeshStandardMaterial({color:0x080808,roughness:.4,metalness:.8});const rimStripeMaterial=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0x990000,emissiveIntensity:.5,roughness:.2,metalness:.5});const brakeDiscMap=createBrakeDiscTexture();const brakeDiscMaterial=new THREE.MeshStandardMaterial({color:0xaaaaaa,map:brakeDiscMap,alphaMap:brakeDiscMap,transparent:!0,side:THREE.DoubleSide,roughness:.3,metalness:.9});const hubMaterial=new THREE.MeshStandardMaterial({color:0x333333,roughness:.5,metalness:.7});const axleMaterial=new THREE.MeshStandardMaterial({color:0x555555,roughness:.6,metalness:.6});const wheelAssembly=new THREE.Group();wheelAssembly.rotation.x=-Math.PI/2;scene.add(wheelAssembly);const axleGeo=new THREE.CylinderGeometry(.5,.5,7,16);axleGeo.rotateX(Math.PI/2);const axle=new THREE.Mesh(axleGeo,axleMaterial);wheelAssembly.add(axle);const rotatingGroup=new THREE.Group();wheelAssembly.add(rotatingGroup);const tireGroup=new THREE.Group();const rimGroup=new THREE.Group();const brakeGroup=new THREE.Group();rotatingGroup.add(tireGroup);rotatingGroup.add(rimGroup);rotatingGroup.add(brakeGroup);const tireGeo=new THREE.TorusGeometry(CONFIG.tireRadius,CONFIG.tireTube,32,64);const tire=new THREE.Mesh(tireGeo,rubberMaterial);tire.scale.set(1,1,1.8);const sidewallGeo=new THREE.RingGeometry(CONFIG.rimRadius,CONFIG.tireRadius+CONFIG.tireTube/2,64);const sidewallLeft=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallLeft.position.z=2.5;sidewallLeft.rotation.y=Math.PI;const sidewallRight=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallRight.position.z=-2.5;const slickGeo=new THREE.CylinderGeometry(CONFIG.tireRadius+CONFIG.tireTube-.2,CONFIG.tireRadius+CONFIG.tireTube-.2,5,64,1,!0);slickGeo.rotateX(Math.PI/2);const slick=new THREE.Mesh(slickGeo,slickMaterial);const edgeGeo=new THREE.TorusGeometry(CONFIG.tireRadius+1.5,1.8,16,64);const edgeMesh=new THREE.Mesh(edgeGeo,slickMaterial);edgeMesh.scale.set(1,1,1.4);tireGroup.add(sidewallLeft);tireGroup.add(sidewallRight);tireGroup.add(slick);tireGroup.add(edgeMesh);const rimCylGeo=new THREE.CylinderGeometry(CONFIG.rimRadius,CONFIG.rimRadius,CONFIG.rimWidth,64,1,!0);rimCylGeo.rotateX(Math.PI/2);const rim=new THREE.Mesh(rimCylGeo,rimMaterial);rimGroup.add(rim);const rimLipGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.1,.2,16,64);const rimLip1=new THREE.Mesh(rimLipGeo,rimMaterial);rimLip1.position.z=CONFIG.rimWidth/2;const rimLip2=rimLip1.clone();rimLip2.position.z=-CONFIG.rimWidth/2;rimGroup.add(rimLip1);rimGroup.add(rimLip2);const rimStripeGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.05,.05,16,100);const rimStripe1=new THREE.Mesh(rimStripeGeo,rimStripeMaterial);rimStripe1.position.z=CONFIG.rimWidth/2+.1;const rimStripe2=rimStripe1.clone();rimStripe2.position.z=-CONFIG.rimWidth/2-.1;rimGroup.add(rimStripe1);rimGroup.add(rimStripe2);for(let i=0;i<CONFIG.spokeCount;i++){const angle=i/CONFIG.spokeCount*Math.PI*2;const spokeGeo=new THREE.CylinderGeometry(.4,.2,CONFIG.rimRadius-1,8);const spoke=new THREE.Mesh(spokeGeo,rimMaterial);spoke.position.x=Math.cos(angle)*(CONFIG.rimRadius/2);spoke.position.y=Math.sin(angle)*(CONFIG.rimRadius/2);spoke.rotation.z=angle-Math.PI/2;spoke.rotation.x=Math.PI/2;spoke.rotation.set(0,0,angle-Math.PI/2);rimGroup.add(spoke)}const hubGeo=new THREE.CylinderGeometry(1.5,1.5,6,32);hubGeo.rotateX(Math.PI/2);const hub=new THREE.Mesh(hubGeo,hubMaterial);rimGroup.add(hub);const discGeo=new THREE.RingGeometry(2.5,CONFIG.brakeDiscRadius,64);const disc=new THREE.Mesh(discGeo,brakeDiscMaterial);disc.position.z=1.8;const discBack=disc.clone();discBack.rotation.y=Math.PI;discBack.position.z=1.9;const carrierGeo=new THREE.RingGeometry(1.5,2.5,32);const carrierMat=new THREE.MeshStandardMaterial({color:0x000000,metalness:.8,roughness:.5});const carrier=new THREE.Mesh(carrierGeo,carrierMat);carrier.position.z=1.85;brakeGroup.add(disc);brakeGroup.add(discBack);brakeGroup.add(carrier);const boltGeo=new THREE.CylinderGeometry(.1,.1,.2,8);const boltMat=new THREE.MeshStandardMaterial({color:0xaaaaaa});for(let i=0;i<5;i++){const angle=i/5*Math.PI*2;const bolt=new THREE.Mesh(boltGeo,boltMat);bolt.rotateX(Math.PI/2);bolt.position.set(Math.cos(angle)*2.5,Math.sin(angle)*2.5,1.9);brakeGroup.add(bolt)}const ambientLight=new THREE.AmbientLight(0xffffff,.2);scene.add(ambientLight);const spotLight=new THREE.SpotLight(0xffffff,500);spotLight.position.set(-10,20,10);spotLight.angle=Math.PI/6;spotLight.penumbra=.5;spotLight.castShadow=!0;scene.add(spotLight);const rimLight1=new THREE.PointLight(0xffffff,200);rimLight1.position.set(15,5,5);scene.add(rimLight1);const rimLight2=new THREE.PointLight(0xff0000,300);rimLight2.position.set(-5,-10,5);scene.add(rimLight2);const clock=new THREE.Clock();let smoothedScroll=0;const animationRange=4000;function animate(){requestAnimationFrame(animate);const time=clock.getElapsedTime();rotatingGroup.rotation.z=time*-.5;const currentScrollY=window.scrollY;const animationProgress=Math.min(Math.max(currentScrollY/animationRange,0),1);smoothedScroll+=(animationProgress-smoothedScroll)*.04;const standProgress=Math.min(smoothedScroll/.15,1);wheelAssembly.rotation.x=THREE.MathUtils.lerp(-Math.PI/2,0,standProgress);if(mainHeader)mainHeader.style.opacity=1-Math.min(smoothedScroll*10,1);if(currentScrollY>animationRange){overlayContainer.style.opacity=0;overlayContainer.style.transition='opacity 0.5s ease'}else{overlayContainer.style.opacity=1}if(themeConcept&&themeEngineering&&themeConfigure){themeConcept.classList.remove('active');themeEngineering.classList.remove('active');themeConfigure.classList.remove('active');if(smoothedScroll<.18){themeConcept.classList.add('active')}else if(smoothedScroll>=.22&&smoothedScroll<.59){themeEngineering.classList.add('active')}else if(smoothedScroll>=.59&&currentScrollY<=animationRange){themeConfigure.classList.add('active')}}const tireScroll=Math.max(0,smoothedScroll-.08);tireGroup.position.z=tireScroll*320;const rimScroll=Math.max(0,smoothedScroll-.22);rimGroup.position.z=rimScroll*122;const brakeScroll=Math.max(0,smoothedScroll-.59);brakeGroup.position.z=brakeScroll*30;if(standProgress>=1){wheelAssembly.rotation.y=Math.sin(time*.5)*.1+smoothedScroll*.5}else{wheelAssembly.rotation.y=0}controls.update();renderer.render(scene,camera)}window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});animate();<\/script></body></html>`;
+        const CONCEPT_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MotoGP Wheel</title><style>body{margin:0;background-color:#050505;color:#fff;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;overflow-x:hidden}#canvas-container{width:100%;height:100vh;position:fixed;top:0;left:0;z-index:1}canvas{display:block;outline:0}#main-header{position:fixed;top:80px;width:100%;text-align:center;z-index:4;pointer-events:none;transition:opacity .5s ease}#main-header h1{font-family:'Arial Black',sans-serif;font-size:42px;text-transform:uppercase;margin:0 0 10px 0;letter-spacing:-1px;color:#fff;text-shadow:0 10px 30px rgba(0,0,0,.5)}#main-header p{font-family:monospace;font-size:13px;color:#888;margin:0;letter-spacing:1px;line-height:1.5;text-transform:uppercase}#overlay-container{position:fixed;bottom:5%;left:50%;transform:translateX(-50%);z-index:3;pointer-events:none;mix-blend-mode:difference;max-width:600px;width:100%;perspective:1000px;text-align:center}.theme-section{position:absolute;bottom:0;left:0;width:100%;opacity:0;transform:rotateX(20deg) translateY(40px);transform-origin:center bottom;transition:opacity .2s ease,transform .3s ease;pointer-events:none;will-change:opacity,transform;display:flex;flex-direction:column;align-items:center}.theme-section.active{opacity:1;transform:rotateX(0) translateY(0);pointer-events:auto;transition:opacity 1s ease,transform 1.2s cubic-bezier(.23,1,.32,1)}.theme-header{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#ff3333;margin-bottom:12px;font-weight:700;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(10px);transition:opacity .1s ease,transform .1s ease}.theme-section.active .theme-header{opacity:1;transform:translateY(0);transition:opacity .6s ease .1s,transform .6s cubic-bezier(.23,1,.32,1) .1s}.theme-header::after,.theme-header::before{content:'';display:inline-block;width:30px;height:2px;background:#ff3333;transform:scaleX(0);transition:transform .1s ease}.theme-header::before{margin-right:15px;transform-origin:right}.theme-header::after{margin-left:15px;transform-origin:left}.theme-section.active .theme-header::after,.theme-section.active .theme-header::before{transform:scaleX(1);transition:transform .6s cubic-bezier(.23,1,.32,1)}.theme-title{font-size:56px;font-weight:900;line-height:.9;margin-bottom:15px;text-transform:uppercase;font-family:'Arial Black',sans-serif;color:#fff;letter-spacing:-2px;clip-path:inset(0 0 100% 0);transform:translateY(10px);transition:clip-path .2s ease,transform .2s ease}.theme-section.active .theme-title{clip-path:inset(0 0 0 0);transform:translateY(0);transition:clip-path 1s cubic-bezier(.19,1,.22,1) .2s,transform 1s cubic-bezier(.19,1,.22,1) .2s}.theme-desc{font-size:13px;line-height:1.6;color:#ccc;font-family:monospace;text-transform:uppercase;letter-spacing:1px;border-top:1px solid #444;padding-top:15px;opacity:0;clip-path:inset(0 100% 0 0);transition:opacity .2s ease,clip-path .2s ease}.theme-section.active .theme-desc{opacity:1;clip-path:inset(0 0 0 0);transition:opacity .8s ease .4s,clip-path 1.2s cubic-bezier(.19,1,.22,1) .4s}#scroll-spacer{height:4000px;position:relative;z-index:0;pointer-events:none}.scroll-instruction{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#444;animation:pulse 2s infinite;z-index:2;pointer-events:none;font-family:monospace;font-size:10px;letter-spacing:2px}@keyframes pulse{0%{opacity:.1}50%{opacity:.6}100%{opacity:.1}}
+        /* NEW BLOG STYLES */
+        #concept-blogs {position: relative;z-index: 10;background: linear-gradient(to bottom, transparent 0%, #050505 15%);padding: 100px 10% 100px 10%;margin-top: -50vh;pointer-events: auto;color: #fff;max-width: 1000px;margin-left: auto;margin-right: auto;}
+        .blog-post {margin-bottom: 120px;position: relative;opacity: 0.8;transition: opacity 0.3s;padding-left: 30px;border-left: 2px solid #222;}
+        .blog-post:hover {opacity: 1;border-left-color: #ef4444;}
+        .blog-header {font-family: 'Arial Black', sans-serif;font-size: 36px;color: #fff;margin-bottom: 20px;text-transform: uppercase;letter-spacing: -1px;line-height: 1;}
+        .blog-header span {color: #ef4444;font-size: 12px;display: block;margin-bottom: 10px;letter-spacing: 3px;font-family: monospace;font-weight: normal;}
+        .blog-content {font-family: 'Segoe UI', sans-serif;font-size: 16px;line-height: 1.8;color: #999;max-width: 700px;}
+        .blog-content p {margin-bottom: 20px;}
+        @media(max-width: 768px) {#concept-blogs { padding: 50px 5%; margin-top: -30vh; }.blog-header { font-size: 28px; }.blog-post { padding-left: 20px; margin-bottom: 80px; }}
+        </style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}<\/script></head><body><div id="main-header"><h1>Velocity Concept</h1><p>THE NEXT GENERATION OF DIGITAL EXPERIENCES<br>CRAFTED WITH PRECISION. POWERED BY VIBE.</p></div><div id="overlay-container"><div id="theme-concept" class="theme-section"><div class="theme-header">PHASE 01 // VISION</div><div class="theme-title">DIGITAL<br>EXPERIENCES</div><div class="theme-desc">[>] NEXT GENERATION MARKETPLACE &nbsp;&nbsp; [>] POWERED BY VIBE</div></div><div id="theme-engineering" class="theme-section"><div class="theme-header">PHASE 02 // PRECISION</div><div class="theme-title">CRAFTED<br>CODE</div><div class="theme-desc">[>] PIXEL PERFECT &nbsp;&nbsp; [>] PERFORMANCE FIRST</div></div><div id="theme-configure" class="theme-section"><div class="theme-header">PHASE 03 // VELOCITY</div><div class="theme-title">SYSTEM<br>READY</div><div class="theme-desc">[>] SHIP AWARDS &nbsp;&nbsp; [>] NOT JUST CODE</div></div></div><div class="scroll-instruction">SCROLL TO ACTIVATE</div><div id="canvas-container"></div><div id="scroll-spacer"></div>
+        <section id="concept-blogs"><div class="blog-post"><div class="blog-header"><span>PHASE 01</span>VISION</div><div class="blog-content"><p>The digital landscape is cluttered. We envision a streamlined ecosystem where design meets function without friction. Velocity.OS starts here: defining the core aesthetics and the unsprung mass of the web.</p><p>It is not just about looking good; it is about the "why". Every pixel must earn its place on the screen. We strip away the noise to reveal the signal. We are building the substrate for the next generation of internet artifacts.</p></div></div><div class="blog-post"><div class="blog-header"><span>PHASE 02</span>PRECISION</div><div class="blog-content"><p>Engineering is an art form. We treat code like a machined component. Strict typing, optimized render cycles, and lightweight architectures ensure that Velocity components perform under pressure.</p><p>Forged in the fires of high-performance requirements, our assets are rigid, reliable, and ready to race. No bloat, just power. We measure latency in microseconds and design in sub-pixels.</p></div></div><div class="blog-post"><div class="blog-header"><span>PHASE 03</span>VELOCITY</div><div class="blog-content"><p>Speed is the ultimate feature. From development time to runtime performance, Velocity.OS is designed to accelerate your workflow.</p><p>We provide the tools to ship awards, not just code. The system is ready. The track is clear. Are you? Join the movement and start building faster, better, and with more vibe than ever before.</p></div></div></section>
+        <script type="module">import*as THREE from'three';import{OrbitControls}from'three/addons/controls/OrbitControls.js';const mainHeader=document.getElementById('main-header');const themeConcept=document.getElementById('theme-concept');const themeEngineering=document.getElementById('theme-engineering');const themeConfigure=document.getElementById('theme-configure');const overlayContainer=document.getElementById('overlay-container');const CONFIG={tireRadius:10,tireTube:3.5,rimRadius:5.8,rimWidth:5,spokeCount:7,brakeDiscRadius:4.5};const scene=new THREE.Scene();scene.background=new THREE.Color(0x050505);scene.fog=new THREE.FogExp2(0x050505,.02);const camera=new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,.1,1000);camera.position.set(0,5,45);camera.lookAt(0,0,0);const renderer=new THREE.WebGLRenderer({antialias:!0,alpha:!0});renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(window.devicePixelRatio);renderer.shadowMap.enabled=!0;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.getElementById('canvas-container').appendChild(renderer.domElement);const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=!0;controls.dampingFactor=.05;controls.minDistance=10;controls.maxDistance=60;controls.enableZoom=!1;function createBrakeDiscTexture(){const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;const ctx=canvas.getContext('2d');ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,512,512);ctx.fillStyle='#000000';const centerX=256;const centerY=256;for(let r=100;r<230;r+=25){const circumference=2*Math.PI*r;const holeCount=Math.floor(circumference/20);for(let i=0;i<holeCount;i++){const angle=i/holeCount*Math.PI*2;const offsetR=r+(Math.random()*5-2.5);const x=centerX+Math.cos(angle)*offsetR;const y=centerY+Math.sin(angle)*offsetR;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()}}const texture=new THREE.CanvasTexture(canvas);texture.anisotropy=16;return texture}function createTireTexture(){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1024;const ctx=canvas.getContext('2d');ctx.fillStyle='#111111';ctx.fillRect(0,0,1024,1024);for(let i=0;i<1000;i++){ctx.fillStyle=\`rgba(255,255,255,\${Math.random()*.05})\`;ctx.fillRect(Math.random()*1024,Math.random()*1024,2,2)}ctx.save();ctx.translate(512,512);function drawCurvedText(text,radius,startAngle,color,fontSize,angleSpacing=.15){ctx.font=\`900 \${fontSize}px Arial\`;ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';const totalAngle=text.length*angleSpacing;let currentAngle=startAngle-totalAngle/2;text.split('').forEach(char=>{ctx.save();ctx.rotate(currentAngle);ctx.translate(0,-radius);ctx.fillText(char,0,0);ctx.restore();currentAngle+=angleSpacing})}drawCurvedText("VELOCITY OS",350,0,"#ffffff",60,.10);ctx.rotate(Math.PI/4);ctx.fillStyle='#FFCC00';ctx.fillRect(-60,-320,120,40);ctx.fillStyle='#000000';ctx.font='bold 20px Arial';ctx.fillText("WARNING",0,-300);ctx.restore();const texture=new THREE.CanvasTexture(canvas);texture.anisotropy=16;return texture}const rubberMaterial=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:.6,metalness:.1,map:createTireTexture(),bumpMap:createTireTexture(),bumpScale:.02});const slickMaterial=new THREE.MeshStandardMaterial({color:0x151515,roughness:.7,metalness:0});const rimMaterial=new THREE.MeshStandardMaterial({color:0x080808,roughness:.4,metalness:.8});const rimStripeMaterial=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0x990000,emissiveIntensity:.5,roughness:.2,metalness:.5});const brakeDiscMap=createBrakeDiscTexture();const brakeDiscMaterial=new THREE.MeshStandardMaterial({color:0xaaaaaa,map:brakeDiscMap,alphaMap:brakeDiscMap,transparent:!0,side:THREE.DoubleSide,roughness:.3,metalness:.9});const hubMaterial=new THREE.MeshStandardMaterial({color:0x333333,roughness:.5,metalness:.7});const axleMaterial=new THREE.MeshStandardMaterial({color:0x555555,roughness:.6,metalness:.6});const wheelAssembly=new THREE.Group();wheelAssembly.rotation.x=-Math.PI/2;scene.add(wheelAssembly);const axleGeo=new THREE.CylinderGeometry(.5,.5,7,16);axleGeo.rotateX(Math.PI/2);const axle=new THREE.Mesh(axleGeo,axleMaterial);wheelAssembly.add(axle);const rotatingGroup=new THREE.Group();wheelAssembly.add(rotatingGroup);const tireGroup=new THREE.Group();const rimGroup=new THREE.Group();const brakeGroup=new THREE.Group();rotatingGroup.add(tireGroup);rotatingGroup.add(rimGroup);rotatingGroup.add(brakeGroup);const tireGeo=new THREE.TorusGeometry(CONFIG.tireRadius,CONFIG.tireTube,32,64);const tire=new THREE.Mesh(tireGeo,rubberMaterial);tire.scale.set(1,1,1.8);const sidewallGeo=new THREE.RingGeometry(CONFIG.rimRadius,CONFIG.tireRadius+CONFIG.tireTube/2,64);const sidewallLeft=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallLeft.position.z=2.5;sidewallLeft.rotation.y=Math.PI;const sidewallRight=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallRight.position.z=-2.5;const slickGeo=new THREE.CylinderGeometry(CONFIG.tireRadius+CONFIG.tireTube-.2,CONFIG.tireRadius+CONFIG.tireTube-.2,5,64,1,!0);slickGeo.rotateX(Math.PI/2);const slick=new THREE.Mesh(slickGeo,slickMaterial);const edgeGeo=new THREE.TorusGeometry(CONFIG.tireRadius+1.5,1.8,16,64);const edgeMesh=new THREE.Mesh(edgeGeo,slickMaterial);edgeMesh.scale.set(1,1,1.4);tireGroup.add(sidewallLeft);tireGroup.add(sidewallRight);tireGroup.add(slick);tireGroup.add(edgeMesh);const rimCylGeo=new THREE.CylinderGeometry(CONFIG.rimRadius,CONFIG.rimRadius,CONFIG.rimWidth,64,1,!0);rimCylGeo.rotateX(Math.PI/2);const rim=new THREE.Mesh(rimCylGeo,rimMaterial);rimGroup.add(rim);const rimLipGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.1,.2,16,64);const rimLip1=new THREE.Mesh(rimLipGeo,rimMaterial);rimLip1.position.z=CONFIG.rimWidth/2;const rimLip2=rimLip1.clone();rimLip2.position.z=-CONFIG.rimWidth/2;rimGroup.add(rimLip1);rimGroup.add(rimLip2);const rimStripeGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.05,.05,16,100);const rimStripe1=new THREE.Mesh(rimStripeGeo,rimStripeMaterial);rimStripe1.position.z=CONFIG.rimWidth/2+.1;const rimStripe2=rimStripe1.clone();rimStripe2.position.z=-CONFIG.rimWidth/2-.1;rimGroup.add(rimStripe1);rimGroup.add(rimStripe2);for(let i=0;i<CONFIG.spokeCount;i++){const angle=i/CONFIG.spokeCount*Math.PI*2;const spokeGeo=new THREE.CylinderGeometry(.4,.2,CONFIG.rimRadius-1,8);const spoke=new THREE.Mesh(spokeGeo,rimMaterial);spoke.position.x=Math.cos(angle)*(CONFIG.rimRadius/2);spoke.position.y=Math.sin(angle)*(CONFIG.rimRadius/2);spoke.rotation.z=angle-Math.PI/2;spoke.rotation.x=Math.PI/2;spoke.rotation.set(0,0,angle-Math.PI/2);rimGroup.add(spoke)}const hubGeo=new THREE.CylinderGeometry(1.5,1.5,6,32);hubGeo.rotateX(Math.PI/2);const hub=new THREE.Mesh(hubGeo,hubMaterial);rimGroup.add(hub);const discGeo=new THREE.RingGeometry(2.5,CONFIG.brakeDiscRadius,64);const disc=new THREE.Mesh(discGeo,brakeDiscMaterial);disc.position.z=1.8;const discBack=disc.clone();discBack.rotation.y=Math.PI;discBack.position.z=1.9;const carrierGeo=new THREE.RingGeometry(1.5,2.5,32);const carrierMat=new THREE.MeshStandardMaterial({color:0x000000,metalness:.8,roughness:.5});const carrier=new THREE.Mesh(carrierGeo,carrierMat);carrier.position.z=1.85;brakeGroup.add(disc);brakeGroup.add(discBack);brakeGroup.add(carrier);const boltGeo=new THREE.CylinderGeometry(.1,.1,.2,8);const boltMat=new THREE.MeshStandardMaterial({color:0xaaaaaa});for(let i=0;i<5;i++){const angle=i/5*Math.PI*2;const bolt=new THREE.Mesh(boltGeo,boltMat);bolt.rotateX(Math.PI/2);bolt.position.set(Math.cos(angle)*2.5,Math.sin(angle)*2.5,1.9);brakeGroup.add(bolt)}const ambientLight=new THREE.AmbientLight(0xffffff,.2);scene.add(ambientLight);const spotLight=new THREE.SpotLight(0xffffff,400);spotLight.position.set(-10,30,20),spotLight.angle=Math.PI/6,spotLight.penumbra=.3,spotLight.castShadow=!0,spotLight.shadow.mapSize.width=512,spotLight.shadow.mapSize.height=512,scene.add(spotLight);const rimLight1=new THREE.PointLight(0xffffff,200);rimLight1.position.set(15,5,5);scene.add(rimLight1);const rimLight2=new THREE.PointLight(0xff0000,300);rimLight2.position.set(-5,-10,5);scene.add(rimLight2);const clock=new THREE.Clock();let smoothedScroll=0;const animationRange=4000;function animate(){requestAnimationFrame(animate);const time=clock.getElapsedTime();rotatingGroup.rotation.z=time*-.5;const currentScrollY=window.scrollY;const animationProgress=Math.min(Math.max(currentScrollY/animationRange,0),1);smoothedScroll+=(animationProgress-smoothedScroll)*.04;const standProgress=Math.min(smoothedScroll/.15,1);wheelAssembly.rotation.x=THREE.MathUtils.lerp(-Math.PI/2,0,standProgress);if(mainHeader)mainHeader.style.opacity=1-Math.min(smoothedScroll*10,1);if(currentScrollY>animationRange){overlayContainer.style.opacity=0;overlayContainer.style.transition='opacity 0.5s ease'}else{overlayContainer.style.opacity=1}if(themeConcept&&themeEngineering&&themeConfigure){themeConcept.classList.remove('active');themeEngineering.classList.remove('active');themeConfigure.classList.remove('active');if(smoothedScroll<.18){themeConcept.classList.add('active')}else if(smoothedScroll>=.22&&smoothedScroll<.59){themeEngineering.classList.add('active')}else if(smoothedScroll>=.59&&currentScrollY<=animationRange){themeConfigure.classList.add('active')}}const tireScroll=Math.max(0,smoothedScroll-.08);tireGroup.position.z=tireScroll*320;const rimScroll=Math.max(0,smoothedScroll-.22);rimGroup.position.z=rimScroll*122;const brakeScroll=Math.max(0,smoothedScroll-.59);brakeGroup.position.z=brakeScroll*30;if(standProgress>=1){wheelAssembly.rotation.y=Math.sin(time*.5)*.1+smoothedScroll*.5}else{wheelAssembly.rotation.y=0}controls.update();renderer.render(scene,camera)}window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)});animate();<\/script></body></html>`;
 
-        const LOGIN_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>MotoGP Wheel Simulation</title><style>body{margin:0;overflow:hidden;background-color:#050505;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;-webkit-tap-highlight-color:transparent}canvas{display:block;position:fixed;top:0;left:0;z-index:0}#signup-container{position:relative;top:auto;left:auto;transform:none;margin:auto;width:85%;max-width:340px;padding:30px;background:rgba(15,15,15,.65);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:0 40px 0 40px;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.9);z-index:100;text-align:center;color:#fff;transition:all .6s cubic-bezier(.16,1,.3,1);overflow:hidden}body{height:100vh;display:flex;align-items:center;justify-content:center}#signup-container::before{content:'';position:absolute;background:#d40000;box-shadow:0 0 15px 2px rgba(212,0,0,.6);z-index:0;top:0;left:0;width:4px;height:100%}@keyframes orbit-to-right{0%{left:0;top:0;width:4px;height:100%}30%{left:0;top:0;width:4px;height:4px}50%{left:0;top:0;width:100%;height:4px}70%{left:calc(100% - 4px);top:0;width:4px;height:4px}100%{left:calc(100% - 4px);top:0;width:4px;height:100%}}@keyframes orbit-to-left{0%{left:calc(100% - 4px);top:0;width:4px;height:100%}30%{left:calc(100% - 4px);top:0;width:4px;height:4px}50%{left:0;top:0;width:100%;height:4px}70%{left:0;top:0;width:4px;height:4px}100%{left:0;top:0;width:4px;height:100%}}#signup-container.login-mode{border-radius:40px 0 40px 0}#signup-container.login-mode::before{animation:orbit-to-right .6s cubic-bezier(.45,0,.55,1) forwards}#signup-container.initialized:not(.login-mode)::before{animation:orbit-to-left .6s cubic-bezier(.45,0,.55,1) forwards}#signup-container h2{margin:0 0 8px;font-weight:300;letter-spacing:3px;text-transform:uppercase;font-size:22px;color:#fff}#signup-container p{color:#888;font-size:11px;margin-bottom:25px;letter-spacing:1px;text-transform:uppercase;transition:opacity .3s ease,transform .3s ease;opacity:1;transform:translateY(0)}.input-group{position:relative;margin-bottom:20px;text-align:left;overflow:hidden;max-height:80px;opacity:1;transform:translateY(0) scale(1);filter:blur(0);transform-origin:top center;transition:all .5s cubic-bezier(.16,1,.3,1)}.input-group.collapsed{max-height:0;margin-bottom:0;opacity:0;transform:translateY(-20px) scale(.95);filter:blur(10px);pointer-events:none}.input-group input{width:100%;padding:12px 0;font-size:16px;color:#fff;background:0 0;border:none;border-bottom:1px solid #444;outline:0;transition:border-color .3s;font-family:inherit}.input-group input:focus{border-bottom:1px solid #ff0000}.input-group label{position:absolute;top:12px;left:0;color:#666;font-size:14px;pointer-events:none;transition:.3s ease all;text-transform:uppercase;letter-spacing:1px}.input-group input:focus~label,.input-group input:not(:placeholder-shown)~label{top:-12px;font-size:10px;color:#ff0000;font-weight:600}.options-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;font-size:12px;color:#888;max-height:40px;opacity:1;transform:translateY(0);transition:all .5s cubic-bezier(.16,1,.3,1);overflow:hidden}.options-row.collapsed{max-height:0;margin-bottom:0;opacity:0;transform:translateY(-10px);pointer-events:none}.remember-me{display:flex;align-items:center;cursor:pointer;user-select:none;transition:color .3s}.remember-me:hover{color:#ccc}.remember-me input{position:absolute;opacity:0;cursor:pointer;height:0;width:0}.checkmark{height:14px;width:14px;background-color:transparent;border:1px solid #666;margin-right:8px;position:relative;transition:all .3s}.remember-me:hover input~.checkmark{border-color:#999}.remember-me input:checked~.checkmark{background-color:#d40000;border-color:#d40000}.checkmark:after{content:"";position:absolute;display:none;left:4px;top:1px;width:3px;height:7px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}.remember-me input:checked~.checkmark:after{display:block}.forgot-password{color:#888;text-decoration:none;transition:color .3s;padding:5px 0}.forgot-password:hover{color:#fff;text-decoration:underline}button.submit-btn{width:100%;padding:16px;background:linear-gradient(135deg,#4a0000,#220000);color:#aaa;border:none;border-radius:0 20px 0 20px;cursor:not-allowed;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-top:5px;transition:all .6s cubic-bezier(.16,1,.3,1);box-shadow:0 4px 10px rgba(0,0,0,.3);opacity:.7;-webkit-touch-callout:none}#signup-container.login-mode button.submit-btn{border-radius:20px 0 20px 0}button.submit-btn.valid{cursor:pointer;opacity:1;color:#fff;background:linear-gradient(135deg,#ff1a1a,#cc0000);box-shadow:0 0 20px rgba(255,0,0,.6);animation:heartbeat 2s infinite ease-in-out;letter-spacing:3px}@keyframes heartbeat{0%{box-shadow:0 0 15px rgba(255,0,0,.5);transform:scale(1)}50%{box-shadow:0 0 30px rgba(255,50,50,.8);transform:scale(1.02)}100%{box-shadow:0 0 15px rgba(255,0,0,.5);transform:scale(1)}}button.submit-btn.valid:active{transform:scale(.98);animation:none}@media (hover:hover){button.submit-btn.valid:hover{transform:translateY(-2px);background:linear-gradient(135deg,#ff3333,#e60000)}}.footer-link{display:block;margin-top:20px;font-size:12px;color:#555;text-decoration:none;cursor:pointer;transition:color .2s,opacity .3s ease,transform .3s ease;opacity:1;transform:translateY(0);padding:10px}.footer-link:hover{color:#888}@media (max-width:480px){#signup-container{padding:25px}#signup-container h2{font-size:20px}}@keyframes shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-5px)}20%,40%,60%,80%{transform:translateX(5px)}}.shake{animation:shake .4s cubic-bezier(.36,.07,.19,.97) both}</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}<\/script></head><body><div id="signup-container"><h2 id="form-title">P Zero World</h2><p id="form-subtitle">Access the telemetry</p><form onsubmit="event.preventDefault()"><div class="input-group" id="racer-id-group"><input type="text" id="racer-id-input" placeholder=" " required><label>Racer ID</label></div><div class="input-group" id="email-group"><input type="email" id="email-input" placeholder=" " required><label>Email Address</label></div><div class="input-group" id="password-group"><input type="password" id="password-input" placeholder=" " required><label>Access Code</label></div><div class="options-row collapsed" id="login-options"><label class="remember-me"><input type="checkbox"><span class="checkmark"></span> Remember me </label><a href="#" class="forgot-password" id="forgot-pw-link">Forgot password?</a></div><button class="submit-btn" id="submit-btn">Initialize Session</button></form><a class="footer-link" id="auth-toggle">Already have an account? Log in</a></div><div id="error-toast" style="position:absolute;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:rgba(220,38,38,0.9);color:white;padding:10px 20px;border-radius:4px;font-size:12px;font-weight:600;pointer-events:none;transition:all 0.3s ease;z-index:200;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.1);text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 20px rgba(0,0,0,0.5)"></div><script type="module">import*as THREE from'three';import{OrbitControls}from'three/addons/controls/OrbitControls.js';const authToggleBtn=document.getElementById('auth-toggle'),signupContainer=document.getElementById('signup-container'),racerIdGroup=document.getElementById('racer-id-group'),emailGroup=document.getElementById('email-group'),passwordGroup=document.getElementById('password-group'),racerIdInput=document.getElementById('racer-id-input'),emailInput=document.getElementById('email-input'),passwordInput=document.getElementById('password-input'),loginOptions=document.getElementById('login-options'),forgotPwLink=document.getElementById('forgot-pw-link'),submitBtn=document.getElementById('submit-btn'),formTitle=document.getElementById('form-title'),formSubtitle=document.getElementById('form-subtitle'),errorToast=document.getElementById('error-toast');let currentMode='signup',isAnimating=!1;const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;function checkValidity(){let e=!1;const t=racerIdInput.value.trim(),n=emailInput.value.trim(),o=passwordInput.value,i=emailRegex.test(n);'signup'===currentMode?e=t.length>0&&i&&o.length>0:'login'===currentMode?e=t.length>0&&o.length>0:'forgot'===currentMode&&(e=i),e?submitBtn.classList.add('valid'):submitBtn.classList.remove('valid')}[racerIdInput,emailInput,passwordInput].forEach(e=>{e.addEventListener('input',checkValidity)});async function setMode(e){if(isAnimating||currentMode===e)return;isAnimating=!0,currentMode=e,submitBtn.classList.remove('valid'),signupContainer.classList.contains('initialized')||signupContainer.classList.add('initialized'),'signup'===e?signupContainer.classList.remove('login-mode'):signupContainer.classList.add('login-mode');const t=[formTitle,formSubtitle,submitBtn,authToggleBtn];t.forEach(e=>{e.style.opacity='0',e.style.transform='translateY(5px)'}),await new Promise(e=>setTimeout(e,300)),'signup'===e?(racerIdGroup.classList.remove('collapsed'),emailGroup.classList.remove('collapsed'),passwordGroup.classList.remove('collapsed'),loginOptions.classList.add('collapsed'),racerIdInput.setAttribute('required','true'),emailInput.setAttribute('required','true'),passwordInput.setAttribute('required','true'),formTitle.textContent='P Zero World',formSubtitle.textContent='Access the telemetry',submitBtn.textContent='Initialize Session',authToggleBtn.textContent='Already have an account? Log in'):'login'===e?(racerIdGroup.classList.remove('collapsed'),passwordGroup.classList.remove('collapsed'),loginOptions.classList.remove('collapsed'),emailGroup.classList.add('collapsed'),racerIdInput.setAttribute('required','true'),passwordInput.setAttribute('required','true'),setTimeout(()=>emailInput.removeAttribute('required'),100),formTitle.textContent='P Zero World',formSubtitle.textContent='Resume Telemetry',submitBtn.textContent='Enter Paddock',authToggleBtn.textContent='New racer? Sign up'):'forgot'===e&&(emailGroup.classList.remove('collapsed'),racerIdGroup.classList.add('collapsed'),passwordGroup.classList.add('collapsed'),loginOptions.classList.add('collapsed'),emailInput.setAttribute('required','true'),racerIdInput.removeAttribute('required'),passwordInput.removeAttribute('required'),formTitle.textContent='Account Recovery',formSubtitle.textContent='Enter email to reset password',submitBtn.textContent='Send Reset Link',authToggleBtn.textContent='Back to Log In'),checkValidity(),t.forEach(e=>{e.style.opacity='1',e.style.transform='translateY(0)'}),setTimeout(()=>{isAnimating=!1},500)}authToggleBtn.addEventListener('click',e=>{e.preventDefault(),'signup'===currentMode?setMode('login'):'login'===currentMode?setMode('signup'):'forgot'===currentMode&&setMode('login')}),forgotPwLink.addEventListener('click',e=>{e.preventDefault(),setMode('forgot')});function showError(msg){errorToast.textContent=msg;errorToast.style.opacity='1';errorToast.style.transform='translateX(-50%) translateY(0)';setTimeout(()=>{errorToast.style.opacity='0';errorToast.style.transform='translateX(-50%) translateY(-20px)'},3000)}submitBtn.addEventListener('click',async(e)=>{e.preventDefault();if(!submitBtn.classList.contains('valid')){submitBtn.classList.add('shake');setTimeout(()=>submitBtn.classList.remove('shake'),500);if('signup'===currentMode){if(!racerIdInput.value)return showError("RACER ID REQUIRED");if(!emailInput.value||!emailRegex.test(emailInput.value))return showError("VALID EMAIL REQUIRED");if(!passwordInput.value)return showError("ACCESS CODE REQUIRED")}else if('login'===currentMode){if(!racerIdInput.value)return showError("RACER ID REQUIRED");if(!passwordInput.value)return showError("ACCESS CODE REQUIRED")}else if('forgot'===currentMode&&(!emailInput.value||!emailRegex.test(emailInput.value)))return showError("VALID EMAIL REQUIRED");return}const email=emailInput.value;const pass=passwordInput.value;const racerId=racerIdInput.value;const originalText=submitBtn.textContent;submitBtn.textContent="AUTHENTICATING...";submitBtn.style.opacity="0.7";submitBtn.style.cursor="wait";try{await window.parent.velocityAuth.authenticate(email,pass,currentMode,racerId)}catch(err){showError(err.message);submitBtn.textContent="ACCESS DENIED";submitBtn.style.background="linear-gradient(135deg, #ff0000, #990000)";setTimeout(()=>{submitBtn.textContent=originalText;submitBtn.style.opacity="1";submitBtn.style.cursor="pointer";submitBtn.style.background=""},2000)}});const CONFIG={tireRadius:10,tireTube:3.5,rimRadius:5.8,rimWidth:5,spokeCount:7,brakeDiscRadius:4.5},scene=new THREE.Scene;scene.background=new THREE.Color(0x050505),scene.fog=new THREE.FogExp2(0x050505,.015);const camera=new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,.1,1000);function updateCameraPosition(){const e=window.innerWidth/window.innerHeight;e<.8?camera.position.set(0,2,65):camera.position.set(0,2,45),camera.lookAt(0,0,0)}updateCameraPosition();const renderer=new THREE.WebGLRenderer({antialias:window.devicePixelRatio<2});renderer.setSize(window.innerWidth,window.innerHeight),renderer.setPixelRatio(Math.min(window.devicePixelRatio,2)),renderer.shadowMap.enabled=!0,renderer.shadowMap.type=THREE.PCFSoftShadowMap,document.body.appendChild(renderer.domElement);const controls=new OrbitControls(camera,renderer.domElement);function createBrakeDiscTexture(){const e=document.createElement('canvas');e.width=512,e.height=512;const t=e.getContext('2d');t.fillStyle='#FFFFFF',t.fillRect(0,0,512,512),t.fillStyle='#000000';const r=256,o=256;for(let e=100;e<230;e+=25){const a=2*Math.PI*e,n=Math.floor(a/20);for(let a=0;a<n;a++){const n=a/n*Math.PI*2,i=e+(5*Math.random()-2.5),s=r+Math.cos(n)*i,l=o+Math.sin(n)*i;t.beginPath(),t.arc(s,l,4,0,2*Math.PI),t.fill()}}t.strokeStyle='rgba(0,0,0,0.1)',t.lineWidth=1;for(let e=0;e<10;e++)t.beginPath(),t.arc(r,o,100+130*Math.random(),0,2*Math.PI),t.stroke();const a=new THREE.CanvasTexture(e);return a.anisotropy=4,a}function createTireTexture(){const e=document.createElement('canvas');e.width=512,e.height=512;const t=e.getContext('2d');t.fillStyle='#111111',t.fillRect(0,0,512,512);for(let e=0;e<5e3;e++)t.fillStyle=\`rgba(255,255,255,\${.05*Math.random()})\`,t.fillRect(512*Math.random(),512*Math.random(),2,2);t.save(),t.translate(256,256);function r(e,r,o,a,n,i=.15,s='Arial'){t.font=\`900 \${n}px \${s}\`,t.fillStyle=a,t.textAlign='center',t.textBaseline='middle';const l=e.length*i;let c=o-l/2;e.split('').forEach(e=>{t.save(),t.rotate(c),t.translate(0,-r),t.fillText(e,0,0),t.restore(),c+=i})}r("P ZERO",175,0,"#D40000",45,.18),r("SOFT",175,Math.PI,"#ffffff",30,.12),t.rotate(Math.PI/4),t.fillStyle='#FFFFFF',t.fillRect(-30,-140,60,15),t.strokeStyle="rgba(255,255,255,0.1)",t.lineWidth=2,t.beginPath(),t.arc(0,0,190,0,1.5),t.stroke(),t.restore();const o=new THREE.CanvasTexture(e);return o.anisotropy=4,o}controls.enableDamping=!0,controls.dampingFactor=.05,controls.minDistance=10,controls.maxDistance=80,controls.enablePan=!1,controls.enableZoom=!1;const rubberMaterial=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:.6,metalness:.1,map:createTireTexture(),bumpMap:createTireTexture(),bumpScale:.02}),slickMaterial=new THREE.MeshStandardMaterial({color:0x151515,roughness:.7,metalness:0}),rimMaterial=new THREE.MeshStandardMaterial({color:0x080808,roughness:.3,metalness:.9}),rimStripeMaterial=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xaa0000,emissiveIntensity:.8,roughness:.2,metalness:.5}),brakeDiscMap=createBrakeDiscTexture(),brakeDiscMaterial=new THREE.MeshStandardMaterial({color:0xdddddd,map:brakeDiscMap,alphaMap:brakeDiscMap,transparent:!0,side:THREE.DoubleSide,roughness:.4,metalness:.8}),hubMaterial=new THREE.MeshStandardMaterial({color:0x222222,roughness:.5,metalness:.7}),axleMaterial=new THREE.MeshStandardMaterial({color:0x444444,roughness:.3,metalness:.8}),wheelAssembly=new THREE.Group;scene.add(wheelAssembly);const rotatingGroup=new THREE.Group;wheelAssembly.add(rotatingGroup);const axleGeo=new THREE.CylinderGeometry(.5,.5,7,12);axleGeo.rotateX(Math.PI/2);const axle=new THREE.Mesh(axleGeo,axleMaterial);wheelAssembly.add(axle);const tireGeo=new THREE.TorusGeometry(CONFIG.tireRadius,CONFIG.tireTube,24,48),tire=new THREE.Mesh(tireGeo,rubberMaterial);tire.scale.set(1,1,1.8),tire.castShadow=!0;const sidewallGeo=new THREE.RingGeometry(CONFIG.rimRadius,CONFIG.tireRadius+CONFIG.tireTube/2,48),sidewallLeft=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallLeft.position.z=2.5,sidewallLeft.rotation.y=Math.PI;const sidewallRight=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallRight.position.z=-2.5;const slickGeo=new THREE.CylinderGeometry(CONFIG.tireRadius+CONFIG.tireTube-.2,CONFIG.tireRadius+CONFIG.tireTube-.2,5,48,1,!0);slickGeo.rotateX(Math.PI/2);const slick=new THREE.Mesh(slickGeo,slickMaterial);slick.castShadow=!0;const edgeGeo=new THREE.TorusGeometry(CONFIG.tireRadius+1.5,1.8,12,48),edgeMesh=new THREE.Mesh(edgeGeo,slickMaterial);edgeMesh.scale.set(1,1,1.4),rotatingGroup.add(sidewallLeft),rotatingGroup.add(sidewallRight),rotatingGroup.add(slick),rotatingGroup.add(edgeMesh);const rimCylGeo=new THREE.CylinderGeometry(CONFIG.rimRadius,CONFIG.rimRadius,CONFIG.rimWidth,48,1,!0);rimCylGeo.rotateX(Math.PI/2);const rim=new THREE.Mesh(rimCylGeo,rimMaterial);rotatingGroup.add(rim);const rimLipGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.1,.2,8,48),rimLip1=new THREE.Mesh(rimLipGeo,rimMaterial);rimLip1.position.z=CONFIG.rimWidth/2;const rimLip2=rimLip1.clone();rimLip2.position.z=-CONFIG.rimWidth/2,rotatingGroup.add(rimLip1),rotatingGroup.add(rimLip2);const rimStripeGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.05,.05,8,64),rimStripe1=new THREE.Mesh(rimStripeGeo,rimStripeMaterial);rimStripe1.position.z=CONFIG.rimWidth/2+.1;const rimStripe2=rimStripe1.clone();rimStripe2.position.z=-CONFIG.rimWidth/2-.1,rotatingGroup.add(rimStripe1),rotatingGroup.add(rimStripe2);const spokeGroup=new THREE.Group,spokeGeo=new THREE.CylinderGeometry(.5,.3,CONFIG.rimRadius-1.5,6),spokeLen=CONFIG.rimRadius-1.5,dist=1.5+spokeLen/2;for(let e=0;e<CONFIG.spokeCount;e++){const t=e/CONFIG.spokeCount*Math.PI*2,r=new THREE.Mesh(spokeGeo,rimMaterial);r.position.x=Math.cos(t)*dist,r.position.y=Math.sin(t)*dist,r.rotation.z=t-Math.PI/2,spokeGroup.add(r)}rotatingGroup.add(spokeGroup);const hubGeo=new THREE.CylinderGeometry(1.6,1.6,6,24);hubGeo.rotateX(Math.PI/2);const hub=new THREE.Mesh(hubGeo,hubMaterial);rotatingGroup.add(hub);const discGeo=new THREE.RingGeometry(2.5,CONFIG.brakeDiscRadius,48),disc=new THREE.Mesh(discGeo,brakeDiscMaterial);disc.position.z=1.8,disc.castShadow=!0;const discBack=disc.clone();discBack.rotation.y=Math.PI,discBack.position.z=1.9;const carrierGeo=new THREE.RingGeometry(1.5,2.5,24),carrierMat=new THREE.MeshStandardMaterial({color:0x111111,metalness:.8,roughness:.5}),carrier=new THREE.Mesh(carrierGeo,carrierMat);carrier.position.z=1.85,carrier.receiveShadow=!0;const boltGeo=new THREE.CylinderGeometry(.12,.12,.25,6),boltMat=new THREE.MeshStandardMaterial({color:0x888888,metalness:1,roughness:.2});for(let e=0;e<5;e++){const t=e/5*Math.PI*2,r=new THREE.Mesh(boltGeo,boltMat);r.rotateX(Math.PI/2),r.position.set(2.5*Math.cos(t),2.5*Math.sin(t),1.95),rotatingGroup.add(r)}rotatingGroup.add(disc),rotatingGroup.add(discBack),rotatingGroup.add(carrier);const ambientLight=new THREE.AmbientLight(0xffffff,.2);scene.add(ambientLight);const spotLight=new THREE.SpotLight(0xffffff,400);spotLight.position.set(-10,30,20),spotLight.angle=Math.PI/6,spotLight.penumbra=.3,spotLight.castShadow=!0,spotLight.shadow.mapSize.width=512,spotLight.shadow.mapSize.height=512,scene.add(spotLight);const rimLight1=new THREE.PointLight(0x4444ff,100);rimLight1.position.set(20,10,10),scene.add(rimLight1);const rimLight2=new THREE.PointLight(0xff4444,100);rimLight2.position.set(-20,10,-10),scene.add(rimLight2);const planeGeo=new THREE.PlaneGeometry(500,500),planeMat=new THREE.MeshStandardMaterial({color:0x050505,roughness:.1,metalness:.5}),plane=new THREE.Mesh(planeGeo,planeMat);plane.rotation.x=-Math.PI/2,plane.position.y=-(CONFIG.tireRadius+CONFIG.tireTube+.5),plane.receiveShadow=!0,scene.add(plane);const clock=new THREE.Clock,pathLength=80,outerRadius=CONFIG.tireRadius+CONFIG.tireTube;function animate(){requestAnimationFrame(animate);const e=clock.getElapsedTime(),t=15,r=e*t%pathLength;wheelAssembly.position.x=r-pathLength/2,wheelAssembly.rotation.y=.02*Math.sin(8*e),wheelAssembly.rotation.z=.01*Math.cos(5*e),rotatingGroup.rotation.z=-wheelAssembly.position.x/outerRadius;const o=wheelAssembly.position.x,a=new THREE.Vector3(o,0,0);controls.target.lerp(a,.1),controls.update(),renderer.render(scene,camera)}window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight,camera.updateProjectionMatrix(),renderer.setSize(window.innerWidth,window.innerHeight)});animate();<\/script></body></html>`;
+        // --- ENGINEERING HTML ---
+        // New interactive architecture visualization page
+        const ENGINEERING_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Velocity Engineering</title><style>body{margin:0;background-color:#000;color:#0f0;font-family:'Courier New',Courier,monospace;overflow:hidden}.hud-container{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}.grid-bg{position:absolute;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(rgba(0,50,0,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(0,50,0,.2) 1px,transparent 1px);background-size:40px 40px;opacity:.5;z-index:0}.tech-card{position:absolute;background:rgba(0,20,0,.8);border:1px solid #0f0;padding:15px;width:200px;font-size:12px;box-shadow:0 0 10px rgba(0,255,0,.2)}.tech-title{font-weight:700;border-bottom:1px solid #0f0;margin-bottom:5px;padding-bottom:2px}.tech-stat{display:flex;justify-content:space-between;margin-top:2px}.fps-counter{position:absolute;top:20px;right:20px;color:#0f0;font-size:24px;font-weight:700}.system-status{position:absolute;bottom:20px;left:20px;color:#0f0;font-size:12px}canvas#node-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}</style></head><body><div class="grid-bg"></div><canvas id="node-canvas"></canvas><div class="hud-container"><div class="fps-counter">60 FPS <span style="font-size:12px;opacity:.7">LOCKED</span></div><div class="system-status">SYSTEM ARCHITECTURE // DIAGNOSTIC MODE<br>KERNEL: ACTIVE | MODULES: 4/4 | LATENCY: 1.2ms</div><div class="tech-card" style="top:20%;left:10%"><div class="tech-title">RENDER CORE</div><div class="tech-stat"><span>TYPE:</span><span>WebGL 2.0</span></div><div class="tech-stat"><span>SHADERS:</span><span>CUSTOM</span></div><div class="tech-stat"><span>STATUS:</span><span>ONLINE</span></div></div><div class="tech-card" style="top:50%;left:15%"><div class="tech-title">PHYSICS ENGINE</div><div class="tech-stat"><span>LANG:</span><span>RUST (WASM)</span></div><div class="tech-stat"><span>THREAD:</span><span>WORKER</span></div><div class="tech-stat"><span>DELTA:</span><span>16ms</span></div></div><div class="tech-card" style="top:30%;right:10%"><div class="tech-title">RECONCILER</div><div class="tech-stat"><span>FRAMEWORK:</span><span>REACT 18</span></div><div class="tech-stat"><span>MODE:</span><span>CONCURRENT</span></div><div class="tech-stat"><span>FIBER:</span><span>ACTIVE</span></div></div><div class="tech-card" style="top:60%;right:15%"><div class="tech-title">ASSET PIPELINE</div><div class="tech-stat"><span>CDN:</span><span>CLOUDINARY</span></div><div class="tech-stat"><span>FORMAT:</span><span>WEBP/GLB</span></div><div class="tech-stat"><span>COMPRESSION:</span><span>BROTLI</span></div></div></div><script>const canvas=document.getElementById('node-canvas');const ctx=canvas.getContext('2d');let width=canvas.width=window.innerWidth;let height=canvas.height=window.innerHeight;const nodes=[];const connections=[];const cursor={x:width/2,y:height/2};window.addEventListener('resize',()=>{width=canvas.width=window.innerWidth;height=canvas.height=window.innerHeight});window.addEventListener('mousemove',e=>{cursor.x=e.clientX;cursor.y=e.clientY});class Node{constructor(x,y){this.x=x;this.y=y;this.vx=(Math.random()-.5)*1.5;this.vy=(Math.random()-.5)*1.5;this.size=Math.random()*2+1}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>width)this.vx*=-1;if(this.y<0||this.y>height)this.vy*=-1;const dx=this.x-cursor.x;const dy=this.y-cursor.y;const dist=Math.sqrt(dx*dx+dy*dy);if(dist<150){this.x+=dx/dist*2;this.y+=dy/dist*2}}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle='#00ff00';ctx.fill()}}for(let i=0;i<40;i++)nodes.push(new Node(Math.random()*width,Math.random()*height));function animate(){ctx.clearRect(0,0,width,height);ctx.strokeStyle='rgba(0, 255, 0, 0.15)';ctx.lineWidth=1;for(let i=0;i<nodes.length;i++){nodes[i].update();nodes[i].draw();for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x;const dy=nodes[i].y-nodes[j].y;const dist=Math.sqrt(dx*dx+dy*dy);if(dist<150){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.stroke()}}}requestAnimationFrame(animate)}animate();<\/script></body></html>`;
+
+        const LOGIN_HTML = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>MotoGP Wheel Simulation</title><style>body{margin:0;overflow:hidden;background-color:#050505;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;-webkit-tap-highlight-color:transparent}canvas{display:block;position:fixed;top:0;left:0;z-index:0}#signup-container{position:relative;top:auto;left:auto;transform:none;margin:auto;width:85%;max-width:340px;padding:30px;background:rgba(15,15,15,.65);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:0 40px 0 40px;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.9);z-index:100;text-align:center;color:#fff;transition:all .6s cubic-bezier(.16,1,.3,1);overflow:hidden}body{height:100vh;display:flex;align-items:center;justify-content:center}#signup-container::before{content:'';position:absolute;background:#d40000;box-shadow:0 0 15px 2px rgba(212,0,0,.6);z-index:0;top:0;left:0;width:4px;height:100%}@keyframes orbit-to-right{0%{left:0;top:0;width:4px;height:100%}30%{left:0;top:0;width:4px;height:4px}50%{left:0;top:0;width:100%;height:4px}70%{left:calc(100% - 4px);top:0;width:4px;height:4px}100%{left:calc(100% - 4px);top:0;width:4px;height:100%}}@keyframes orbit-to-left{0%{left:calc(100% - 4px);top:0;width:4px;height:100%}30%{left:calc(100% - 4px);top:0;width:4px;height:4px}50%{left:0;top:0;width:100%;height:4px}70%{left:0;top:0;width:4px;height:4px}100%{left:0;top:0;width:4px;height:100%}}#signup-container.login-mode{border-radius:40px 0 40px 0}#signup-container.login-mode::before{animation:orbit-to-right .6s cubic-bezier(.45,0,.55,1) forwards}#signup-container.initialized:not(.login-mode)::before{animation:orbit-to-left .6s cubic-bezier(.45,0,.55,1) forwards}#signup-container h2{margin:0 0 8px;font-weight:300;letter-spacing:3px;text-transform:uppercase;font-size:22px;color:#fff}#signup-container p{color:#888;font-size:11px;margin-bottom:25px;letter-spacing:1px;text-transform:uppercase;transition:opacity .3s ease,transform .3s ease;opacity:1;transform:translateY(0)}.input-group{position:relative;margin-bottom:20px;text-align:left;overflow:hidden;max-height:80px;opacity:1;transform:translateY(0) scale(1);filter:blur(0);transform-origin:top center;transition:all .5s cubic-bezier(.16,1,.3,1)}.input-group.collapsed{max-height:0;margin-bottom:0;opacity:0;transform:translateY(-20px) scale(.95);filter:blur(10px);pointer-events:none}.input-group input{width:100%;padding:12px 0;font-size:16px;color:#fff;background:0 0;border:none;border-bottom:1px solid #444;outline:0;transition:border-color .3s;font-family:inherit}.input-group input:focus{border-bottom:1px solid #ff0000}.input-group label{position:absolute;top:12px;left:0;color:#666;font-size:14px;pointer-events:none;transition:.3s ease all;text-transform:uppercase;letter-spacing:1px}.input-group input:focus~label,.input-group input:not(:placeholder-shown)~label{top:-12px;font-size:10px;color:#ff0000;font-weight:600}.options-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;font-size:12px;color:#888;max-height:40px;opacity:1;transform:translateY(0);transition:all .5s cubic-bezier(.16,1,.3,1);overflow:hidden}.options-row.collapsed{max-height:0;margin-bottom:0;opacity:0;transform:translateY(-10px);pointer-events:none}.remember-me{display:flex;align-items:center;cursor:pointer;user-select:none;transition:color .3s}.remember-me:hover{color:#ccc}.remember-me input{position:absolute;opacity:0;cursor:pointer;height:0;width:0}.checkmark{height:14px;width:14px;background-color:transparent;border:1px solid #666;margin-right:8px;position:relative;transition:all .3s}.remember-me:hover input~.checkmark{border-color:#999}.remember-me input:checked~.checkmark{background-color:#d40000;border-color:#d40000}.checkmark:after{content:"";position:absolute;display:none;left:4px;top:1px;width:3px;height:7px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}.remember-me input:checked~.checkmark:after{display:block}.forgot-password{color:#888;text-decoration:none;transition:color .3s;padding:5px 0}.forgot-password:hover{color:#fff;text-decoration:underline}button.submit-btn{width:100%;padding:16px;background:linear-gradient(135deg,#4a0000,#220000);color:#aaa;border:none;border-radius:0 20px 0 20px;cursor:not-allowed;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-top:5px;transition:all .6s cubic-bezier(.16,1,.3,1);box-shadow:0 4px 10px rgba(0,0,0,.3);opacity:.7;-webkit-touch-callout:none}#signup-container.login-mode button.submit-btn{border-radius:20px 0 20px 0}button.submit-btn.valid{cursor:pointer;opacity:1;color:#fff;background:linear-gradient(135deg,#ff1a1a,#cc0000);box-shadow:0 0 20px rgba(255,0,0,.6);animation:heartbeat 2s infinite ease-in-out;letter-spacing:3px}@keyframes heartbeat{0%{box-shadow:0 0 15px rgba(255,0,0,.5);transform:scale(1)}50%{box-shadow:0 0 30px rgba(255,50,50,.8);transform:scale(1.02)}100%{box-shadow:0 0 15px rgba(255,0,0,.5);transform:scale(1)}}button.submit-btn.valid:active{transform:scale(.98);animation:none}@media (hover:hover){button.submit-btn.valid:hover{transform:translateY(-2px);background:linear-gradient(135deg,#ff3333,#e60000)}}.footer-link{display:block;margin-top:20px;font-size:12px;color:#555;text-decoration:none;cursor:pointer;transition:color .2s,opacity .3s ease,transform .3s ease;opacity:1;transform:translateY(0);padding:10px}.footer-link:hover{color:#888}@media (max-width:480px){#signup-container{padding:25px}#signup-container h2{font-size:20px}}@keyframes shake{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-5px)}20%,40%,60%,80%{transform:translateX(5px)}}.shake{animation:shake .4s cubic-bezier(.36,.07,.19,.97) both}</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}<\/script></head><body><div id="signup-container"><h2 id="form-title">P Zero World</h2><p id="form-subtitle">Access the telemetry</p><form onsubmit="event.preventDefault()"><div class="input-group" id="racer-id-group"><input type="text" id="racer-id-input" placeholder=" " required><label>Racer ID</label></div><div class="input-group" id="email-group"><input type="email" id="email-input" placeholder=" " required><label>Email Address</label></div><div class="input-group" id="password-group"><input type="password" id="password-input" placeholder=" " required><label>Access Code</label></div><div class="options-row collapsed" id="login-options"><label class="remember-me"><input type="checkbox"><span class="checkmark"></span> Remember me </label><a href="#" class="forgot-password" id="forgot-pw-link">Forgot password?</a></div><button class="submit-btn" id="submit-btn">Initialize Session</button></form><a class="footer-link" id="auth-toggle">Already have an account? Log in</a></div><div id="error-toast" style="position:absolute;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);opacity:0;background:rgba(220,38,38,0.9);color:white;padding:10px 20px;border-radius:4px;font-size:12px;font-weight:600;pointer-events:none;transition:all 0.3s ease;z-index:200;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.1);text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 20px rgba(0,0,0,0.5)"></div><script type="module">import*as THREE from'three';import{OrbitControls}from'three/addons/controls/OrbitControls.js';const authToggleBtn=document.getElementById('auth-toggle'),signupContainer=document.getElementById('signup-container'),racerIdGroup=document.getElementById('racer-id-group'),emailGroup=document.getElementById('email-group'),passwordGroup=document.getElementById('password-group'),racerIdInput=document.getElementById('racer-id-input'),emailInput=document.getElementById('email-input'),passwordInput=document.getElementById('password-input'),loginOptions=document.getElementById('login-options'),forgotPwLink=document.getElementById('forgot-pw-link'),submitBtn=document.getElementById('submit-btn'),formTitle=document.getElementById('form-title'),formSubtitle=document.getElementById('form-subtitle'),errorToast=document.getElementById('error-toast');let currentMode='signup',isAnimating=!1;const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;function checkValidity(){let e=!1;const t=racerIdInput.value.trim(),n=emailInput.value.trim(),o=passwordInput.value,i=emailRegex.test(n);'signup'===currentMode?e=t.length>0&&i&&o.length>0:'login'===currentMode?e=t.length>0&&o.length>0:'forgot'===currentMode&&(e=i),e?submitBtn.classList.add('valid'):submitBtn.classList.remove('valid')}[racerIdInput,emailInput,passwordInput].forEach(e=>{e.addEventListener('input',checkValidity)});async function setMode(e){if(isAnimating||currentMode===e)return;isAnimating=!0,currentMode=e,submitBtn.classList.remove('valid'),signupContainer.classList.contains('initialized')||signupContainer.classList.add('initialized'),'signup'===e?signupContainer.classList.remove('login-mode'):signupContainer.classList.add('login-mode');const t=[formTitle,formSubtitle,submitBtn,authToggleBtn];t.forEach(e=>{e.style.opacity='0',e.style.transform='translateY(5px)'}),await new Promise(e=>setTimeout(e,300)),'signup'===e?(racerIdGroup.classList.remove('collapsed'),emailGroup.classList.remove('collapsed'),passwordGroup.classList.remove('collapsed'),loginOptions.classList.add('collapsed'),racerIdInput.setAttribute('required','true'),emailInput.setAttribute('required','true'),passwordInput.setAttribute('required','true'),formTitle.textContent='P Zero World',formSubtitle.textContent='Access the telemetry',submitBtn.textContent='Initialize Session',authToggleBtn.textContent='Already have an account? Log in'):'login'===e?(racerIdGroup.classList.remove('collapsed'),passwordGroup.classList.remove('collapsed'),loginOptions.classList.remove('collapsed'),emailGroup.classList.add('collapsed'),racerIdInput.setAttribute('required','true'),passwordInput.setAttribute('required','true'),setTimeout(()=>emailInput.removeAttribute('required'),100),formTitle.textContent='P Zero World',formSubtitle.textContent='Resume Telemetry',submitBtn.textContent='Enter Paddock',authToggleBtn.textContent='New racer? Sign up'):'forgot'===e&&(emailGroup.classList.remove('collapsed'),racerIdGroup.classList.add('collapsed'),passwordGroup.classList.add('collapsed'),loginOptions.classList.add('collapsed'),emailInput.setAttribute('required','true'),racerIdInput.removeAttribute('required'),passwordInput.removeAttribute('required'),formTitle.textContent='Account Recovery',formSubtitle.textContent='Enter email to reset password',submitBtn.textContent='Send Reset Link',authToggleBtn.textContent='Back to Log In'),checkValidity(),t.forEach(e=>{e.style.opacity='1',e.style.transform='translateY(0)'}),setTimeout(()=>{isAnimating=!1},500)}authToggleBtn.addEventListener('click',e=>{e.preventDefault(),'signup'===currentMode?setMode('login'):'login'===currentMode?setMode('signup'):'forgot'===currentMode&&setMode('login')}),forgotPwLink.addEventListener('click',e=>{e.preventDefault(),setMode('forgot')});function showError(msg){errorToast.textContent=msg;errorToast.style.opacity='1';errorToast.style.transform='translateX(-50%) translateY(0)';setTimeout(()=>{errorToast.style.opacity='0';errorToast.style.transform='translateX(-50%) translateY(-20px)'},3000)}submitBtn.addEventListener('click',async(e)=>{e.preventDefault();if(!submitBtn.classList.contains('valid')){submitBtn.classList.add('shake');setTimeout(()=>submitBtn.classList.remove('shake'),500);if('signup'===currentMode){if(!racerIdInput.value)return showError("RACER ID REQUIRED");if(!emailInput.value||!emailRegex.test(emailInput.value))return showError("VALID EMAIL REQUIRED");if(!passwordInput.value)return showError("ACCESS CODE REQUIRED")}else if('login'===currentMode){if(!racerIdInput.value)return showError("RACER ID REQUIRED");if(!passwordInput.value)return showError("ACCESS CODE REQUIRED")}else if('forgot'===currentMode&&(!emailInput.value||!emailRegex.test(emailInput.value)))return showError("VALID EMAIL REQUIRED");return}const email=emailInput.value;const pass=passwordInput.value;const racerId=racerIdInput.value;const originalText=submitBtn.textContent;submitBtn.textContent="AUTHENTICATING...";submitBtn.style.opacity="0.7";submitBtn.style.cursor="wait";try{await window.parent.velocityAuth.authenticate(email,pass,currentMode,racerId)}catch(err){showError(err.message);submitBtn.textContent="ACCESS DENIED";submitBtn.style.background="linear-gradient(135deg, #ff0000, #990000)";setTimeout(()=>{submitBtn.textContent=originalText;submitBtn.style.opacity="1";submitBtn.style.cursor="pointer";submitBtn.style.background=""},2000)}});const CONFIG={tireRadius:10,tireTube:3.5,rimRadius:5.8,rimWidth:5,spokeCount:7,brakeDiscRadius:4.5},scene=new THREE.Scene;scene.background=new THREE.Color(0x050505),scene.fog=new THREE.FogExp2(0x050505,.015);const camera=new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,.1,1000);function updateCameraPosition(){const e=window.innerWidth/window.innerHeight;e<.8?camera.position.set(0,2,65):camera.position.set(0,2,45),camera.lookAt(0,0,0)}updateCameraPosition();const renderer=new THREE.WebGLRenderer({antialias:window.devicePixelRatio<2});renderer.setSize(window.innerWidth,window.innerHeight),renderer.setPixelRatio(Math.min(window.devicePixelRatio,2)),renderer.shadowMap.enabled=!0,renderer.shadowMap.type=THREE.PCFSoftShadowMap,document.body.appendChild(renderer.domElement);const controls=new OrbitControls(camera,renderer.domElement);function createBrakeDiscTexture(){const e=document.createElement('canvas');e.width=512,e.height=512;const t=e.getContext('2d');t.fillStyle='#FFFFFF',t.fillRect(0,0,512,512),t.fillStyle='#000000';const r=256,o=256;for(let e=100;e<230;e+=25){const a=2*Math.PI*e,n=Math.floor(a/20);for(let a=0;a<n;a++){const n=a/n*Math.PI*2,i=e+(5*Math.random()-2.5),s=r+Math.cos(n)*i,l=o+Math.sin(n)*i;t.beginPath(),t.arc(s,l,4,0,2*Math.PI),t.fill()}}t.strokeStyle='rgba(0,0,0,0.1)',t.lineWidth=1;for(let e=0;e<10;e++)t.beginPath(),t.arc(r,o,100+130*Math.random(),0,2*Math.PI),t.stroke();const a=new THREE.CanvasTexture(e);return a.anisotropy=4,a}function createTireTexture(){const e=document.createElement('canvas');e.width=512,e.height=512;const t=e.getContext('2d');t.fillStyle='#111111',t.fillRect(0,0,512,512);for(let e=0;e<5e3;e++)t.fillStyle=\`rgba(255,255,255,\${.05*Math.random()})\`,t.fillRect(512*Math.random(),512*Math.random(),2,2);t.save(),t.translate(256,256);function r(e,r,o,a,n,i=.15,s='Arial'){t.font=\`900 \${n}px \${s}\`,t.fillStyle=a,t.textAlign='center',t.textBaseline='middle';const l=e.length*i;let c=o-l/2;e.split('').forEach(e=>{t.save(),t.rotate(c),t.translate(0,-r),t.fillText(e,0,0),t.restore(),c+=i})}r("P ZERO",175,0,"#D40000",45,.18),r("SOFT",175,Math.PI,"#ffffff",30,.12),t.rotate(Math.PI/4),t.fillStyle='#FFFFFF',t.fillRect(-30,-140,60,15),t.strokeStyle="rgba(255,255,255,0.1)",t.lineWidth=2,t.beginPath(),t.arc(0,0,190,0,1.5),t.stroke(),t.restore();const o=new THREE.CanvasTexture(e);return o.anisotropy=4,o}controls.enableDamping=!0,controls.dampingFactor=.05,controls.minDistance=10,controls.maxDistance=80,controls.enablePan=!1,controls.enableZoom=!1;const rubberMaterial=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:.6,metalness:.1,map:createTireTexture(),bumpMap:createTireTexture(),bumpScale:.02}),slickMaterial=new THREE.MeshStandardMaterial({color:0x151515,roughness:.7,metalness:0}),rimMaterial=new THREE.MeshStandardMaterial({color:0x080808,roughness:.3,metalness:.9}),rimStripeMaterial=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xaa0000,emissiveIntensity:.8,roughness:.2,metalness:.5}),brakeDiscMap=createBrakeDiscTexture(),brakeDiscMaterial=new THREE.MeshStandardMaterial({color:0xdddddd,map:brakeDiscMap,alphaMap:brakeDiscMap,transparent:!0,side:THREE.DoubleSide,roughness:.4,metalness:.8}),hubMaterial=new THREE.MeshStandardMaterial({color:0x222222,roughness:.5,metalness:.7}),axleMaterial=new THREE.MeshStandardMaterial({color:0x444444,roughness:.3,metalness:.8}),wheelAssembly=new THREE.Group;scene.add(wheelAssembly);const rotatingGroup=new THREE.Group;wheelAssembly.add(rotatingGroup);const axleGeo=new THREE.CylinderGeometry(.5,.5,7,12);axleGeo.rotateX(Math.PI/2);const axle=new THREE.Mesh(axleGeo,axleMaterial);wheelAssembly.add(axle);const tireGeo=new THREE.TorusGeometry(CONFIG.tireRadius,CONFIG.tireTube,24,48),tire=new THREE.Mesh(tireGeo,rubberMaterial);tire.scale.set(1,1,1.8),tire.castShadow=!0;const sidewallGeo=new THREE.RingGeometry(CONFIG.rimRadius,CONFIG.tireRadius+CONFIG.tireTube/2,48),sidewallLeft=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallLeft.position.z=2.5,sidewallLeft.rotation.y=Math.PI;const sidewallRight=new THREE.Mesh(sidewallGeo,rubberMaterial);sidewallRight.position.z=-2.5;const slickGeo=new THREE.CylinderGeometry(CONFIG.tireRadius+CONFIG.tireTube-.2,CONFIG.tireRadius+CONFIG.tireTube-.2,5,48,1,!0);slickGeo.rotateX(Math.PI/2);const slick=new THREE.Mesh(slickGeo,slickMaterial);slick.castShadow=!0;const edgeGeo=new THREE.TorusGeometry(CONFIG.tireRadius+1.5,1.8,12,48),edgeMesh=new THREE.Mesh(edgeGeo,slickMaterial);edgeMesh.scale.set(1,1,1.4),rotatingGroup.add(sidewallLeft),rotatingGroup.add(sidewallRight),rotatingGroup.add(slick),rotatingGroup.add(edgeMesh);const rimCylGeo=new THREE.CylinderGeometry(CONFIG.rimRadius,CONFIG.rimRadius,CONFIG.rimWidth,48,1,!0);rimCylGeo.rotateX(Math.PI/2);const rim=new THREE.Mesh(rimCylGeo,rimMaterial);rotatingGroup.add(rim);const rimLipGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.1,.2,8,48),rimLip1=new THREE.Mesh(rimLipGeo,rimMaterial);rimLip1.position.z=CONFIG.rimWidth/2;const rimLip2=rimLip1.clone();rimLip2.position.z=-CONFIG.rimWidth/2,rotatingGroup.add(rimLip1),rotatingGroup.add(rimLip2);const rimStripeGeo=new THREE.TorusGeometry(CONFIG.rimRadius-.05,.05,8,64),rimStripe1=new THREE.Mesh(rimStripeGeo,rimStripeMaterial);rimStripe1.position.z=CONFIG.rimWidth/2+.1;const rimStripe2=rimStripe1.clone();rimStripe2.position.z=-CONFIG.rimWidth/2-.1,rotatingGroup.add(rimStripe1),rotatingGroup.add(rimStripe2);const spokeGroup=new THREE.Group,spokeGeo=new THREE.CylinderGeometry(.5,.3,CONFIG.rimRadius-1.5,6),spokeLen=CONFIG.rimRadius-1.5,dist=1.5+spokeLen/2;for(let e=0;e<CONFIG.spokeCount;e++){const t=e/CONFIG.spokeCount*Math.PI*2,r=new THREE.Mesh(spokeGeo,rimMaterial);r.position.x=Math.cos(t)*dist,r.position.y=Math.sin(t)*dist,r.rotation.z=t-Math.PI/2,spokeGroup.add(r)}rotatingGroup.add(spokeGroup);const hubGeo=new THREE.CylinderGeometry(1.6,1.6,6,24);hubGeo.rotateX(Math.PI/2);const hub=new THREE.Mesh(hubGeo,hubMaterial);rotatingGroup.add(hub);const discGeo=new THREE.RingGeometry(2.5,CONFIG.brakeDiscRadius,48),disc=new THREE.Mesh(discGeo,brakeDiscMaterial);disc.position.z=1.8,disc.castShadow=!0;const discBack=disc.clone();discBack.rotation.y=Math.PI,discBack.position.z=1.9;const carrierGeo=new THREE.RingGeometry(1.5,2.5,24),carrierMat=new THREE.MeshStandardMaterial({color:0x111111,metalness:.8,roughness:.5}),carrier=new THREE.Mesh(carrierGeo,carrierMat);carrier.position.z=1.85,carrier.receiveShadow=!0;const boltGeo=new THREE.CylinderGeometry(.12,.12,.25,6),boltMat=new THREE.MeshStandardMaterial({color:0x888888,metalness:1,roughness:.2});for(let e=0;e<5;e++){const t=e/5*Math.PI*2,r=new THREE.Mesh(boltGeo,boltMat);r.rotateX(Math.PI/2),r.position.set(2.5*Math.cos(t),2.5*Math.sin(t),1.95),rotatingGroup.add(r)}rotatingGroup.add(disc),rotatingGroup.add(discBack),rotatingGroup.add(carrier);const ambientLight=new THREE.AmbientLight(0xffffff,.2);scene.add(ambientLight);const spotLight=new THREE.SpotLight(0xffffff,400);spotLight.position.set(-10,30,20),spotLight.angle=Math.PI/6,spotLight.penumbra=.3,spotLight.castShadow=!0,spotLight.shadow.mapSize.width=512,spotLight.shadow.mapSize.height=512,scene.add(spotLight);const rimLight1=new THREE.PointLight(0x4444ff,100);rimLight1.position.set(20,10,10),scene.add(rimLight1);const rimLight2=new THREE.PointLight(0xff4444,100);rimLight2.position.set(-20,10,-10),scene.add(rimLight2);const planeGeo=new THREE.PlaneGeometry(500,500),planeMat=new THREE.MeshStandardMaterial({color:0x050505,roughness:.1,metalness:.5}),plane=new THREE.Mesh(planeGeo,planeMat);plane.rotation.x=-Math.PI/2,plane.position.y=-(CONFIG.tireRadius+CONFIG.tireTube+.5),plane.receiveShadow=!0,scene.add(plane);const clock=new THREE.Clock,pathLength=80,outerRadius=CONFIG.tireRadius+CONFIG.tireTube;function animate(){requestAnimationFrame(animate);const e=clock.getElapsedTime(),t=15,r=e*t%pathLength;wheelAssembly.position.x=r-pathLength/2,wheelAssembly.rotation.y=.02*Math.sin(8*e),wheelAssembly.rotation.z=.01*Math.cos(5*e),rotatingGroup.rotation.z=-wheelAssembly.position.x/outerRadius;const o=wheelAssembly.position.x,a=new THREE.Vector3(o,0,0);controls.target.lerp(a,.1),controls.update(),renderer.render(scene,camera)}window.addEventListener('resize',()=>{updateCameraPosition(),camera.aspect=window.innerWidth/window.innerHeight,camera.updateProjectionMatrix(),renderer.setSize(window.innerWidth,window.innerHeight)}),animate();<\/script></body></html>`;
 
         const WHEEL_CONFIG = {
             tireRadius: 2.5,
@@ -1074,8 +1091,8 @@
             engineering: { title: "ENGINEERING // CORE", content: "Built on a custom WebGL render pipeline, Velocity.OS achieves 60fps interaction on standard hardware. <br><br><b>Stack:</b><br>- Three.js (Custom Shaders)<br>- React Fiber (Orchestration)<br>- Rust (WASM Modules for Physics)<br><br>Every animation is calculated in real-time. No pre-rendered videos. Pure math." },
             // Configure content is now handled dynamically by renderAdminDashboard()
             configure: { title: "COMMAND // CONSOLE", content: "" },
-            login: { 
-                title: "ACCESS CONTROL", 
+            login: {
+                title: "ACCESS CONTROL",
                 content: "" // Content handled by LOGIN_HTML via iframe injection
             }
         };
@@ -1140,7 +1157,7 @@
                 { id: "c8", title: "DOCS_TEMPLATE", cat: "HEADING", price: "$25", img: "https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=600&q=80", desc: "Markdown-driven documentation site.", ...randomStats() }
             ]
         };
-        
+
         // --- STORE & AUTH SYSTEM (Dynamic Components) ---
         window.velocityStore = {
             products: products,
@@ -1149,7 +1166,7 @@
                 category: 'ALL',
                 sort: 'NEWEST'
             },
-            addComponent: function(data) {
+            addComponent: function (data) {
                 return new Promise((resolve) => {
                     setTimeout(() => {
                         const newProduct = {
@@ -1170,7 +1187,7 @@
                         // Add to New and Community lists
                         this.products.new.unshift(newProduct);
                         this.products.community.unshift(newProduct);
-                        
+
                         // If current tab is New or Community, re-render immediately
                         if (currentTab === 'new' || currentTab === 'community') {
                             renderCards();
@@ -1179,7 +1196,7 @@
                     }, 500);
                 });
             },
-            updateComponent: function(id, data) {
+            updateComponent: function (id, data) {
                 return new Promise((resolve) => {
                     setTimeout(() => {
                         // Update in all categories
@@ -1196,14 +1213,14 @@
                     }, 500);
                 });
             },
-            deleteComponent: function(id) {
+            deleteComponent: function (id) {
                 // Remove from all arrays
                 Object.keys(this.products).forEach(key => {
                     this.products[key] = this.products[key].filter(p => p.id !== id);
                 });
                 renderCards(); // Refresh marketplace
             },
-            getComponent: function(id) {
+            getComponent: function (id) {
                 // Helper to find a component
                 for (const key of Object.keys(this.products)) {
                     const found = this.products[key].find(p => p.id === id);
@@ -1211,13 +1228,13 @@
                 }
                 return null;
             },
-            getAllComponents: function() {
+            getAllComponents: function () {
                 // Flatten and dedupe for admin view
                 const all = [];
                 const seen = new Set();
                 ['trending', 'new', 'community'].forEach(key => {
                     this.products[key].forEach(p => {
-                        if(!seen.has(p.id)){
+                        if (!seen.has(p.id)) {
                             all.push(p);
                             seen.add(p.id);
                         }
@@ -1226,7 +1243,7 @@
                 return all;
             },
             // Advanced Filtering for Admin
-            getFilteredComponents: function() {
+            getFilteredComponents: function () {
                 let items = this.getAllComponents();
                 const { search, category, sort } = this.adminFilter;
 
@@ -1237,7 +1254,7 @@
                     const q = search.toLowerCase();
                     items = items.filter(i => i.title.toLowerCase().includes(q));
                 }
-                
+
                 // Sorting
                 items.sort((a, b) => {
                     if (sort === 'NEWEST') return b.createdAt - a.createdAt;
@@ -1246,7 +1263,7 @@
                     if (sort === 'RATING') return b.rating - a.rating;
                     return 0;
                 });
-                
+
                 return items;
             }
         };
@@ -1262,7 +1279,7 @@
             }, { views: 0, downloads: 0 });
 
             // Format numbers helper
-            const kFormatter = (num) => Math.abs(num) > 999 ? Math.sign(num)*((Math.abs(num)/1000).toFixed(1)) + 'k' : Math.sign(num)*Math.abs(num);
+            const kFormatter = (num) => Math.abs(num) > 999 ? Math.sign(num) * ((Math.abs(num) / 1000).toFixed(1)) + 'k' : Math.sign(num) * Math.abs(num);
 
             container.innerHTML = `
                 <div class="flex flex-col gap-6 w-full font-['Inter']">
@@ -1385,18 +1402,18 @@
         }
 
         // Global function for filter updates
-        window.updateAdminFilter = function(key, value) {
+        window.updateAdminFilter = function (key, value) {
             window.velocityStore.adminFilter[key] = value;
             renderAdminDashboard(); // Trigger re-render of list part
         }
 
         // Toggle Image Input Mode
-        window.toggleImageInputMode = function() {
+        window.toggleImageInputMode = function () {
             const mode = document.querySelector('input[name="img-source"]:checked').value;
             const urlInput = document.getElementById('new-img');
             const fileInput = document.getElementById('new-img-file');
-            
-            if(mode === 'file') {
+
+            if (mode === 'file') {
                 urlInput.classList.add('hidden');
                 fileInput.classList.remove('hidden');
             } else {
@@ -1405,9 +1422,9 @@
             }
         }
 
-        window.toggleAdminForm = function(show) {
+        window.toggleAdminForm = function (show) {
             const form = document.getElementById('admin-form-container');
-            if(show) {
+            if (show) {
                 form.classList.remove('hidden');
                 form.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } else {
@@ -1416,27 +1433,27 @@
             }
         }
 
-        window.resetAdminForm = function() {
+        window.resetAdminForm = function () {
             document.getElementById('new-title').value = '';
             document.getElementById('new-cat').value = 'HERO';
             document.getElementById('new-price').value = '';
             document.getElementById('new-img').value = '';
-            document.getElementById('new-img-file').value = ''; 
+            document.getElementById('new-img-file').value = '';
             document.getElementById('new-desc').value = '';
-            
+
             // Reset new fields
             document.getElementById('new-lang').value = 'HTML';
             document.getElementById('new-code').value = '';
 
-            document.getElementById('edit-mode-id').value = ''; 
+            document.getElementById('edit-mode-id').value = '';
             document.getElementById('form-header').textContent = "NEW COMPONENT PARAMETERS";
             document.getElementById('form-submit-btn').textContent = "DEPLOY";
             const radios = document.getElementsByName('img-source');
-            if(radios.length) radios[0].checked = true;
+            if (radios.length) radios[0].checked = true;
             toggleImageInputMode();
         }
 
-        window.editAsset = function(id) {
+        window.editAsset = function (id) {
             const item = window.velocityStore.getComponent(id);
             if (!item) return;
 
@@ -1445,42 +1462,42 @@
 
             // Populate Fields
             document.getElementById('new-title').value = item.title;
-            
+
             const selectCat = document.getElementById('new-cat');
             const catUpper = item.cat.toUpperCase();
             let catFound = false;
-            for(let i=0; i<selectCat.options.length; i++) {
-                if(selectCat.options[i].value === catUpper) {
+            for (let i = 0; i < selectCat.options.length; i++) {
+                if (selectCat.options[i].value === catUpper) {
                     selectCat.selectedIndex = i;
                     catFound = true;
                     break;
                 }
             }
             if (!catFound) selectCat.value = 'HERO';
-            
+
             document.getElementById('new-price').value = item.price;
             document.getElementById('new-img').value = item.img;
-            
+
             const radios = document.getElementsByName('img-source');
-            if(radios.length) radios[0].checked = true;
+            if (radios.length) radios[0].checked = true;
             toggleImageInputMode();
 
             document.getElementById('new-desc').value = item.desc;
-            
+
             // Populate New Fields
             const selectLang = document.getElementById('new-lang');
             // Assuming item.lang exists, otherwise default
             selectLang.value = item.lang || 'HTML';
-            
+
             document.getElementById('new-code').value = item.code || '';
-            
+
             // Set Edit Mode
             document.getElementById('edit-mode-id').value = id;
-            document.getElementById('form-header').textContent = `EDITING ASSET // ${id.substring(0,8)}...`;
+            document.getElementById('form-header').textContent = `EDITING ASSET // ${id.substring(0, 8)}...`;
             document.getElementById('form-submit-btn').textContent = "UPDATE ASSET";
         }
 
-        window.handleComponentSubmit = async function() {
+        window.handleComponentSubmit = async function () {
             const title = document.getElementById('new-title').value;
             const cat = document.getElementById('new-cat').value;
             const price = document.getElementById('new-price').value;
@@ -1491,15 +1508,15 @@
 
             const editId = document.getElementById('edit-mode-id').value;
             const btn = document.getElementById('form-submit-btn');
-            
+
             // Image Processing
             let finalImg = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"; // Default
-            
+
             const mode = document.querySelector('input[name="img-source"]:checked').value;
-            
+
             if (mode === 'url') {
                 const val = document.getElementById('new-img').value;
-                if(val) finalImg = val;
+                if (val) finalImg = val;
             } else {
                 // File Upload Handling (Cloudinary)
                 const fileInput = document.getElementById('new-img-file');
@@ -1509,7 +1526,7 @@
                     btn.textContent = "UPLOADING IMAGE...";
                     btn.style.opacity = "0.7";
                     btn.style.cursor = "wait";
-                    
+
                     try {
                         const file = fileInput.files[0];
                         const formData = new FormData();
@@ -1538,11 +1555,11 @@
                     }
                 } else if (editId) {
                     const current = window.velocityStore.getComponent(editId);
-                    if(current) finalImg = current.img;
+                    if (current) finalImg = current.img;
                 }
             }
 
-            if(!title || !price) {
+            if (!title || !price) {
                 alert("MISSING REQUIRED FIELDS");
                 // Reset button state if it was changed during upload attempt
                 btn.textContent = editId ? "UPDATE ASSET" : "DEPLOY";
@@ -1550,12 +1567,12 @@
                 btn.style.cursor = "pointer";
                 return;
             }
-            
-            const componentData = { 
-                title, 
-                cat, 
-                price, 
-                img: finalImg, 
+
+            const componentData = {
+                title,
+                cat,
+                price,
+                img: finalImg,
                 desc,
                 lang, // Save Language
                 code  // Save Source Code
@@ -1570,13 +1587,13 @@
                 btn.textContent = "DEPLOYING...";
                 await window.velocityStore.addComponent(componentData);
             }
-            
+
             toggleAdminForm(false);
             renderAdminDashboard(); // Re-render list
         }
 
-        window.deleteAsset = function(id) {
-            if(confirm("CONFIRM DELETION PROTOCOL?")) {
+        window.deleteAsset = function (id) {
+            if (confirm("CONFIRM DELETION PROTOCOL?")) {
                 window.velocityStore.deleteComponent(id);
                 renderAdminDashboard();
             }
@@ -1606,11 +1623,11 @@
         let smoothedScrollAmount = 0;
         let currentScroll = 0;
         let lastTransitionTime = 0;
-        
+
         let currentTab = 'trending';
         let currentCategoryFilter = 'All';
         let searchQuery = '';
-        
+
         const categories = ['All', 'Hero', 'Section', 'Button', 'Card', 'Background', 'Header', 'Logo', 'Feature', 'Pricing', 'Testimonial', 'Footer', 'Form', 'Heading'];
 
         // --- SCROLL SNAPPING VARIABLES ---
@@ -1637,9 +1654,9 @@
             const b = Math.round(lerp(startRGB[2], endRGB[2], factor));
             return `rgb(${r}, ${g}, ${b})`;
         }
-        
+
         // Global Number Formatter
-        const kFormatter = (num) => Math.abs(num) > 999 ? Math.sign(num)*((Math.abs(num)/1000).toFixed(1)) + 'k' : Math.sign(num)*Math.abs(num);
+        const kFormatter = (num) => Math.abs(num) > 999 ? Math.sign(num) * ((Math.abs(num) / 1000).toFixed(1)) + 'k' : Math.sign(num) * Math.abs(num);
 
         // --- AUTH SYSTEM (Secure Handler) ---
         window.velocityAuth = {
@@ -1650,16 +1667,16 @@
                         if (mode === 'signup') {
                             reject(new Error("REGISTRATION CLOSED. INVITE ONLY."));
                         } else if (mode === 'login') {
-                             // Check Racer ID instead of Email since Email is hidden in login mode
+                            // Check Racer ID instead of Email since Email is hidden in login mode
                             if (racerId.toLowerCase() === 'admin' && password === 'velocity') {
                                 window.velocityAuth.isAdmin = true;
                                 updateUIForAdmin();
                                 closePage();
                                 // Redirect to Dashboard immediately
-                                setTimeout(() => openPage('configure'), 500); 
+                                setTimeout(() => openPage('configure'), 500);
                                 resolve();
                             } else {
-                                 reject(new Error("INVALID CREDENTIALS."));
+                                reject(new Error("INVALID CREDENTIALS."));
                             }
                         } else {
                             reject(new Error("INVALID MODE"));
@@ -1673,23 +1690,23 @@
             const navRight = document.getElementById('nav-right');
             const navCenter = document.getElementById('nav-center'); // Target center nav
             const loginLink = navRight.querySelector('a'); // The existing LOGIN link
-            
+
             // Reveal Configure Buttons
             const configBtn = document.getElementById('nav-configure-btn');
             const mobileConfigBtn = document.getElementById('mobile-nav-configure-btn');
-            if(configBtn) configBtn.classList.remove('hidden');
-            if(mobileConfigBtn) mobileConfigBtn.classList.remove('hidden');
+            if (configBtn) configBtn.classList.remove('hidden');
+            if (mobileConfigBtn) mobileConfigBtn.classList.remove('hidden');
 
             // 2. Transform Login Link to Logout
             if (loginLink) {
                 loginLink.textContent = "LOGOUT";
                 loginLink.classList.remove('text-white');
                 loginLink.classList.add('text-red-500'); // Make logout red
-                
+
                 // Override click handler for logout
                 loginLink.onclick = () => {
                     window.velocityAuth.isAdmin = false;
-                    
+
                     // Hide Configure Buttons Again
                     if (configBtn) configBtn.classList.add('hidden');
                     if (mobileConfigBtn) mobileConfigBtn.classList.add('hidden');
@@ -1699,24 +1716,24 @@
                     loginLink.classList.remove('text-red-500');
                     loginLink.classList.add('text-white');
                     loginLink.onclick = () => openPage('login');
-                    
+
                     // Close restricted pages if open
                     const conceptFrame = document.getElementById('concept-frame-container');
                     const currentLoaded = conceptFrame.getAttribute('data-loaded');
                     if (conceptFrame.style.display === 'block' && currentLoaded === 'configure') {
                         closePage();
                     }
-                    
+
                     // Also close overlay if text content (e.g. configure text) is shown
                     if (document.getElementById('page-overlay').classList.contains('active')) {
-                         const titleText = document.getElementById('page-overlay-title').innerText;
-                         if(titleText.includes("CONFIG")) closePage();
+                        const titleText = document.getElementById('page-overlay-title').innerText;
+                        if (titleText.includes("CONFIG")) closePage();
                     }
 
                     alert("SESSION TERMINATED.");
                 };
             }
-            
+
             // Show Success Notification
             const toast = document.createElement('div');
             toast.className = "fixed top-24 right-8 bg-red-600/90 text-white px-6 py-3 rounded border border-white/20 shadow-2xl z-[200] font-['Michroma'] text-xs tracking-widest backdrop-blur-md animate-bounce";
@@ -1732,8 +1749,8 @@
             const bodyEl = document.getElementById('page-overlay-body');
             const contentEl = document.getElementById('page-content');
             const conceptFrame = document.getElementById('concept-frame-container');
-            
-            if(!overlay) return;
+
+            if (!overlay) return;
 
             // Check Access for Configure
             if (pageId === 'configure' && !window.velocityAuth.isAdmin) {
@@ -1752,6 +1769,14 @@
                     conceptFrame.innerHTML = `<iframe srcdoc='${CONCEPT_HTML.replace(/'/g, "&apos;")}' style="width:100%; height:100%; border:none;"></iframe>`;
                     conceptFrame.setAttribute('data-loaded', 'concept');
                 }
+            } else if (pageId === 'engineering') {
+                // ENGINEERING MODE (New)
+                contentEl.style.display = 'none';
+                conceptFrame.style.display = 'block';
+                if (conceptFrame.getAttribute('data-loaded') !== 'engineering') {
+                    conceptFrame.innerHTML = `<iframe srcdoc='${ENGINEERING_HTML.replace(/'/g, "&apos;")}' style="width:100%; height:100%; border:none;"></iframe>`;
+                    conceptFrame.setAttribute('data-loaded', 'engineering');
+                }
             } else if (pageId === 'login') {
                 contentEl.style.display = 'none';
                 conceptFrame.style.display = 'block';
@@ -1764,11 +1789,11 @@
                 // ADMIN DASHBOARD MODE
                 conceptFrame.style.display = 'none';
                 contentEl.style.display = 'flex';
-                
+
                 titleEl.innerText = pagesContent.configure.title;
                 // Render the dynamic dashboard instead of static content
                 renderAdminDashboard();
-                
+
                 setTimeout(() => {
                     contentEl.style.opacity = '1';
                     contentEl.style.transform = 'translateY(0)';
@@ -1792,19 +1817,19 @@
             const overlay = document.getElementById('page-overlay');
             const contentEl = document.getElementById('page-content');
             const conceptFrame = document.getElementById('concept-frame-container');
-            
+
             contentEl.style.opacity = '0';
             contentEl.style.transform = 'translateY(20px)';
-            
+
             // We delay hiding the frame slightly or hide immediately
             conceptFrame.style.display = 'none';
-            contentEl.style.display = 'flex'; 
-            
+            contentEl.style.display = 'flex';
+
             overlay.classList.remove('active');
             isPageOpen = false;
         };
 
-        window.toggleMobileMenu = function() {
+        window.toggleMobileMenu = function () {
             const menu = document.getElementById('mobile-menu');
             const isOpen = !menu.classList.contains('translate-x-full');
             if (isOpen) {
@@ -1816,9 +1841,9 @@
 
         // --- 4. RENDER FUNCTIONS ---
         function renderPills() {
-            if(!filterPillsContainer) return;
+            if (!filterPillsContainer) return;
             filterPillsContainer.innerHTML = '';
-            
+
             categories.forEach(cat => {
                 const btn = document.createElement('button');
                 // Uses tailwind classes for styling the pill
@@ -1833,14 +1858,14 @@
         function renderCards() {
             if (!cardsContainer) return;
             cardsContainer.innerHTML = '';
-            
+
             let data = [];
 
             // LOGIC UPDATE: Dynamic Trending Filtering
             if (currentTab === 'trending') {
                 // 1. Aggregation: Get all unique components from the system
                 const allComponents = window.velocityStore ? window.velocityStore.getAllComponents() : [];
-                
+
                 // 2. Algorithm: Calculate Trending Score
                 // Logic: A download is worth 4x a view to determine "true" popularity
                 data = allComponents.sort((a, b) => {
@@ -1856,17 +1881,17 @@
                 const source = window.velocityStore ? window.velocityStore.products : products;
                 data = source[currentTab] || [];
             }
-            
+
             // Apply Filters (Category)
             if (currentCategoryFilter !== 'All') {
                 data = data.filter(item => item.cat === currentCategoryFilter.toUpperCase());
             }
-            
+
             // Apply Search
             if (searchQuery) {
                 const q = searchQuery.toLowerCase();
-                data = data.filter(item => 
-                    item.title.toLowerCase().includes(q) || 
+                data = data.filter(item =>
+                    item.title.toLowerCase().includes(q) ||
                     item.desc.toLowerCase().includes(q)
                 );
             }
@@ -1886,9 +1911,9 @@
                 const card = document.createElement('div');
                 card.className = `fuel-cell-card group opacity-0`;
                 card.style.transition = `opacity 0.6s ease ${index * 0.05}s, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${index * 0.05}s, border-color 0.3s ease, background 0.3s ease`;
-                
+
                 // Click handler
-                card.onclick = () => openModalWithItem(item); 
+                card.onclick = () => openModalWithItem(item);
 
                 card.innerHTML = `
                     <div class="card-visual">
@@ -1937,16 +1962,16 @@
                 Array.from(cardsContainer.children).forEach(c => { c.style.opacity = '1'; c.style.transform = 'translateY(0)'; });
             });
         }
-        
+
         // --- REAL-TIME ANALYTICS SIMULATION ---
         function simulateLiveActivity() {
             // Pick a random component to "interact" with
             const allProducts = window.velocityStore.getAllComponents();
             if (allProducts.length === 0) return;
-            
+
             const randomIdx = Math.floor(Math.random() * allProducts.length);
             const item = allProducts[randomIdx];
-            
+
             // Randomly increment views (more likely) or downloads (less likely)
             if (Math.random() > 0.8) {
                 item.downloads += 1;
@@ -1975,7 +2000,7 @@
         // --- MODAL & PREVIEW FUNCTIONS ---
 
         // Switch between Preview (Image/Iframe) and Source Code
-        window.switchModalView = function(view) {
+        window.switchModalView = function (view) {
             const viewPreview = document.getElementById('view-preview');
             const viewCode = document.getElementById('view-code');
             const btnPreview = document.getElementById('btn-view-preview');
@@ -1983,45 +2008,45 @@
             const btnCopy = document.getElementById('btn-copy-code');
 
             if (view === 'preview') {
-                if(viewPreview) viewPreview.classList.remove('hidden');
-                if(viewCode) viewCode.classList.add('hidden');
-                
-                if(btnPreview) {
+                if (viewPreview) viewPreview.classList.remove('hidden');
+                if (viewCode) viewCode.classList.add('hidden');
+
+                if (btnPreview) {
                     btnPreview.classList.remove('text-gray-500', 'hover:text-white', 'hover:bg-white/5');
                     btnPreview.classList.add('text-white', 'bg-white/5');
                 }
-                
-                if(btnCode) {
+
+                if (btnCode) {
                     btnCode.classList.add('text-gray-500', 'hover:text-white', 'hover:bg-white/5');
                     btnCode.classList.remove('text-white', 'bg-white/5');
                 }
 
-                if(btnCopy) btnCopy.classList.add('hidden');
+                if (btnCopy) btnCopy.classList.add('hidden');
 
             } else {
-                if(viewPreview) viewPreview.classList.add('hidden');
-                if(viewCode) viewCode.classList.remove('hidden');
-                
-                if(btnCode) {
+                if (viewPreview) viewPreview.classList.add('hidden');
+                if (viewCode) viewCode.classList.remove('hidden');
+
+                if (btnCode) {
                     btnCode.classList.remove('text-gray-500', 'hover:text-white', 'hover:bg-white/5');
                     btnCode.classList.add('text-white', 'bg-white/5');
                 }
-                
-                if(btnPreview) {
+
+                if (btnPreview) {
                     btnPreview.classList.add('text-gray-500', 'hover:text-white', 'hover:bg-white/5');
                     btnPreview.classList.remove('text-white', 'bg-white/5');
                 }
 
-                if(btnCopy) btnCopy.classList.remove('hidden');
+                if (btnCopy) btnCopy.classList.remove('hidden');
             }
         }
-        
-        window.copyCodeToClipboard = function() {
+
+        window.copyCodeToClipboard = function () {
             const codeText = document.getElementById('modal-code-block').textContent;
             const btn = document.getElementById('btn-copy-code');
             const span = btn.querySelector('span');
             const originalText = "COPY"; // Hardcoded original text
-            
+
             // Use textarea hack for iframe compatibility
             const textArea = document.createElement("textarea");
             textArea.value = codeText;
@@ -2029,15 +2054,15 @@
             textArea.style.opacity = "0";
             document.body.appendChild(textArea);
             textArea.select();
-            
+
             try {
                 document.execCommand('copy');
-                
+
                 // Success State
                 span.innerText = "COPIED!";
                 btn.classList.remove('text-red-500', 'hover:bg-red-600', 'bg-[#0a0a0a]');
                 btn.classList.add('bg-red-600', 'text-white');
-                
+
                 setTimeout(() => {
                     // Reset State
                     span.innerText = originalText;
@@ -2048,7 +2073,7 @@
                 console.error('Copy failed', err);
                 alert("Failed to copy to clipboard");
             }
-            
+
             document.body.removeChild(textArea);
         }
 
@@ -2056,8 +2081,8 @@
         function openModalWithItem(item) {
             // Fix: Changed 'modal-img' to 'modal-image' to match HTML ID
             const imgEl = document.getElementById('modal-image');
-            if(imgEl) imgEl.src = item.img;
-            
+            if (imgEl) imgEl.src = item.img;
+
             // Fix: Corrected IDs to match HTML
             const catEl = document.getElementById('modal-category');
             if (catEl) catEl.innerText = item.cat;
@@ -2070,11 +2095,11 @@
 
             const priceEl = document.getElementById('modal-price');
             if (priceEl) priceEl.innerText = item.price;
-            
+
             // Handle Code / Preview Logic
             const codeBlock = document.getElementById('modal-code-block');
             const iframe = document.getElementById('modal-iframe');
-            
+
             // Reset View to Preview
             switchModalView('preview');
 
@@ -2109,27 +2134,27 @@
                         </html>
                     `;
                     iframe.classList.remove('hidden');
-                    if(imgEl) imgEl.classList.add('hidden');
+                    if (imgEl) imgEl.classList.add('hidden');
                 } else {
                     // Fallback to Image
                     iframe.classList.add('hidden');
                     iframe.srcdoc = ""; // Clear
-                    if(imgEl) imgEl.classList.remove('hidden');
+                    if (imgEl) imgEl.classList.remove('hidden');
                 }
             }
-            
+
             // Update Spec Sheet
             const specLang = document.getElementById('modal-spec-lang');
-            if(specLang) specLang.innerText = item.lang || 'HTML/CSS';
+            if (specLang) specLang.innerText = item.lang || 'HTML/CSS';
 
             const modal = document.getElementById('product-modal');
             if (modal) {
                 // 1. Unhide from DOM
                 modal.classList.remove('hidden');
-                
+
                 // 2. Force reflow to enable transition
                 void modal.offsetWidth;
-                
+
                 // 3. Trigger Fade In
                 modal.classList.add('active');
             }
@@ -2138,30 +2163,30 @@
         // Legacy wrapper for compatibility if needed elsewhere
         window.openProductModal = function (cat, index) {
             const item = products[cat][index];
-            if(item) openModalWithItem(item);
+            if (item) openModalWithItem(item);
         }
 
-        window.closeProductModal = function () { 
+        window.closeProductModal = function () {
             const modal = document.getElementById('product-modal');
             if (!modal) return;
-            
+
             // 1. Trigger Fade Out
             modal.classList.remove('active');
-            
+
             // 2. Wait for transition, then Hide from DOM
             setTimeout(() => {
                 modal.classList.add('hidden');
                 // Reset iframe to stop running code
                 const iframe = document.getElementById('modal-iframe');
-                if(iframe) iframe.srcdoc = "";
+                if (iframe) iframe.srcdoc = "";
             }, 300);
         }
-        
+
         window.addEventListener('click', function (e) { if (e.target === document.getElementById('product-modal')) closeProductModal(); });
 
         window.switchTab = function (cat) {
             currentTab = cat;
-            
+
             // Update active state of tab buttons
             const btns = document.querySelectorAll('.cmd-tab-btn');
             btns.forEach(b => {
@@ -2181,8 +2206,8 @@
                 setTimeout(() => { renderCards(); }, 200);
             }
         }
-        
-        window.filterByCategory = function(cat) {
+
+        window.filterByCategory = function (cat) {
             currentCategoryFilter = cat;
             renderPills();
             renderCards();
@@ -2292,7 +2317,7 @@
                 const isScrollingUp = event.deltaY < 0;
 
                 if (isAtTop && isScrollingUp) {
-                    event.preventDefault(); 
+                    event.preventDefault();
                     const now = Date.now();
                     if (now - lastTransitionTime > 1000) {
                         marketplaceOpen = false;
@@ -2304,7 +2329,7 @@
             } else {
                 // 3D Timeline Mode - Hijack logic
                 event.preventDefault();
-                
+
                 // Flag scrolling active
                 isUserScrolling = true;
                 targetSnap = null; // Cancel any active auto-snap
@@ -2337,10 +2362,10 @@
             const currentRatio = currentScroll / MAX_SCROLL_AMOUNT;
             let closest = SNAP_POINTS[0];
             let minDiff = 100; // Large initial value
-            
+
             SNAP_POINTS.forEach(p => {
                 const diff = Math.abs(p - currentRatio);
-                if(diff < minDiff) {
+                if (diff < minDiff) {
                     minDiff = diff;
                     closest = p;
                 }
@@ -2348,19 +2373,19 @@
 
             // Only snap if we are within a reasonable "magnetic" range (e.g., 10%)
             // This prevents snapping across huge distances if the user intentionally stops in transition
-            if (minDiff < 0.12) { 
+            if (minDiff < 0.12) {
                 targetSnap = closest * MAX_SCROLL_AMOUNT;
             }
         }
 
         let touchStartY = 0;
-        document.addEventListener('touchstart', e => { 
-            touchStartY = e.touches[0].clientY; 
+        document.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
             isUserScrolling = true; // User is touching
             targetSnap = null;      // Stop auto movement
             clearTimeout(snapTimeout);
         }, { passive: false });
-        
+
         document.addEventListener('touchmove', e => {
             if (isPageOpen) return;
             if (marketplaceOpen) {
@@ -2370,7 +2395,7 @@
                 const isScrollingUp = deltaY < 0;
 
                 if (isAtTop && isScrollingUp) {
-                    e.preventDefault(); 
+                    e.preventDefault();
                     onScroll({ preventDefault: () => { }, deltaY: deltaY });
                     touchStartY = touchY;
                 } else {
@@ -2387,9 +2412,9 @@
 
         // Add touchend to trigger snap on mobile
         document.addEventListener('touchend', () => {
-             // Delay slightly to let any momentum settle if we were implementing momentum, 
-             // but since we are hijacking, we snap immediately on release.
-             initiateSnap();
+            // Delay slightly to let any momentum settle if we were implementing momentum, 
+            // but since we are hijacking, we snap immediately on release.
+            initiateSnap();
         }, { passive: false });
 
 
@@ -2422,12 +2447,12 @@
             philQuote = document.getElementById('phil-quote');
             marketplaceWrapper = document.getElementById('marketplace-wrapper');
             cardsContainer = document.getElementById('cards-container');
-            
+
             // New Elements
             searchInput = document.getElementById('search-input');
             filterPillsContainer = document.getElementById('filter-pills-container');
-            
-            if(searchInput) {
+
+            if (searchInput) {
                 searchInput.addEventListener('input', (e) => {
                     searchQuery = e.target.value.trim();
                     renderCards();
@@ -2451,7 +2476,7 @@
             const ambientLight = new THREE.AmbientLight(AMBIENT_COLOR); scene.add(ambientLight);
             const spotLight = new THREE.SpotLight(SPOTLIGHT_COLOR, 30); spotLight.position.set(0, 10, 0);
             spotLight.angle = Math.PI / 8; spotLight.penumbra = 0.5; spotLight.decay = 2; spotLight.distance = 50; spotLight.castShadow = true;
-            spotLight.shadow.mapSize.width = 1024; spotLight.shadow.mapSize.height = 1024; 
+            spotLight.shadow.mapSize.width = 1024; spotLight.shadow.mapSize.height = 1024;
             scene.add(spotLight); scene.add(spotLight.target);
 
             sphereObject = new THREE.Group(); sphereObject.add(createSphere()); sphereObject.position.y = TOP_SPHERE_Y; scene.add(sphereObject);
@@ -2476,7 +2501,7 @@
                 // 0.05 is the speed of the "magnet" (lower = slower/smoother)
                 currentScroll = lerp(currentScroll, targetSnap, 0.05);
                 scrollAmount = currentScroll / MAX_SCROLL_AMOUNT;
-                
+
                 // If extremely close, lock it to save calc
                 if (Math.abs(currentScroll - targetSnap) < 1) {
                     currentScroll = targetSnap;
