@@ -430,12 +430,18 @@
         }
 
         .card-visual {
-            height: 200px;
+            height: 140px; /* Mobile height */
             width: 100%;
             position: relative;
             overflow: hidden;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             flex-shrink: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .card-visual {
+                height: 200px; /* Desktop height */
+            }
         }
 
         .card-visual img {
@@ -807,8 +813,8 @@
                 </div>
             </div>
 
-            <!-- Redesigned Filter Command Bar (Sticky) -->
-            <div class="w-full mb-6 md:mb-8 sticky top-[60px] md:top-[88px] z-30 transition-all duration-300 -mx-4 px-4 md:-mx-12 md:px-12 py-4 bg-[#050505]/95 backdrop-blur-xl border-b border-white/10 shadow-2xl"
+            <!-- Redesigned Filter Command Bar (Static) -->
+            <div class="w-full mb-6 md:mb-8 relative z-20 transition-all duration-300 -mx-4 px-4 md:-mx-12 md:px-12 py-4 bg-[#050505]/95 backdrop-blur-xl border-b border-white/10 shadow-2xl"
                 id="sticky-filter">
                 <div
                     class="bg-white/5 border border-white/10 backdrop-blur-md rounded-md flex flex-col md:flex-row p-1">
@@ -848,7 +854,7 @@
             <!-- Dynamic Grid Container -->
             <!-- grid-cols-1 on mobile for better visibility -->
             <div id="cards-container"
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 min-h-[600px]">
+                class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 min-h-[600px]">
                 <!-- Cards injected via JS -->
             </div>
 
@@ -866,7 +872,7 @@
                         </p>
                         <div class="flex items-center gap-2 justify-center md:justify-start">
                             <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span class="text-[9px] md:text-[10px] font-mono text-gray-600 tracking-widest">SYSTEM STATUS: NOMINAL // v2.4.0 LIVE</span>
+                            <span class="text-[9px] md:text-[10px] font-mono text-gray-600 tracking-widest">SYSTEM STATUS: NOMINAL // v1.0.0 LIVE</span>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 mt-4 md:mt-0">
@@ -884,7 +890,7 @@
                         </div>
                         <div>
                             <h4 class="section-label text-[10px] md:text-xs">VERSION</h4>
-                            <p class="font-['Michroma'] text-base md:text-xl text-white">v2.4.0</p>
+                            <p class="font-['Michroma'] text-base md:text-xl text-white">v1.0.0</p>
                         </div>
                     </div>
                 </div>
@@ -903,9 +909,9 @@
 
     <!-- PRODUCT MODAL (UPDATED WITH CODE VIEW & LIVE RENDER) -->
     <div id="product-modal"
-        class="fixed inset-0 z-[210] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 hidden">
+        class="fixed inset-0 z-[210] flex items-center justify-center bg-black/90 backdrop-blur-xl p-0 md:p-4 hidden">
         <div id="modal-content"
-            class="w-full max-w-6xl h-[90vh] rounded-lg flex flex-col md:flex-row relative bg-[#0a0a0a] border border-white/10 shadow-[0_0_100px_rgba(220,38,38,0.15)] overflow-hidden">
+            class="w-full max-w-6xl h-full md:h-[90vh] rounded-none md:rounded-lg flex flex-col md:flex-row relative bg-[#0a0a0a] border border-white/10 shadow-[0_0_100px_rgba(220,38,38,0.15)] overflow-hidden">
             <button onclick="closeProductModal()"
                 class="absolute top-4 right-4 z-50 text-white/70 hover:text-white transition-colors bg-black/60 backdrop-blur-md border border-white/10 rounded-full p-2 hover:bg-red-600 hover:border-red-600">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -916,24 +922,25 @@
             </button>
 
             <!-- LEFT: Preview / Code Area -->
-            <div class="w-full md:w-7/12 flex flex-col border-b md:border-b-0 md:border-r border-white/10 bg-black">
+            <!-- Mobile: Fixed 45% height. Desktop: Flexible width, full height -->
+            <div class="w-full h-[45%] md:h-auto md:w-7/12 flex flex-col border-b md:border-b-0 md:border-r border-white/10 bg-black shrink-0 relative">
                 <!-- Toolbar -->
-                <div class="flex border-b border-white/10 bg-[#0a0a0a] relative">
+                <div class="flex border-b border-white/10 bg-[#0a0a0a] relative shrink-0 z-20">
                     <button id="btn-view-preview" onclick="switchModalView('preview')"
                         class="flex-1 py-3 text-[10px] font-['Michroma'] tracking-widest text-white bg-white/5 border-r border-white/10 transition-colors">PREVIEW</button>
                     <button id="btn-view-code" onclick="switchModalView('code')"
                         class="flex-1 py-3 text-[10px] font-['Michroma'] tracking-widest text-gray-500 hover:text-white hover:bg-white/5 transition-colors">SOURCE
                         CODE</button>
 
-                    <!-- Copy Button (Hidden by default) -->
+                    <!-- Copy Button (Responsive: Icon only on mobile) -->
                     <button id="btn-copy-code" onclick="copyCodeToClipboard()"
-                        class="hidden absolute right-0 top-0 bottom-0 px-6 text-[10px] font-['Michroma'] tracking-widest text-red-500 hover:text-white hover:bg-red-600 transition-all flex items-center gap-2 border-l border-white/10 z-10 bg-[#0a0a0a]">
+                        class="hidden absolute right-0 top-0 bottom-0 px-4 md:px-6 text-[10px] font-['Michroma'] tracking-widest text-red-500 hover:text-white hover:bg-red-600 transition-all flex items-center gap-2 border-l border-white/10 z-10 bg-[#0a0a0a]">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                         </svg>
-                        <span>COPY</span>
+                        <span class="hidden md:inline">COPY</span>
                     </button>
                 </div>
 
@@ -966,7 +973,8 @@
             </div>
 
             <!-- RIGHT: Details -->
-            <div class="w-full md:w-5/12 p-8 md:p-10 flex flex-col bg-[#080808] overflow-y-auto custom-scrollbar">
+            <!-- Mobile: Fills remaining height. Desktop: 5/12 width -->
+            <div class="w-full flex-1 md:h-auto md:w-5/12 p-6 md:p-10 flex flex-col bg-[#080808] overflow-y-auto custom-scrollbar">
                 <div class="flex justify-between items-start mb-4">
                     <div id="modal-category"
                         class="text-xs font-['Michroma'] text-red-500 tracking-[0.2em] uppercase border border-red-500/30 px-3 py-1.5 rounded-sm bg-red-500/5">
@@ -979,10 +987,10 @@
                 </div>
 
                 <h2 id="modal-title"
-                    class="font-['Rajdhani'] font-bold text-4xl md:text-5xl text-white mb-6 leading-none tracking-wide">
+                    class="font-['Rajdhani'] font-bold text-3xl md:text-5xl text-white mb-4 md:mb-6 leading-none tracking-wide">
                 </h2>
                 <p id="modal-description"
-                    class="font-['Inter'] text-sm text-gray-300 leading-7 mb-8 border-l-2 border-red-600/50 pl-5"></p>
+                    class="font-['Inter'] text-sm text-gray-300 leading-7 mb-6 md:mb-8 border-l-2 border-red-600/50 pl-5"></p>
 
                 <div class="bg-white/5 rounded border border-white/10 p-5 mb-8">
                     <h4 class="text-[10px] font-['Michroma'] text-gray-400 mb-3 border-b border-white/10 pb-2">
@@ -996,6 +1004,10 @@
                         <div class="spec-item">
                             <span class="text-xs text-gray-500 font-mono">LICENSE</span>
                             <span class="text-xs text-white font-['Michroma'] tracking-wide">Commercial</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="text-xs text-gray-500 font-mono">VERSION</span>
+                            <span class="text-xs text-white font-['Michroma'] tracking-wide">v1.0.0 (Stable)</span>
                         </div>
                         <div class="spec-item">
                             <span class="text-xs text-gray-500 font-mono">SIZE</span>
@@ -1014,7 +1026,7 @@
                             <path d="M12 5l7 7-7 7"></path>
                         </svg>
                     </button>
-                    <button
+                    <button onclick="viewDocumentation()"
                         class="w-full py-3 text-[10px] font-['Michroma'] border border-white/10 text-gray-400 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all duration-300 rounded-sm uppercase tracking-widest">
                         View Documentation
                     </button>
@@ -1911,9 +1923,9 @@
                 const card = document.createElement('div');
                 card.className = `fuel-cell-card group opacity-0`;
                 card.style.transition = `opacity 0.6s ease ${index * 0.05}s, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) ${index * 0.05}s, border-color 0.3s ease, background 0.3s ease`;
-
+                
                 // Click handler
-                card.onclick = () => openModalWithItem(item);
+                card.onclick = () => openModalWithItem(item); 
 
                 card.innerHTML = `
                     <div class="card-visual">
@@ -1922,12 +1934,13 @@
                         <div class="price-stamp">${item.price}</div>
                     </div>
                     <!-- FLEX-GROW content, removed fixed height -->
-                    <div class="p-6 flex flex-col flex-grow bg-gradient-to-b from-transparent to-black/80 relative">
+                    <!-- Updated Padding for Mobile (p-3) vs Desktop (p-6) -->
+                    <div class="p-3 md:p-6 flex flex-col flex-grow bg-gradient-to-b from-transparent to-black/80 relative">
                         <div class="flex-grow">
                             <div class="flex justify-between items-start mb-1">
-                                <div class="text-[10px] font-['Michroma'] text-red-500 tracking-widest opacity-80">${item.cat}</div>
+                                <div class="text-[8px] md:text-[10px] font-['Michroma'] text-red-500 tracking-widest opacity-80">${item.cat}</div>
                                 <!-- Live Analytics Display -->
-                                <div class="flex items-center gap-2 text-[9px] font-mono text-gray-500">
+                                <div class="flex items-center gap-2 text-[8px] md:text-[9px] font-mono text-gray-500">
                                     <span class="flex items-center gap-0.5" title="Views">
                                         <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                         <span id="stat-views-${item.id}" class="transition-colors duration-300">${kFormatter(item.views || 0)}</span>
@@ -1938,21 +1951,22 @@
                                     </span>
                                 </div>
                             </div>
-                            <h3 class="font-['Rajdhani'] font-bold text-2xl text-white mb-2 leading-none tracking-wide group-hover:text-red-500 transition-colors">${item.title}</h3>
+                            <!-- Updated Text Sizes for Mobile -->
+                            <h3 class="font-['Rajdhani'] font-bold text-base md:text-2xl text-white mb-1 md:mb-2 leading-none tracking-wide group-hover:text-red-500 transition-colors truncate">${item.title}</h3>
                             
                             <!-- Clamped Text + Read More -->
                             <div class="relative">
-                                <p class="font-['Inter'] text-xs text-gray-400 leading-relaxed opacity-80 line-clamp-3 mb-1">${item.desc}</p>
-                                <div class="text-[9px] font-['Michroma'] text-red-500 mt-2 flex items-center gap-1 group-hover:text-white transition-colors">
+                                <p class="font-['Inter'] text-[10px] md:text-xs text-gray-400 leading-relaxed opacity-80 line-clamp-2 md:line-clamp-3 mb-1">${item.desc}</p>
+                                <div class="text-[8px] md:text-[9px] font-['Michroma'] text-red-500 mt-1 md:mt-2 flex items-center gap-1 group-hover:text-white transition-colors">
                                     READ MORE <span class="text-xs">&rsaquo;</span>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Buttons pinned to bottom, prevented from shrinking -->
-                        <div class="flex gap-3 mt-4 pt-4 border-t border-white/5 shrink-0">
-                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] border border-white/20 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-300 rounded-sm">PREVIEW</button>
-                            <button class="flex-1 py-2.5 text-[10px] font-['Michroma'] bg-red-600/10 text-red-500 border border-red-600/30 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300 rounded-sm shadow-[0_0_10px_rgba(220,38,38,0.1)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]" onclick="event.stopPropagation()">ACQUIRE</button>
+                        <div class="flex gap-2 md:gap-3 mt-3 md:mt-4 pt-3 md:pt-4 border-t border-white/5 shrink-0">
+                            <button class="w-full flex-1 py-1.5 md:py-2.5 text-[8px] md:text-[10px] font-['Michroma'] border border-white/20 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-300 rounded-sm">PREVIEW</button>
+                            <button class="w-full flex-1 py-1.5 md:py-2.5 text-[8px] md:text-[10px] font-['Michroma'] bg-red-600/10 text-red-500 border border-red-600/30 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300 rounded-sm shadow-[0_0_10px_rgba(220,38,38,0.1)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]" onclick="event.stopPropagation()">ACQUIRE</button>
                         </div>
                     </div>
                 `;
@@ -1961,120 +1975,6 @@
             requestAnimationFrame(() => {
                 Array.from(cardsContainer.children).forEach(c => { c.style.opacity = '1'; c.style.transform = 'translateY(0)'; });
             });
-        }
-
-        // --- REAL-TIME ANALYTICS SIMULATION ---
-        function simulateLiveActivity() {
-            // Pick a random component to "interact" with
-            const allProducts = window.velocityStore.getAllComponents();
-            if (allProducts.length === 0) return;
-
-            const randomIdx = Math.floor(Math.random() * allProducts.length);
-            const item = allProducts[randomIdx];
-
-            // Randomly increment views (more likely) or downloads (less likely)
-            if (Math.random() > 0.8) {
-                item.downloads += 1;
-                // Update DOM if visible
-                const el = document.getElementById(`stat-downloads-${item.id}`);
-                if (el) {
-                    el.textContent = kFormatter(item.downloads);
-                    el.classList.add('text-green-400');
-                    setTimeout(() => el.classList.remove('text-green-400'), 1000);
-                }
-            } else {
-                item.views += Math.floor(Math.random() * 5) + 1;
-                // Update DOM if visible
-                const el = document.getElementById(`stat-views-${item.id}`);
-                if (el) {
-                    el.textContent = kFormatter(item.views);
-                    el.classList.add('text-white'); // Flash white
-                    setTimeout(() => el.classList.remove('text-white'), 500);
-                }
-            }
-        }
-        // Run simulation loop
-        setInterval(simulateLiveActivity, 2000);
-
-
-        // --- MODAL & PREVIEW FUNCTIONS ---
-
-        // Switch between Preview (Image/Iframe) and Source Code
-        window.switchModalView = function (view) {
-            const viewPreview = document.getElementById('view-preview');
-            const viewCode = document.getElementById('view-code');
-            const btnPreview = document.getElementById('btn-view-preview');
-            const btnCode = document.getElementById('btn-view-code');
-            const btnCopy = document.getElementById('btn-copy-code');
-
-            if (view === 'preview') {
-                if (viewPreview) viewPreview.classList.remove('hidden');
-                if (viewCode) viewCode.classList.add('hidden');
-
-                if (btnPreview) {
-                    btnPreview.classList.remove('text-gray-500', 'hover:text-white', 'hover:bg-white/5');
-                    btnPreview.classList.add('text-white', 'bg-white/5');
-                }
-
-                if (btnCode) {
-                    btnCode.classList.add('text-gray-500', 'hover:text-white', 'hover:bg-white/5');
-                    btnCode.classList.remove('text-white', 'bg-white/5');
-                }
-
-                if (btnCopy) btnCopy.classList.add('hidden');
-
-            } else {
-                if (viewPreview) viewPreview.classList.add('hidden');
-                if (viewCode) viewCode.classList.remove('hidden');
-
-                if (btnCode) {
-                    btnCode.classList.remove('text-gray-500', 'hover:text-white', 'hover:bg-white/5');
-                    btnCode.classList.add('text-white', 'bg-white/5');
-                }
-
-                if (btnPreview) {
-                    btnPreview.classList.add('text-gray-500', 'hover:text-white', 'hover:bg-white/5');
-                    btnPreview.classList.remove('text-white', 'bg-white/5');
-                }
-
-                if (btnCopy) btnCopy.classList.remove('hidden');
-            }
-        }
-
-        window.copyCodeToClipboard = function () {
-            const codeText = document.getElementById('modal-code-block').textContent;
-            const btn = document.getElementById('btn-copy-code');
-            const span = btn.querySelector('span');
-            const originalText = "COPY"; // Hardcoded original text
-
-            // Use textarea hack for iframe compatibility
-            const textArea = document.createElement("textarea");
-            textArea.value = codeText;
-            textArea.style.position = "fixed"; // Avoid scrolling to bottom
-            textArea.style.opacity = "0";
-            document.body.appendChild(textArea);
-            textArea.select();
-
-            try {
-                document.execCommand('copy');
-
-                // Success State
-                span.innerText = "COPIED!";
-                btn.classList.remove('text-red-500', 'hover:bg-red-600', 'bg-[#0a0a0a]');
-                btn.classList.add('bg-red-600', 'text-white');
-
-                setTimeout(() => {
-                    // Reset State
-                    span.innerText = originalText;
-                    btn.classList.remove('bg-red-600', 'text-white');
-                    btn.classList.add('text-red-500', 'hover:bg-red-600', 'bg-[#0a0a0a]');
-                }, 2000);
-            } catch (err) {
-                console.error('Copy failed', err);
-                alert("Failed to copy to clipboard");
-            }
-
-            document.body.removeChild(textArea);
         }
 
         // New Modal Function to handle direct item object
